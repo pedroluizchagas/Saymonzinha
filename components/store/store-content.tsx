@@ -74,7 +74,6 @@ export function StoreContent() {
               variant={selectedCategory === category.value ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(category.value)}
-              className={selectedCategory === category.value ? "bg-primary hover:bg-primary/90" : ""}
             >
               {category.label}
             </Button>

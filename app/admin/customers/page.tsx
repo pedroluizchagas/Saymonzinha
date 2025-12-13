@@ -31,7 +31,7 @@ export default async function CustomersPage() {
 
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <Button asChild className="bg-primary hover:bg-primary/90">
+          <Button asChild>
             <Link href="/admin/customers/new">
               <Plus className="w-4 h-4 mr-2" />
               Novo Cliente

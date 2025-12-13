@@ -188,7 +188,7 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
             }}
           >
             <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button>
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Produto
               </Button>
@@ -336,7 +336,6 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
                 <Button
                   onClick={handleCreate}
                   disabled={!name || !salePrice || isSubmitting}
-                  className="bg-primary hover:bg-primary/90"
                 >
                   {isSubmitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

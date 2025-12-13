@@ -76,7 +76,6 @@ export function ProductCard({ product }: ProductCardProps) {
             size="sm"
             onClick={() => addItem(product)}
             disabled={isOutOfStock}
-            className="bg-primary hover:bg-primary/90"
           >
             <ShoppingCart className="w-4 h-4 mr-1" />
             Adicionar

@@ -11,7 +11,7 @@
   --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0 0);
-  --primary: oklch(0.55 0.22 25);
+  --primary: #ff0200;
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.96 0 0);
   --secondary-foreground: oklch(0.15 0 0);
@@ -19,11 +19,11 @@
   --muted-foreground: oklch(0.45 0 0);
   --accent: oklch(0.65 0.2 145);
   --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.55 0.22 25);
+  --destructive: #ff0200;
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.9 0 0);
   --input: oklch(0.9 0 0);
-  --ring: oklch(0.55 0.22 25);
+  --ring: #ff0200;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -47,7 +47,7 @@
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.14 0 0);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.6 0.22 25);
+  --primary: #ff0200;
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.2 0 0);
   --secondary-foreground: oklch(0.98 0 0);
@@ -55,11 +55,11 @@
   --muted-foreground: oklch(0.6 0 0);
   --accent: oklch(0.65 0.2 145);
   --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.55 0.22 25);
+  --destructive: #ff0200;
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.25 0 0);
   --input: oklch(0.25 0 0);
-  --ring: oklch(0.6 0.22 25);
+  --ring: #ff0200;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -130,6 +130,26 @@
   h5,
   h6 {
     font-family: var(--font-heading);
+  }
+  h1.text-primary,
+  h2.text-primary,
+  h3.text-primary,
+  h4.text-primary,
+  h5.text-primary,
+  h6.text-primary,
+  h1 .text-primary,
+  h2 .text-primary,
+  h3 .text-primary,
+  h4 .text-primary,
+  h5 .text-primary,
+  h6 .text-primary,
+  .font-bold.text-primary,
+  .font-semibold.text-primary {
+    background-image: linear-gradient(90deg, #ff4d4f 0%, #ff0200 60%, #b00000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
   }
 }
 

@@ -182,7 +182,7 @@ export function PreQuoteForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6">
+        <Button size="lg" className="text-lg px-8 py-6">
           <FileText className="w-5 h-5 mr-2" />
           Abrir Pré-Orçamento Rápido
         </Button>
@@ -258,7 +258,7 @@ export function PreQuoteForm() {
                   type="button"
                   onClick={handleNext}
                   disabled={!canProceed()}
-                  className="flex-1 bg-primary hover:bg-primary/90"
+                  className="flex-1"
                 >
                   Próximo
                   <ChevronRight className="w-4 h-4 ml-1" />
@@ -498,7 +498,7 @@ function SuccessScreen({ onClose }: { onClose: () => void }) {
         Recebemos seu pré-orçamento. Entraremos em contato pelo WhatsApp em breve para passar o valor e agendar o
         serviço.
       </p>
-      <Button onClick={onClose} className="bg-primary hover:bg-primary/90">
+      <Button onClick={onClose}>
         Fechar
       </Button>
     </div>

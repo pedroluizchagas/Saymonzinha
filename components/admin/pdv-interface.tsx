@@ -409,7 +409,7 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => setShowSuccess(false)} className="w-full bg-primary hover:bg-primary/90">
+            <Button onClick={() => setShowSuccess(false)} className="w-full">
               Nova Venda
             </Button>
           </DialogFooter>

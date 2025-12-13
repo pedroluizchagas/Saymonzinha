@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Instagram, Facebook, Phone, MapPin } from "lucide-react"
+import { Logo } from "@/components/layout/logo"
 
 export function Footer() {
   return (
@@ -9,13 +10,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Logo e Descrição */}
           <div>
-            <Image
-              src="/images/chatgpt-20image-2023-20de-20jun.png"
-              alt="Saymon Cell - Assistência Técnica"
-              width={150}
-              height={50}
-              className="h-10 w-auto mb-4"
-            />
+            <Logo variant="footer" className="mb-4" />
             <p className="text-muted-foreground text-sm">
               Referência em reparo de smartphones em Divinópolis. Tecnologia de ponta, conforto de casa.
             </p>

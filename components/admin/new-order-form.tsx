@@ -515,7 +515,7 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
         <Button type="button" variant="outline" onClick={() => router.back()} className="bg-transparent">
           Cancelar
         </Button>
-        <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

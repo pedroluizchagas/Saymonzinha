@@ -34,7 +34,7 @@ export default async function OrdersPage() {
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <Button asChild className="bg-primary hover:bg-primary/90">
+            <Button asChild>
               <Link href="/admin/orders/new">
                 <Plus className="w-4 h-4 mr-2" />
                 Nova OS

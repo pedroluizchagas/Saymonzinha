@@ -1,7 +1,7 @@
 import type React from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { MessageCircle, Star, Shield, Clock } from "lucide-react"
+import { MessageCircle, Shield, Clock } from "lucide-react"
 import { PreQuoteForm } from "@/components/forms/pre-quote-form"
 
 export function HeroSection() {
@@ -22,9 +22,8 @@ export function HeroSection() {
       <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge de Autoridade */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-6">
-            <Star className="w-4 h-4 text-primary fill-primary" />
-            <span className="text-sm font-medium text-primary">3 Anos de Experiência no Mercado</span>
+          <div className="inline-flex items-center px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-6">
+            <span className="text-sm font-semibold text-primary">3 Anos de Experiência no Mercado</span>
           </div>
 
           {/* Headline Principal */}
