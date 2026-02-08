@@ -29,6 +29,7 @@ export interface Profile {
   full_name: string
   role: UserRole
   phone: string | null
+  avatar_url: string | null
   commission_rate: number
   is_active: boolean
   created_at: string
@@ -115,6 +116,7 @@ export interface ServiceOrder {
   customer?: Customer
   technician?: Profile
   problem_type?: ProblemType
+  items?: ServiceOrderItem[]
 }
 
 export interface ServiceOrderHistory {
@@ -125,6 +127,19 @@ export interface ServiceOrderHistory {
   new_status: string
   notes: string | null
   created_at: string
+}
+
+export interface ServiceOrderItem {
+  id: string
+  service_order_id: string
+  product_id: string | null
+  description: string
+  quantity: number
+  unit_price: number
+  total_price: number
+  created_at: string
+  // Relacionamentos
+  product?: Product
 }
 
 export interface Product {

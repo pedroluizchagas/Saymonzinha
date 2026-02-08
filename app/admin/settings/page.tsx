@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Settings, Users, Smartphone, CreditCard, Tag } from "lucide-react"
 import Link from "next/link"
 import type { Profile } from "@/types/database"
+import { ProfileSettings } from "@/components/admin/profile-settings"
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -28,6 +29,7 @@ export default async function SettingsPage() {
       />
 
       <div className="p-6">
+        {profile ? <ProfileSettings profile={profile as Profile} /> : null}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
           <SettingsCard
             icon={Users}

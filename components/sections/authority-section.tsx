@@ -37,7 +37,7 @@ export function AuthoritySection() {
               Confiança conquistada em <span className="text-primary">Divinópolis</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              A Saymon Cell celebra <strong className="text-foreground">3 anos de história</strong> cuidando do que
+              A Saymon Cell celebra <strong className="text-foreground">10 anos de história</strong> cuidando do que
               conecta você ao mundo. Estamos completando 1 ano em nossa nova sede no Jardim dos Candidés, com uma
               estrutura modernizada para oferecer o reparo mais rápido e seguro da região.
             </p>

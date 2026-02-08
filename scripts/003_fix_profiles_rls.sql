@@ -8,6 +8,7 @@ DROP POLICY IF EXISTS "profiles_insert_own" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_select_admin" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_update_admin" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_delete_admin" ON public.profiles;
 
 -- Criar função SECURITY DEFINER para verificar se usuário é admin
 -- Isso evita a recursão porque a função roda com permissões elevadas
@@ -50,11 +51,11 @@ CREATE POLICY "profiles_insert_own" ON public.profiles
 
 -- Usuário pode atualizar seu próprio perfil
 CREATE POLICY "profiles_update_own" ON public.profiles 
-  FOR UPDATE USING (auth.uid() = id);
+  FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
 -- Admin pode atualizar qualquer perfil
 CREATE POLICY "profiles_update_admin" ON public.profiles 
-  FOR UPDATE USING (public.is_admin());
+  FOR UPDATE USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 -- Admin pode deletar perfis (exceto o próprio)
 CREATE POLICY "profiles_delete_admin" ON public.profiles 
