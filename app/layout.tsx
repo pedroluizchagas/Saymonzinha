@@ -4,6 +4,7 @@ import { Inter, Poppins } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { CartProvider } from "@/contexts/cart-context"
 import { CartDrawer } from "@/components/store/cart-drawer"
+import { SWRegister } from "@/components/pwa/sw-register"
 import "./globals.css"
 
 const inter = Inter({
@@ -38,7 +39,17 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
   },
-    generator: 'v0.app'
+  icons: {
+    icon: [{ url: "/images/logo.png", type: "image/png" }],
+    apple: [{ url: "/images/logo.png", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Saymon Cell Admin",
+  },
+  manifest: "/manifest.webmanifest",
+  generator: "v0.app",
 }
 
 export const viewport: Viewport = {
@@ -60,6 +71,7 @@ export default function RootLayout({
           <CartDrawer />
         </CartProvider>
         <Analytics />
+        <SWRegister />
       </body>
     </html>
   )
