@@ -29,7 +29,7 @@ export default async function CustomersPage() {
     <div>
       <AdminHeader user={profile as Profile | null} title="Clientes" subtitle="Gerencie sua base de clientes" />
 
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="flex items-center justify-between mb-6">
           <Button asChild>
             <Link href="/admin/customers/new">

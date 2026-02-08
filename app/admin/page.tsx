@@ -170,7 +170,7 @@ export default async function AdminDashboardPage() {
     <div>
       <AdminHeader user={profile as Profile | null} title="Dashboard" subtitle="Visão geral do seu negócio" />
 
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <DashboardKPIs data={kpiData} />
       </div>
     </div>

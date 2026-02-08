@@ -33,7 +33,12 @@ export default function LoginPage() {
       if (error) throw error
       router.push("/admin")
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "Erro ao fazer login")
+      const msg = error instanceof Error ? error.message : "Erro ao fazer login"
+      if (typeof msg === "string" && /WeakPasswordError/i.test(msg)) {
+        setError("Sua senha não atende à nova política de segurança. Atualize a senha.")
+      } else {
+        setError(msg)
+      }
     } finally {
       setIsLoading(false)
     }

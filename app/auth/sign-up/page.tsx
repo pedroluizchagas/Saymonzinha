@@ -12,6 +12,34 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, Smartphone } from "lucide-react"
 
+async function sha1Hex(str: string) {
+  const data = new TextEncoder().encode(str)
+  const hash = await crypto.subtle.digest("SHA-1", data)
+  const bytes = Array.from(new Uint8Array(hash))
+  return bytes.map((b) => b.toString(16).padStart(2, "0")).join("").toUpperCase()
+}
+
+async function checkPwnedPassword(password: string) {
+  const hash = await sha1Hex(password)
+  const prefix = hash.slice(0, 5)
+  const suffix = hash.slice(5)
+  const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+    headers: { "Add-Padding": "true" },
+    cache: "no-store",
+  })
+  const text = await res.text()
+  return text.split("\n").some((line) => line.split(":")[0] === suffix)
+}
+
+function passwordPolicyError(pwd: string): string | null {
+  if (pwd.length < 8) return "A senha deve ter pelo menos 8 caracteres"
+  const hasRequired = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|<>?,./`~])/.test(pwd)
+  if (!hasRequired) {
+    return "A senha deve conter minúscula, maiúscula, dígito e símbolo"
+  }
+  return null
+}
+
 export default function SignUpPage() {
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
@@ -33,10 +61,21 @@ export default function SignUpPage() {
       return
     }
 
-    if (password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres")
+    const policyErr = passwordPolicyError(password)
+    if (policyErr) {
+      setError(policyErr)
       setIsLoading(false)
       return
+    }
+
+    try {
+      const isPwned = await checkPwnedPassword(password)
+      if (isPwned) {
+        setError("Esta senha já apareceu em vazamentos de dados. Escolha outra.")
+        setIsLoading(false)
+        return
+      }
+    } catch {
     }
 
     try {

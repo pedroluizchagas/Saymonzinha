@@ -31,7 +31,7 @@ export default async function OrdersPage() {
         subtitle="Gerencie os reparos em andamento"
       />
 
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Button asChild>
