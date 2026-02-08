@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description:
       "Painel administrativo do Saymon Cell com acesso rápido às ordens de serviço, clientes e finanças.",
     start_url: "/admin",
-    scope: "/admin",
+    scope: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: "#000000",

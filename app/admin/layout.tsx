@@ -1,8 +1,19 @@
 import type React from "react"
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { AdminSidebar } from "@/components/admin/sidebar"
 import type { Profile } from "@/types/database"
+import { SWRegister } from "@/components/pwa/sw-register"
+
+export const metadata: Metadata = {
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Saymon Cell Admin",
+  },
+  manifest: "/manifest.webmanifest",
+}
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -23,6 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="min-h-screen bg-background">
       <AdminSidebar user={profile as Profile | null} />
       <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">{children}</main>
+      <SWRegister />
     </div>
   )
 }
