@@ -31,9 +31,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single()
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background safe-area-top safe-area-bottom">
       <AdminSidebar user={profile as Profile | null} />
-      <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">{children}</main>
+      <main className="lg:ml-64 pt-16 lg:pt-0 safe-area-top min-h-screen">{children}</main>
       <SWRegister />
       <InstallPrompt />
     </div>

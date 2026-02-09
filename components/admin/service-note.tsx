@@ -1,103 +1,184 @@
- "use client"
- 
- import { useRef, useState } from "react"
- import { Card, CardContent } from "@/components/ui/card"
- import { Button } from "@/components/ui/button"
+"use client"
+
+import { useRef, useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import type { ServiceOrder, ServiceOrderItem } from "@/types/database"
 import { toPng } from "html-to-image"
-import { Loader2, Download, MessageCircle } from "lucide-react"
- import Image from "next/image"
+import { Loader2, Download, MessageCircle, ExternalLink } from "lucide-react"
+import Image from "next/image"
 import { uploadServiceNoteImage } from "@/lib/actions/service-order-actions"
- 
+
 interface ServiceNoteProps {
   order: ServiceOrder
   items?: ServiceOrderItem[]
 }
- 
-export function ServiceNote({ order, items = [] }: ServiceNoteProps) {
-   const ref = useRef<HTMLDivElement | null>(null)
-   const [exporting, setExporting] = useState(false)
-   const [sending, setSending] = useState(false)
- 
-   const formatCurrency = (v: number | null | undefined) => {
-     if (v == null) return "-"
-     return `R$ ${v.toFixed(2)}`
-   }
- 
-   const formatDate = (iso?: string | null) => {
-     if (!iso) return "-"
-     try {
-       return new Date(iso).toLocaleDateString("pt-BR")
-     } catch {
-       return "-"
-     }
-   }
- 
-   const handleExport = async () => {
-     if (!ref.current) return
-     setExporting(true)
-     try {
-       const dataUrl = await toPng(ref.current, {
-         width: 390,
-         height: 844,
-         pixelRatio: 2,
-         cacheBust: true,
-        backgroundColor: "#0f1115",
-       })
- 
-       const link = document.createElement("a")
-       link.download = `nota-os-${order.order_number}.png`
-       link.href = dataUrl
-       link.click()
-     } finally {
-       setExporting(false)
-     }
-   }
 
-   const handleSendWhatsApp = async () => {
-     if (!ref.current) return
-     setSending(true)
-     try {
-      const preOpened = window.open("", "_blank")
-       const dataUrl = await toPng(ref.current, {
-         width: 390,
-         height: 844,
-         pixelRatio: 2,
-         cacheBust: true,
-         backgroundColor: "#0f1115",
-       })
-       const upload = await uploadServiceNoteImage(order.order_number, dataUrl)
-       const url = upload.url || ""
-       const msg = `Olá! Segue a Nota de Serviço da OS #${order.order_number}:\n${url}`
-       const phone = formatWhatsAppPhone(order.customer?.phone || "")
-       const wa = phone
-         ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
-         : `https://wa.me/?text=${encodeURIComponent(msg)}`
-      if (preOpened) {
-        preOpened.location.href = wa
-      } else {
-        window.location.href = wa
+export function ServiceNote({ order, items = [] }: ServiceNoteProps) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [exporting, setExporting] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null)
+
+  const formatCurrency = (v: number | null | undefined) => {
+    if (v == null) return "-"
+    return `R$ ${v.toFixed(2)}`
+  }
+
+  const formatDate = (iso?: string | null) => {
+    if (!iso) return "-"
+    try {
+      return new Date(iso).toLocaleDateString("pt-BR")
+    } catch {
+      return "-"
+    }
+  }
+
+  const handleExport = async () => {
+    if (!ref.current) return
+    setExporting(true)
+    try {
+      const dataUrl = await toPng(ref.current, {
+        width: 390,
+        height: 844,
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: "#0f1115",
+      })
+
+      const link = document.createElement("a")
+      link.download = `nota-os-${order.order_number}.png`
+      link.href = dataUrl
+      link.click()
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const buildWhatsAppUrl = async (): Promise<string> => {
+    if (!ref.current) throw new Error("Referencia do componente indisponivel")
+
+    const dataUrl = await toPng(ref.current, {
+      width: 390,
+      height: 844,
+      pixelRatio: 2,
+      cacheBust: true,
+      backgroundColor: "#0f1115",
+    })
+    const upload = await uploadServiceNoteImage(order.order_number, dataUrl)
+    const url = upload.url || ""
+    const msg = `Olha! Segue a Nota de Servico da OS #${order.order_number}:\n${url}`
+    const phone = formatWhatsAppPhone(order.customer?.phone || "")
+    return phone
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
+      : `https://wa.me/?text=${encodeURIComponent(msg)}`
+  }
+
+  const isMobileDevice = () => {
+    if (typeof navigator === "undefined") return false
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    )
+  }
+
+  const handleSendWhatsApp = async () => {
+    if (!ref.current) return
+    setSending(true)
+    setWhatsappUrl(null)
+
+    try {
+      // No desktop, pre-abre uma aba durante o gesto do usuario (funciona bem)
+      // No mobile, pop-ups sao bloqueados; usamos navegacao direta depois
+      const isMobile = isMobileDevice()
+      let preOpened: Window | null = null
+
+      if (!isMobile) {
+        preOpened = window.open("", "_blank")
       }
-     } finally {
-       setSending(false)
-     }
-   }
- 
-   return (
-     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">Nota de Serviço (Preview Mobile)</p>
-        <div className="flex items-center gap-2">
-          <Button onClick={handleExport} disabled={exporting} className="bg-primary text-primary-foreground">
-            {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-            Exportar imagem (390x844)
+
+      const wa = await buildWhatsAppUrl()
+
+      // Desktop: redireciona a aba pre-aberta
+      if (preOpened && !preOpened.closed) {
+        try {
+          preOpened.location.href = wa
+          return
+        } catch {
+          // Se falhar, fecha a aba e usa o fallback
+          try { preOpened.close() } catch { /* ignora */ }
+        }
+      }
+
+      // Mobile: navegacao direta abre o app do WhatsApp
+      if (isMobile) {
+        window.location.href = wa
+        return
+      }
+
+      // Fallback desktop (caso pre-open tenha sido bloqueado):
+      // Mostra link clicavel para o usuario abrir manualmente
+      setWhatsappUrl(wa)
+    } catch {
+      setWhatsappUrl(null)
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p className="text-sm text-muted-foreground">Nota de Servico (Preview Mobile)</p>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <Button
+            onClick={handleExport}
+            disabled={exporting}
+            className="bg-primary text-primary-foreground"
+          >
+            {exporting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            Exportar imagem
           </Button>
-          <Button onClick={handleSendWhatsApp} disabled={sending} className="bg-emerald-600 text-white">
-            {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageCircle className="w-4 h-4 mr-2" />}
+          <Button
+            onClick={handleSendWhatsApp}
+            disabled={sending}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
+            {sending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <MessageCircle className="w-4 h-4 mr-2" />
+            )}
             Enviar WhatsApp
           </Button>
         </div>
       </div>
+
+      {whatsappUrl && (
+        <div className="flex items-center gap-3 rounded-lg border border-emerald-600/30 bg-emerald-600/10 px-4 py-3">
+          <MessageCircle className="w-5 h-5 text-emerald-500 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-foreground font-medium">
+              Nota gerada com sucesso!
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Clique no botao abaixo para abrir o WhatsApp.
+            </p>
+          </div>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors shrink-0"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            Abrir WhatsApp
+          </a>
+        </div>
+      )}
  
       <div className="w-full overflow-x-auto">
         <div className="inline-block">

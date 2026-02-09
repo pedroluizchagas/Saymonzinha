@@ -57,7 +57,7 @@ export function AdminSidebar({ user }: SidebarProps) {
   return (
     <>
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-card border-b border-border z-40 flex items-center justify-between px-4">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-card border-b border-border z-40 flex items-center justify-between px-4 safe-area-top">
         <div className="flex items-center gap-2">
           <Smartphone className="w-6 h-6 text-primary" />
           <span className="font-bold text-foreground">
@@ -85,7 +85,7 @@ export function AdminSidebar({ user }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-card border-r border-border z-50 transition-transform duration-300",
+          "fixed top-0 left-0 h-full w-64 bg-card border-r border-border z-50 transition-transform duration-300 safe-area-top",
           "lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}

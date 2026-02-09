@@ -1,11 +1,13 @@
-const SW_VERSION = "2.0.0"
+const SW_VERSION = "2.1.0"
 const CACHE_NAME = "saymoncell-v" + SW_VERSION
 const APP_PREFIXES = ["/admin", "/auth"]
 const PRECACHE_URLS = [
   "/offline-admin.html",
   "/manifest.webmanifest",
-  "/icon.svg",
-  "/apple-icon.png",
+  "/icons/favicon-32x32.png",
+  "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png",
+  "/icons/apple-touch-icon.png",
   "/images/logo.png",
 ]
 
