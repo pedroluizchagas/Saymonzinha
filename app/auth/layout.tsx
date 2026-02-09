@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background safe-area-top safe-area-bottom">
+    <div className="min-h-screen-safe bg-background safe-area-top safe-area-bottom safe-area-x">
       {children}
       <SWRegister />
       <InstallPrompt />

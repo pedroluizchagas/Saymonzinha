@@ -56,24 +56,26 @@ export function AdminSidebar({ user }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-card border-b border-border z-40 flex items-center justify-between px-4 safe-area-top">
-        <div className="flex items-center gap-2">
-          <Smartphone className="w-6 h-6 text-primary" />
-          <span className="font-bold text-foreground">
-            SAYMON <span className="text-primary">CELL</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-              3
+      {/* Mobile Header - fundo se estende atras da barra de status */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-card border-b border-border z-40 pwa-safe-header">
+        <div className="h-16 flex items-center justify-between px-4">
+          <div className="flex items-center gap-2">
+            <Smartphone className="w-6 h-6 text-primary" />
+            <span className="font-bold text-foreground">
+              SAYMON <span className="text-primary">CELL</span>
             </span>
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)}>
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+                3
+              </span>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)}>
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -82,24 +84,25 @@ export function AdminSidebar({ user }: SidebarProps) {
         <div className="lg:hidden fixed inset-0 bg-background/80 z-40" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - flexbox para layout correto com safe areas */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-card border-r border-border z-50 transition-transform duration-300 safe-area-top",
+          "fixed top-0 left-0 h-full w-64 bg-card border-r border-border z-50 transition-transform duration-300",
+          "flex flex-col pwa-safe-header",
           "lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center gap-2 px-6 border-b border-border">
+        <div className="h-16 shrink-0 flex items-center gap-2 px-6 border-b border-border">
           <Smartphone className="w-7 h-7 text-primary" />
           <span className="font-bold text-lg text-foreground">
             SAYMON <span className="text-primary">CELL</span>
           </span>
         </div>
 
-        {/* Navigation */}
-        <nav className="p-4 space-y-1 flex-1 overflow-y-auto h-[calc(100vh-16rem)]">
+        {/* Navigation - preenche espaco disponivel e rola se necessario */}
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
@@ -118,15 +121,15 @@ export function AdminSidebar({ user }: SidebarProps) {
           ))}
         </nav>
 
-        {/* User Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card">
+        {/* User Section - fixo no rodape com safe area bottom */}
+        <div className="shrink-0 p-4 border-t border-border bg-card safe-area-bottom">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
               <span className="text-primary font-semibold">{user?.full_name?.charAt(0) || "U"}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{user?.full_name || "Usuário"}</p>
-              <p className="text-xs text-muted-foreground capitalize">{user?.role || "técnico"}</p>
+              <p className="text-sm font-medium text-foreground truncate">{user?.full_name || "Usuario"}</p>
+              <p className="text-xs text-muted-foreground capitalize">{user?.role || "tecnico"}</p>
             </div>
           </div>
           <Button

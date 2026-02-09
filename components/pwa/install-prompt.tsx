@@ -141,7 +141,7 @@ export function InstallPrompt() {
   // ================================================================ //
   if (platform === "ios") {
     return (
-      <div className="fixed inset-x-0 bottom-0 z-[9999] safe-area-bottom animate-in slide-in-from-bottom duration-300">
+      <div className="fixed inset-x-0 bottom-0 z-[9999] pwa-safe-bottom animate-in slide-in-from-bottom duration-300">
         <div className="mx-auto max-w-lg px-4 pb-4">
           <div className="relative rounded-2xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur-xl">
             {/* Botao fechar */}
@@ -215,7 +215,7 @@ export function InstallPrompt() {
   // ================================================================ //
   if (deferredPrompt) {
     return (
-      <div className="fixed inset-x-0 bottom-0 z-[9999] safe-area-bottom animate-in slide-in-from-bottom duration-300">
+      <div className="fixed inset-x-0 bottom-0 z-[9999] pwa-safe-bottom animate-in slide-in-from-bottom duration-300">
         <div className="mx-auto max-w-lg px-4 pb-4">
           <div className="relative rounded-2xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur-xl">
             <button
@@ -269,7 +269,7 @@ export function InstallPrompt() {
   // ================================================================ //
   if (platform === "android") {
     return (
-      <div className="fixed inset-x-0 bottom-0 z-[9999] safe-area-bottom animate-in slide-in-from-bottom duration-300">
+      <div className="fixed inset-x-0 bottom-0 z-[9999] pwa-safe-bottom animate-in slide-in-from-bottom duration-300">
         <div className="mx-auto max-w-lg px-4 pb-4">
           <div className="relative rounded-2xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur-xl">
             <button

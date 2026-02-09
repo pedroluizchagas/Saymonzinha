@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -76,8 +76,8 @@
 }
 
 @theme inline {
-  --font-sans: "Inter", "Inter Fallback", system-ui, sans-serif;
-  --font-heading: "Poppins", "Poppins Fallback", system-ui, sans-serif;
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --font-heading: 'Poppins', 'Poppins Fallback', system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -145,7 +145,12 @@
   h6 .text-primary,
   .font-bold.text-primary,
   .font-semibold.text-primary {
-    background-image: linear-gradient(90deg, #ff4d4f 0%, #ff0200 60%, #b00000 100%);
+    background-image: linear-gradient(
+      90deg,
+      #ff4d4f 0%,
+      #ff0200 60%,
+      #b00000 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -157,21 +162,96 @@
 /* PWA / iOS safe-area e standalone utilities          */
 /* -------------------------------------------------- */
 
-/* Padding inferior respeitando a safe-area do iPhone */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+/* Variaveis CSS para safe area com fallback */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
-/* Padding superior respeitando a safe-area (notch) */
+/* Padding basico respeitando cada lado da safe-area */
 .safe-area-top {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: var(--sat);
 }
 
-/* Quando aberto como PWA standalone no iOS */
+.safe-area-bottom {
+  padding-bottom: var(--sab);
+}
+
+.safe-area-left {
+  padding-left: var(--sal);
+}
+
+.safe-area-right {
+  padding-right: var(--sar);
+}
+
+.safe-area-x {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+
+/* Header fixo que estende o background atras da barra de status / notch */
+.pwa-safe-header {
+  padding-top: var(--sat);
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+
+/* Elemento fixo no rodape que respeita o home indicator / gesture bar */
+.pwa-safe-bottom {
+  padding-bottom: var(--sab);
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+
+/* Offset do conteudo principal para compensar header fixo + safe area
+   4rem = altura do header mobile (h-16) */
+.main-content-offset {
+  padding-top: calc(4rem + var(--sat));
+}
+
+@media (min-width: 1024px) {
+  .main-content-offset {
+    padding-top: 0;
+  }
+}
+
+/* Altura minima usando dvh (dynamic viewport height) para mobile */
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* -------------------------------------------------- */
+/* PWA standalone mode                                */
+/* -------------------------------------------------- */
+
 @media all and (display-mode: standalone) {
+  /* Background se estende atras da barra de status transparente */
+  html,
+  body {
+    background-color: var(--background);
+  }
+
   body {
     /* Evita o bounce/overscroll no iOS standalone */
     overscroll-behavior-y: none;
+    -webkit-user-select: none;
+    user-select: text;
+  }
+
+  /* Previne pull-to-refresh no iOS */
+  html {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  body {
+    overflow: auto;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

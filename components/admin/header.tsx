@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import Image from "next/image"
-import { useEffect, useState } from "react"
-import { Bell, Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import type { Profile } from "@/types/database"
-import { createClient } from "@/lib/supabase/client"
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
+import { Bell, Search } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import type { Profile } from '@/types/database'
+import { createClient } from '@/lib/supabase/client'
 
 interface AdminHeaderProps {
   user: Profile | null
@@ -23,12 +23,14 @@ export function AdminHeader({ user, title, subtitle }: AdminHeaderProps) {
         setAvatarUrl(null)
         return
       }
-      if (user.avatar_url.startsWith("http")) {
+      if (user.avatar_url.startsWith('http')) {
         setAvatarUrl(user.avatar_url)
         return
       }
       const supabase = createClient()
-      const { data } = await supabase.storage.from("avatar_profire").createSignedUrl(user.avatar_url, 3600)
+      const { data } = await supabase.storage
+        .from('avatar_profire')
+        .createSignedUrl(user.avatar_url, 3600)
       setAvatarUrl(data?.signedUrl || null)
     }
     run()
@@ -38,14 +40,19 @@ export function AdminHeader({ user, title, subtitle }: AdminHeaderProps) {
     <header className="hidden lg:flex h-16 items-center justify-between px-6 border-b border-border bg-card/50 backdrop-blur-sm">
       <div>
         <h1 className="text-xl font-semibold text-foreground">{title}</h1>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+        {subtitle && (
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
+        )}
       </div>
 
       <div className="flex items-center gap-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Buscar..." className="pl-9 w-64 bg-background border-input" />
+          <Input
+            placeholder="Buscar..."
+            className="pl-9 w-64 bg-background border-input"
+          />
         </div>
 
         {/* Notifications */}
@@ -61,19 +68,25 @@ export function AdminHeader({ user, title, subtitle }: AdminHeaderProps) {
           {avatarUrl ? (
             <Image
               src={avatarUrl}
-              alt={user?.full_name || "Usuário"}
+              alt={user?.full_name || 'Usuário'}
               width={36}
               height={36}
               className="rounded-full object-cover"
             />
           ) : (
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary font-semibold text-sm">{user?.full_name?.charAt(0) || "U"}</span>
+              <span className="text-primary font-semibold text-sm">
+                {user?.full_name?.charAt(0) || 'U'}
+              </span>
             </div>
           )}
           <div className="hidden xl:block">
-            <p className="text-sm font-medium text-foreground">{user?.full_name}</p>
-            <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+            <p className="text-sm font-medium text-foreground">
+              {user?.full_name}
+            </p>
+            <p className="text-xs text-muted-foreground capitalize">
+              {user?.role}
+            </p>
           </div>
         </div>
       </div>
