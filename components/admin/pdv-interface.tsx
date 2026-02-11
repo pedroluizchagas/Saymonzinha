@@ -155,7 +155,8 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
         {/* Busca e Código de Barras */}
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
+              {/* Busca - ocupa toda a linha no mobile */}
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -187,23 +188,26 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
                 )}
               </div>
 
-              <form onSubmit={handleBarcodeSubmit} className="flex gap-2">
-                <div className="relative">
-                  <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    ref={barcodeRef}
-                    placeholder="Código de barras"
-                    value={barcodeInput}
-                    onChange={(e) => setBarcodeInput(e.target.value)}
-                    className="pl-10 w-40 bg-background border-input"
-                  />
-                </div>
-              </form>
+              {/* Codigo de barras + Item Avulso lado a lado no mobile */}
+              <div className="flex gap-2">
+                <form onSubmit={handleBarcodeSubmit} className="flex-1 lg:flex-none">
+                  <div className="relative">
+                    <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      ref={barcodeRef}
+                      placeholder="Cod. barras"
+                      value={barcodeInput}
+                      onChange={(e) => setBarcodeInput(e.target.value)}
+                      className="pl-10 lg:w-40 bg-background border-input"
+                    />
+                  </div>
+                </form>
 
-              <Button type="button" variant="outline" onClick={addCustomItem} className="bg-transparent">
-                <Plus className="w-4 h-4 mr-2" />
-                Item Avulso
-              </Button>
+                <Button type="button" variant="outline" onClick={addCustomItem} className="bg-transparent shrink-0">
+                  <Plus className="w-4 h-4 mr-1 lg:mr-2" />
+                  <span className="hidden sm:inline">Item</span> Avulso
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

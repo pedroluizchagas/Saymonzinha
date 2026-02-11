@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
@@ -22,7 +23,7 @@ import {
   Home,
   ChevronRight,
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { Profile } from "@/types/database"
 import { NotificationManager } from "@/components/pwa/notification-manager"
 
@@ -46,6 +47,27 @@ export function AdminSidebar({ user }: SidebarProps) {
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+
+  // Buscar URL do avatar do usuario
+  useEffect(() => {
+    const loadAvatar = async () => {
+      if (!user?.avatar_url) {
+        setAvatarUrl(null)
+        return
+      }
+      if (user.avatar_url.startsWith("http")) {
+        setAvatarUrl(user.avatar_url)
+        return
+      }
+      const supabase = createClient()
+      const { data } = await supabase.storage
+        .from("avatar_profire")
+        .createSignedUrl(user.avatar_url, 3600)
+      setAvatarUrl(data?.signedUrl || null)
+    }
+    loadAvatar()
+  }, [user?.avatar_url])
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -64,7 +86,7 @@ export function AdminSidebar({ user }: SidebarProps) {
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-card border-b border-border z-[60] pwa-safe-header">
         <div className="h-16 flex items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-primary rounded" />
+            <Smartphone className="w-6 h-6 text-primary" />
             <span className="font-bold text-foreground">
               SAYMON <span className="text-primary">CELL</span>
             </span>
@@ -73,11 +95,23 @@ export function AdminSidebar({ user }: SidebarProps) {
             <NotificationManager />
             <Link
               href="/admin/settings"
-              className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center"
+              className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
             >
-              <span className="text-white font-semibold text-xs">
-                {user?.full_name?.charAt(0) || "U"}
-              </span>
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt={user?.full_name || "Usuario"}
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover w-8 h-8"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center">
+                  <span className="text-white font-semibold text-xs">
+                    {user?.full_name?.charAt(0) || "U"}
+                  </span>
+                </div>
+              )}
             </Link>
           </div>
         </div>
@@ -162,7 +196,7 @@ export function AdminSidebar({ user }: SidebarProps) {
           "lg:hidden fixed left-0 right-0 z-50 transition-transform duration-300 ease-out",
           moreOpen ? "translate-y-0" : "translate-y-full",
         )}
-        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom, 0px))" }}
+        style={{ bottom: "calc(4rem + var(--sab))" }}
       >
         <div className="bg-card rounded-t-2xl border-t border-x border-border overflow-hidden">
           {/* Leads */}

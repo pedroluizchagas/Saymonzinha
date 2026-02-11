@@ -184,10 +184,11 @@ export function NotificationManager() {
       onClick={handleClick}
       disabled={!isClickable}
       title={getTitle()}
+      aria-label={getTitle()}
       className={cn(
-        "relative p-1 transition-all duration-200",
-        isClickable && "cursor-pointer hover:scale-110",
-        !isClickable && "cursor-default opacity-50",
+        "relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200",
+        isClickable && "cursor-pointer hover:scale-110 hover:bg-secondary/50 active:scale-95",
+        !isClickable && "cursor-default opacity-60",
         animating && "animate-pulse"
       )}
     >
@@ -201,13 +202,13 @@ export function NotificationManager() {
 
       {/* Indicador de status */}
       {status === "subscribed" && (
-        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-card" />
+        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-card" />
       )}
       {(status === "prompt" || status === "unsubscribed") && (
-        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-card animate-pulse" />
+        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-card animate-pulse" />
       )}
       {status === "denied" && (
-        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-card" />
+        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-card" />
       )}
     </button>
   )

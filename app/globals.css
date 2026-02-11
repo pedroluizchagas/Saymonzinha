@@ -170,6 +170,14 @@
   --sar: env(safe-area-inset-right, 0px);
 }
 
+/* No iOS/iPhone desabilita safe-area para posicionar menu corretamente */
+html.is-ios {
+  --sat: 0px;
+  --sab: 0px;
+  --sal: 0px;
+  --sar: 0px;
+}
+
 /* Padding basico respeitando cada lado da safe-area */
 .safe-area-top {
   padding-top: var(--sat);
@@ -218,6 +226,18 @@
   }
 }
 
+/* Padding inferior no conteudo principal para compensar o bottom nav mobile
+   4rem = altura do bottom nav (h-16) + safe area bottom */
+.main-content-bottom {
+  padding-bottom: calc(4rem + var(--sab) + 0.5rem);
+}
+
+@media (min-width: 1024px) {
+  .main-content-bottom {
+    padding-bottom: 0;
+  }
+}
+
 /* Altura minima usando dvh (dynamic viewport height) para mobile */
 .min-h-screen-safe {
   min-height: 100vh;
@@ -240,6 +260,13 @@
     overscroll-behavior-y: none;
     -webkit-user-select: none;
     user-select: text;
+    /* Esconde scrollbar no PWA mobile */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
   }
 
   /* Previne pull-to-refresh no iOS */
