@@ -2,11 +2,11 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { Bell, Search } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import type { Profile } from '@/types/database'
 import { createClient } from '@/lib/supabase/client'
+import { NotificationDropdown } from '@/components/admin/notification-dropdown'
 
 interface AdminHeaderProps {
   user: Profile | null
@@ -56,12 +56,7 @@ export function AdminHeader({ user, title, subtitle }: AdminHeaderProps) {
         </div>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-            3
-          </span>
-        </Button>
+        <NotificationDropdown />
 
         {/* User */}
         <div className="flex items-center gap-3 pl-4 border-l border-border">

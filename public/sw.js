@@ -1,4 +1,4 @@
-const SW_VERSION = "3.0.0"
+const SW_VERSION = "4.0.0"
 const CACHE_NAME = "saymoncell-v" + SW_VERSION
 const APP_PREFIXES = ["/admin", "/auth"]
 const PRECACHE_URLS = [
@@ -38,14 +38,27 @@ self.addEventListener("push", function (event) {
       url: data.url || "/admin",
     },
     vibrate: [200, 100, 200],
-    requireInteraction: true,
+    requireInteraction: false,
+    silent: false,
     actions: [
       { action: "open", title: "Abrir" },
       { action: "dismiss", title: "Fechar" },
     ],
   }
 
-  event.waitUntil(self.registration.showNotification(title, options))
+  event.waitUntil(
+    self.registration.showNotification(title, options).then(function () {
+      // Notificar abas abertas para atualizar o badge/contador
+      return self.clients.matchAll({ type: "window" }).then(function (clients) {
+        clients.forEach(function (client) {
+          client.postMessage({
+            type: "PUSH_RECEIVED",
+            payload: data,
+          })
+        })
+      })
+    })
+  )
 })
 
 // ----------------------------------------------------------

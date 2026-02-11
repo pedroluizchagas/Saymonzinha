@@ -17,8 +17,6 @@ import {
   LogOut,
   Smartphone,
   Menu,
-  X,
-  Bell,
   FileText,
   Home,
   ChevronRight,
@@ -26,6 +24,7 @@ import {
 import { useState, useEffect } from "react"
 import type { Profile } from "@/types/database"
 import { NotificationManager } from "@/components/pwa/notification-manager"
+import { NotificationDropdown } from "@/components/admin/notification-dropdown"
 
 interface SidebarProps {
   user: Profile | null
@@ -92,6 +91,7 @@ export function AdminSidebar({ user }: SidebarProps) {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationDropdown />
             <NotificationManager />
             <Link
               href="/admin/settings"

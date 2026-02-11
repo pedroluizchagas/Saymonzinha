@@ -288,3 +288,32 @@ export interface CartItem {
   product: Product
   quantity: number
 }
+
+// Notificacoes
+export type NotificationType =
+  | "new_lead"
+  | "low_stock"
+  | "new_purchase"
+  | "order_status"
+  | "system"
+
+export interface Notification {
+  id: string
+  type: NotificationType
+  title: string
+  body: string
+  url: string
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+export interface NotificationRead {
+  id: string
+  notification_id: string
+  user_id: string
+  read_at: string
+}
+
+export interface NotificationWithReadStatus extends Notification {
+  is_read: boolean
+}
