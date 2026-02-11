@@ -162,20 +162,19 @@
 /* PWA / iOS safe-area e standalone utilities          */
 /* -------------------------------------------------- */
 
-/* Variaveis CSS para safe area com fallback */
+/* Variaveis CSS para safe area com fallback.
+   - iOS (black-translucent + viewport-fit:cover): env() retorna o offset real
+     do notch / Dynamic Island (~47-59 px), necessario para empurrar o conteudo
+     abaixo da barra de status translucida.
+   - Android standalone: o SO posiciona o webview abaixo da barra de status,
+     entao env() retorna 0 px naturalmente -- nenhum padding extra e adicionado.
+   Nao sobrescreva esses valores por plataforma; o env() ja faz o trabalho
+   correto em cada sistema. */
 :root {
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
-}
-
-/* No iOS/iPhone desabilita safe-area para posicionar menu corretamente */
-html.is-ios {
-  --sat: 0px;
-  --sab: 0px;
-  --sal: 0px;
-  --sar: 0px;
 }
 
 /* Padding basico respeitando cada lado da safe-area */

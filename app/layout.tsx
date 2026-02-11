@@ -116,12 +116,6 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="dark scroll-smooth">
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
-        {/* Detecta iOS antes do primeiro paint para desabilitar safe-area */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var u=navigator.userAgent||'';if(/iPad|iPhone|iPod/.test(u)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))document.documentElement.classList.add('is-ios')})()`,
-          }}
-        />
         <CartProvider>
           {children}
           <CartDrawer />
