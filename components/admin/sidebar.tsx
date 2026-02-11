@@ -253,10 +253,8 @@ export function AdminSidebar({ user }: SidebarProps) {
         </div>
       </div>
 
-      {/* Bottom Navigation - Mobile (z-index alto para ficar acima do popup)
-         O background se estende ate a borda inferior da tela via ::after
-         para evitar faixa escura visivel no iPhone (home indicator area). */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-[60] bottom-nav-extend">
+      {/* Bottom Navigation - Mobile */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-[60] bottom-nav-extend pwa-safe-bottom safe-area-x">
         <nav className="h-16 grid grid-cols-5">
           {/* Inicio */}
           <Link
