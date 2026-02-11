@@ -226,15 +226,36 @@
 }
 
 /* Padding inferior no conteudo principal para compensar o bottom nav mobile
-   4rem = altura do bottom nav (h-16) + safe area bottom */
+   4rem = altura do bottom nav (h-16) */
 .main-content-bottom {
-  padding-bottom: calc(4rem + var(--sab) + 0.5rem);
+  padding-bottom: calc(4rem + 0.5rem);
 }
 
 @media (min-width: 1024px) {
   .main-content-bottom {
     padding-bottom: 0;
   }
+}
+
+/* Estende o fundo do bottom nav ate a borda fisica da tela.
+   Usa ::after com altura generosa para cobrir qualquer gap que o
+   sistema (home indicator, gesture bar) possa criar abaixo do nav.
+   Funciona tanto no iOS (home indicator ~34px) quanto no Android. */
+.bottom-nav-extend {
+  position: relative;
+}
+
+.bottom-nav-extend::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: env(safe-area-inset-bottom, 34px);
+  /* Garante cobertura minima mesmo quando env() retorna 0 */
+  min-height: 34px;
+  background: inherit;
+  z-index: -1;
 }
 
 /* Altura minima usando dvh (dynamic viewport height) para mobile */
