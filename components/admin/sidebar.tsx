@@ -19,9 +19,12 @@ import {
   X,
   Bell,
   FileText,
+  Home,
+  ChevronRight,
 } from "lucide-react"
 import { useState } from "react"
 import type { Profile } from "@/types/database"
+import { NotificationManager } from "@/components/pwa/notification-manager"
 
 interface SidebarProps {
   user: Profile | null
@@ -42,6 +45,7 @@ export function AdminSidebar({ user }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -56,25 +60,25 @@ export function AdminSidebar({ user }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Header - fundo se estende atras da barra de status */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-card border-b border-border z-40 pwa-safe-header">
+      {/* Mobile Header - identico ao design */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-card border-b border-border z-[60] pwa-safe-header">
         <div className="h-16 flex items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <Smartphone className="w-6 h-6 text-primary" />
+            <div className="w-6 h-6 bg-primary rounded" />
             <span className="font-bold text-foreground">
               SAYMON <span className="text-primary">CELL</span>
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                3
+          <div className="flex items-center gap-3">
+            <NotificationManager />
+            <Link
+              href="/admin/settings"
+              className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center"
+            >
+              <span className="text-white font-semibold text-xs">
+                {user?.full_name?.charAt(0) || "U"}
               </span>
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)}>
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -143,6 +147,177 @@ export function AdminSidebar({ user }: SidebarProps) {
           </Button>
         </div>
       </aside>
+
+      {/* Overlay escuro do popup Mais - Mobile */}
+      {moreOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/60 z-[45]"
+          onClick={() => setMoreOpen(false)}
+        />
+      )}
+
+      {/* Bottom Sheet popup do Mais - Mobile */}
+      <div
+        className={cn(
+          "lg:hidden fixed left-0 right-0 z-50 transition-transform duration-300 ease-out",
+          moreOpen ? "translate-y-0" : "translate-y-full",
+        )}
+        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom, 0px))" }}
+      >
+        <div className="bg-card rounded-t-2xl border-t border-x border-border overflow-hidden">
+          {/* Leads */}
+          <Link
+            href="/admin/leads"
+            onClick={() => setMoreOpen(false)}
+            className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/30 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+              <FileText className="w-5 h-5 text-blue-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">Leads</p>
+              <p className="text-xs text-muted-foreground">Gerenciar oportunidades</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground/50 flex-shrink-0" />
+          </Link>
+
+          <div className="h-px bg-border mx-5" />
+
+          {/* Clientes */}
+          <Link
+            href="/admin/customers"
+            onClick={() => setMoreOpen(false)}
+            className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/30 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-purple-500/15 flex items-center justify-center flex-shrink-0">
+              <Users className="w-5 h-5 text-purple-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">Clientes</p>
+              <p className="text-xs text-muted-foreground">Base de contatos</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground/50 flex-shrink-0" />
+          </Link>
+
+          <div className="h-px bg-border mx-5" />
+
+          {/* PDV */}
+          <Link
+            href="/admin/pdv"
+            onClick={() => setMoreOpen(false)}
+            className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/30 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center flex-shrink-0">
+              <ShoppingCart className="w-5 h-5 text-red-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">PDV</p>
+              <p className="text-xs text-muted-foreground">Frente de caixa</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground/50 flex-shrink-0" />
+          </Link>
+        </div>
+      </div>
+
+      {/* Bottom Navigation - Mobile (z-index alto para ficar acima do popup) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-[60] pwa-safe-bottom">
+        <nav className="h-16 grid grid-cols-5">
+          {/* Inicio */}
+          <Link
+            href="/admin"
+            onClick={() => setMoreOpen(false)}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 text-xs",
+              isActive("/admin") ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <Home className="w-5 h-5" />
+            <span>Inicio</span>
+            <span
+              className={cn(
+                "mt-1 h-0.5 w-6 rounded-full",
+                isActive("/admin") ? "bg-primary" : "bg-transparent",
+              )}
+            />
+          </Link>
+
+          {/* OS */}
+          <Link
+            href="/admin/orders"
+            onClick={() => setMoreOpen(false)}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 text-xs",
+              isActive("/admin/orders") ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <ClipboardList className="w-5 h-5" />
+            <span>OS</span>
+            <span
+              className={cn(
+                "mt-1 h-0.5 w-6 rounded-full",
+                isActive("/admin/orders") ? "bg-primary" : "bg-transparent",
+              )}
+            />
+          </Link>
+
+          {/* Produtos */}
+          <Link
+            href="/admin/products"
+            onClick={() => setMoreOpen(false)}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 text-xs",
+              isActive("/admin/products") ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <Package className="w-5 h-5" />
+            <span>Produtos</span>
+            <span
+              className={cn(
+                "mt-1 h-0.5 w-6 rounded-full",
+                isActive("/admin/products") ? "bg-primary" : "bg-transparent",
+              )}
+            />
+          </Link>
+
+          {/* Financeiro */}
+          <Link
+            href="/admin/financial"
+            onClick={() => setMoreOpen(false)}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 text-xs",
+              isActive("/admin/financial") ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <DollarSign className="w-5 h-5" />
+            <span>Financeiro</span>
+            <span
+              className={cn(
+                "mt-1 h-0.5 w-6 rounded-full",
+                isActive("/admin/financial") ? "bg-primary" : "bg-transparent",
+              )}
+            />
+          </Link>
+
+          {/* Mais */}
+          <button
+            type="button"
+            onClick={() => setMoreOpen(!moreOpen)}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 text-xs",
+              moreOpen ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <Menu className="w-5 h-5" />
+            <span>Mais</span>
+            <span
+              className={cn(
+                "mt-1 h-0.5 w-6 rounded-full",
+                moreOpen ? "bg-primary" : "bg-transparent",
+              )}
+            />
+          </button>
+        </nav>
+      </div>
     </>
   )
 }

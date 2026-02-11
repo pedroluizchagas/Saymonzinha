@@ -1,4 +1,4 @@
-const SW_VERSION = "2.1.0"
+const SW_VERSION = "3.0.0"
 const CACHE_NAME = "saymoncell-v" + SW_VERSION
 const APP_PREFIXES = ["/admin", "/auth"]
 const PRECACHE_URLS = [
@@ -10,6 +10,75 @@ const PRECACHE_URLS = [
   "/icons/apple-touch-icon.png",
   "/images/logo.png",
 ]
+
+// ----------------------------------------------------------
+// Push Notifications
+// ----------------------------------------------------------
+self.addEventListener("push", function (event) {
+  if (!event.data) return
+
+  var data = {}
+  try {
+    data = event.data.json()
+  } catch (e) {
+    data = {
+      title: "Saymon Cell",
+      body: event.data.text(),
+    }
+  }
+
+  var title = data.title || "Saymon Cell"
+  var options = {
+    body: data.body || "",
+    icon: "/icons/icon-192x192.png",
+    badge: "/icons/favicon-32x32.png",
+    tag: data.tag || "default",
+    renotify: true,
+    data: {
+      url: data.url || "/admin",
+    },
+    vibrate: [200, 100, 200],
+    requireInteraction: true,
+    actions: [
+      { action: "open", title: "Abrir" },
+      { action: "dismiss", title: "Fechar" },
+    ],
+  }
+
+  event.waitUntil(self.registration.showNotification(title, options))
+})
+
+// ----------------------------------------------------------
+// Notification Click
+// ----------------------------------------------------------
+self.addEventListener("notificationclick", function (event) {
+  event.notification.close()
+
+  if (event.action === "dismiss") return
+
+  var url = event.notification.data && event.notification.data.url
+    ? event.notification.data.url
+    : "/admin"
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then(function (clientList) {
+        // Tentar focar uma janela existente
+        for (var i = 0; i < clientList.length; i++) {
+          var client = clientList[i]
+          if (client.url.includes("/admin") && "focus" in client) {
+            client.navigate(url)
+            return client.focus()
+          }
+        }
+        // Abrir nova janela se nenhuma encontrada
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(url)
+        }
+      })
+  )
+})
 
 // ----------------------------------------------------------
 // Mensagens

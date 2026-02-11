@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { notifyLowStock } from "@/lib/notifications"
 
 interface SaleItem {
   product_id?: string
@@ -34,10 +35,10 @@ export async function createSale(data: CreateSaleDTO): Promise<ActionResult> {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      return { success: false, message: "Usuário não autenticado" }
+      return { success: false, message: "Usuario nao autenticado" }
     }
 
-    // Buscar método de pagamento para calcular taxa
+    // Buscar metodo de pagamento para calcular taxa
     const { data: paymentMethod } = await supabase
       .from("payment_methods")
       .select("fee_percentage")
@@ -91,17 +92,31 @@ export async function createSale(data: CreateSaleDTO): Promise<ActionResult> {
       console.error("Error creating sale items:", itemsError)
     }
 
-    // Atualizar estoque dos produtos
+    // Atualizar estoque dos produtos e verificar estoque baixo
     for (const item of data.items) {
       if (item.product_id) {
         await supabase.rpc("decrement_stock", {
           p_product_id: item.product_id,
           p_quantity: item.quantity,
         })
+
+        // Verificar se o estoque ficou baixo apos a venda
+        const { data: product } = await supabase
+          .from("products")
+          .select("name, stock_quantity, min_stock")
+          .eq("id", item.product_id)
+          .single()
+
+        if (product && product.stock_quantity <= product.min_stock) {
+          // Notificar sobre estoque baixo (fire-and-forget)
+          notifyLowStock(product.name, product.stock_quantity).catch((err) =>
+            console.error("[PDV] Erro ao enviar notificacao de estoque:", err)
+          )
+        }
       }
     }
 
-    // Criar transação de caixa
+    // Criar transacao de caixa
     await supabase.from("cash_transactions").insert({
       type: "income",
       sale_id: sale.id,

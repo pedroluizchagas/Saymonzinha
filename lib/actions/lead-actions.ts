@@ -1,7 +1,8 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@supabase/ssr"
 import type { CreateLeadDTO } from "@/types/database"
+import { notifyNewLead } from "@/lib/notifications"
 
 interface ActionResult {
   success: boolean
@@ -11,7 +12,19 @@ interface ActionResult {
 
 export async function createLead(data: CreateLeadDTO): Promise<ActionResult> {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return []
+          },
+          setAll() {
+          },
+        },
+      },
+    )
 
     const { data: lead, error } = await supabase
       .from("leads")
@@ -34,13 +47,19 @@ export async function createLead(data: CreateLeadDTO): Promise<ActionResult> {
       console.error("Error creating lead:", error)
       return {
         success: false,
-        message: "Erro ao enviar orçamento. Tente novamente.",
+        message: "Erro ao enviar orcamento. Tente novamente.",
       }
     }
 
+    // Notificar admins sobre o novo lead (fire-and-forget)
+    notifyNewLead(
+      data.customer_name,
+      `${data.device_brand} ${data.device_model}`
+    ).catch((err) => console.error("[Lead] Erro ao enviar notificacao:", err))
+
     return {
       success: true,
-      message: "Orçamento enviado com sucesso! Entraremos em contato em breve.",
+      message: "Orcamento enviado com sucesso! Entraremos em contato em breve.",
       data: { id: lead.id },
     }
   } catch (error) {

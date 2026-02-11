@@ -170,7 +170,35 @@ export default async function AdminDashboardPage() {
     <div>
       <AdminHeader user={profile as Profile | null} title="Dashboard" subtitle="Visão geral do seu negócio" />
 
-      <div className="p-4 md:p-6">
+      {/* Cabeçalho Mobile conforme design */}
+      <div className="lg:hidden px-4 md:px-6 pt-2">
+        <p className="text-sm text-muted-foreground">Bom dia, {profile?.full_name?.split(' ')[0] || 'Admin'}</p>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-foreground">Visão Geral</h1>
+          <span className="text-xs text-muted-foreground">
+            {(() => {
+              const now = new Date()
+              const monthNames = [
+                "Janeiro",
+                "Fevereiro",
+                "Março",
+                "Abril",
+                "Maio",
+                "Junho",
+                "Julho",
+                "Agosto",
+                "Setembro",
+                "Outubro",
+                "Novembro",
+                "Dezembro",
+              ]
+              return `${monthNames[now.getMonth()]} ${now.getFullYear()}`
+            })()}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-4 md:p-6 pb-24 lg:pb-6">
         <DashboardKPIs data={kpiData} />
       </div>
     </div>
