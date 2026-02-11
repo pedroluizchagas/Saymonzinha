@@ -23,7 +23,6 @@ import {
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import type { Profile } from "@/types/database"
-import { NotificationManager } from "@/components/pwa/notification-manager"
 import { NotificationDropdown } from "@/components/admin/notification-dropdown"
 
 interface SidebarProps {
@@ -92,7 +91,6 @@ export function AdminSidebar({ user }: SidebarProps) {
           </div>
           <div className="flex items-center gap-3">
             <NotificationDropdown />
-            <NotificationManager />
             <Link
               href="/admin/settings"
               className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
@@ -193,10 +191,11 @@ export function AdminSidebar({ user }: SidebarProps) {
       {/* Bottom Sheet popup do Mais - Mobile */}
       <div
         className={cn(
-          "lg:hidden fixed left-0 right-0 z-50 transition-transform duration-300 ease-out",
-          moreOpen ? "translate-y-0" : "translate-y-full",
+          "lg:hidden fixed left-0 right-0 z-50 duration-300 ease-out bottom-sheet-offset",
+          moreOpen
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "translate-y-full opacity-0 pointer-events-none",
         )}
-        style={{ bottom: "4rem" }}
       >
         <div className="bg-card rounded-t-2xl border-t border-x border-border overflow-hidden">
           {/* Leads */}
@@ -254,7 +253,7 @@ export function AdminSidebar({ user }: SidebarProps) {
       </div>
 
       {/* Bottom Navigation - Mobile */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-[60] bottom-nav-extend pwa-safe-bottom safe-area-x">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-[60] pwa-safe-bottom">
         <nav className="h-16 grid grid-cols-5">
           {/* Inicio */}
           <Link

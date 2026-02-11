@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
   Bell,
+  BellRing,
   FileText,
   Package,
   ShoppingCart,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useNotifications } from "@/hooks/use-notifications"
+import { usePushSubscription } from "@/hooks/use-push-subscription"
 import type { NotificationWithReadStatus, NotificationType } from "@/types/database"
 
 const TYPE_CONFIG: Record<
@@ -137,6 +139,13 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
   const router = useRouter()
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead } =
     useNotifications()
+  const { status: pushStatus, busy: pushBusy, subscribe: pushSubscribe } =
+    usePushSubscription()
+
+  // Banner so aparece quando o usuario pode tomar acao (ativar push).
+  // Se "denied", nao ha o que fazer de dentro do app.
+  const showPushBanner =
+    pushStatus === "prompt" || pushStatus === "unsubscribed"
 
   // Fechar ao clicar fora
   useEffect(() => {
@@ -240,6 +249,24 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
               </button>
             )}
           </div>
+
+          {/* Banner para ativar push notifications */}
+          {showPushBanner && (
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-amber-500/5">
+              <BellRing className="w-4 h-4 flex-shrink-0 text-amber-500" />
+              <p className="flex-1 text-xs text-muted-foreground leading-snug">
+                Receba alertas em tempo real no seu dispositivo.
+              </p>
+              <button
+                type="button"
+                onClick={pushSubscribe}
+                disabled={pushBusy}
+                className="flex-shrink-0 px-3 py-1 text-xs font-semibold rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-60"
+              >
+                {pushBusy ? "..." : "Ativar"}
+              </button>
+            </div>
+          )}
 
           {/* Content */}
           <div className="max-h-[400px] overflow-y-auto overscroll-contain">

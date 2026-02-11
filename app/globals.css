@@ -226,9 +226,9 @@
 }
 
 /* Padding inferior no conteudo principal para compensar o bottom nav mobile
-   4rem = altura do bottom nav (h-16) */
+   4rem = altura do bottom nav (h-16) + safe area bottom + folga */
 .main-content-bottom {
-  padding-bottom: calc(4rem + 0.5rem);
+  padding-bottom: calc(4rem + var(--sab) + 0.5rem);
 }
 
 @media (min-width: 1024px) {
@@ -237,13 +237,22 @@
   }
 }
 
-/* Estende o fundo do bottom nav ate a borda fisica da tela.
-   Cobre apenas o safe-area real do dispositivo (ex: home indicator do iOS).
-   Em dispositivos sem safe-area (maioria dos Android) nao gera espaco extra. */
-.bottom-nav-extend {
-  position: relative;
+/* Posiciona o bottom sheet logo acima do bottom nav + safe area.
+   Usado no popup "Mais" do mobile. */
+.bottom-sheet-offset {
+  bottom: calc(4rem + var(--sab));
 }
 
+@media (min-width: 1024px) {
+  .bottom-sheet-offset {
+    bottom: auto;
+  }
+}
+
+/* Estende o fundo de um elemento fixo ate a borda fisica da tela.
+   Cobre apenas o safe-area real do dispositivo (ex: home indicator do iOS).
+   Em dispositivos sem safe-area (maioria dos Android) nao gera espaco extra.
+   NOTA: nao define position -- o elemento pai ja deve ser fixed/absolute/relative. */
 .bottom-nav-extend::after {
   content: "";
   position: absolute;
@@ -252,7 +261,6 @@
   top: 100%;
   height: env(safe-area-inset-bottom, 0px);
   background: inherit;
-  z-index: -1;
 }
 
 /* Altura minima usando dvh (dynamic viewport height) para mobile */
