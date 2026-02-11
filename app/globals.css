@@ -238,9 +238,8 @@
 }
 
 /* Estende o fundo do bottom nav ate a borda fisica da tela.
-   Usa ::after com altura generosa para cobrir qualquer gap que o
-   sistema (home indicator, gesture bar) possa criar abaixo do nav.
-   Funciona tanto no iOS (home indicator ~34px) quanto no Android. */
+   Cobre apenas o safe-area real do dispositivo (ex: home indicator do iOS).
+   Em dispositivos sem safe-area (maioria dos Android) nao gera espaco extra. */
 .bottom-nav-extend {
   position: relative;
 }
@@ -251,9 +250,7 @@
   left: 0;
   right: 0;
   top: 100%;
-  height: env(safe-area-inset-bottom, 34px);
-  /* Garante cobertura minima mesmo quando env() retorna 0 */
-  min-height: 34px;
+  height: env(safe-area-inset-bottom, 0px);
   background: inherit;
   z-index: -1;
 }

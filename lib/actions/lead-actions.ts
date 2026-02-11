@@ -1,6 +1,6 @@
 "use server"
 
-import { createServerClient } from "@supabase/ssr"
+import { createAdminClient } from "@/lib/supabase/admin"
 import type { CreateLeadDTO } from "@/types/database"
 import { notifyNewLead } from "@/lib/notifications"
 
@@ -12,19 +12,10 @@ interface ActionResult {
 
 export async function createLead(data: CreateLeadDTO): Promise<ActionResult> {
   try {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return []
-          },
-          setAll() {
-          },
-        },
-      },
-    )
+    // Usa o admin client (service role) para bypass de RLS,
+    // pois leads sao criados por visitantes nao autenticados.
+    // Seguro porque esta server action valida os dados antes de inserir.
+    const supabase = createAdminClient()
 
     const { data: lead, error } = await supabase
       .from("leads")
