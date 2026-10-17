@@ -1,9 +1,10 @@
 "use client"
 
 // Moldura das páginas da loja virtual (o catálogo e a página de cada produto): o cabeçalho do site,
-// a janela do pedido de orçamento, o carrinho, o rodapé da home e os avisos. As páginas adicionam
-// produtos pelo useAddToCart, que põe no carrinho e avisa. Ao abrir a página e ao abrir o carrinho, o
-// carrinho guardado é conferido com o banco.
+// que ganha fundo quando a página rola, a janela do pedido de orçamento, o carrinho, o rodapé com a
+// chamada recebida e os avisos. As páginas adicionam produtos pelo useAddToCart, que põe no carrinho e
+// avisa com a foto do produto. Ao abrir a página e ao abrir o carrinho, o carrinho guardado é
+// conferido com o banco.
 
 import "@/components/home/sc-system.css"
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react"
@@ -18,10 +19,12 @@ import { reconcileCart } from "@/lib/purchase-request"
 import type { Product } from "@/types/database"
 import { CartDialog } from "./cart-dialog"
 import { SiteHeader } from "./site-header"
+import { StoreCall } from "./store-sections"
 import { StoreNotification, type StoreNotice } from "./store-notification"
 import "./loja.css"
 
-type AddToCart = (product: Product, quantity?: number) => void
+/** Põe o produto no carrinho e avisa; devolve se entrou alguma unidade. */
+type AddToCart = (product: Product, quantity?: number) => boolean
 
 const AddToCartContext = createContext<AddToCart | null>(null)
 
@@ -40,6 +43,15 @@ export function StoreShell({ children }: { children: ReactNode }) {
   const [cartOpen, setCartOpen] = useState(false)
   const [published, setPublished] = useState<Product[] | null>(null)
   const [removed, setRemoved] = useState<string[]>([])
+  const [scrolled, setScrolled] = useState(false)
+
+  // O cabeçalho fica transparente no topo e ganha fundo quando a página rola, como na Raio-X.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
 
   const notify = useCallback((next: StoreNotice) => setNotice((last) => ({ notice: next, signal: last.signal + 1 })), [])
 
@@ -70,36 +82,36 @@ export function StoreShell({ children }: { children: ReactNode }) {
       const room = product.stock_quantity - (items.find((i) => i.product.id === product.id)?.quantity ?? 0)
       if (room <= 0) {
         notify({ title: "Todas as unidades já estão no carrinho", detail: product.name, tone: "info" })
-        return
+        return false
       }
       addItem(product, Math.min(quantity, room))
       notify({
         title: quantity > room ? `Só ${room} ${room === 1 ? "unidade adicionada" : "unidades adicionadas"}: é o que há em estoque` : "Adicionado ao carrinho",
         detail: product.name,
         tone: "done",
+        image: product.image_url,
       })
+      return true
     },
     [addItem, items, notify],
   )
 
+  const openCart = useCallback(() => {
+    refresh()
+    setCartOpen(true)
+  }, [refresh])
+
   return (
     <QuoteRequestProvider layout={quoteLayout}>
       <AddToCartContext.Provider value={add}>
-        <div className="sc lv">
-          <SiteHeader
-            menu={SITE_MENU}
-            current={STORE_PATH}
-            cartCount={cart.getItemCount()}
-            onOpenCart={() => {
-              refresh()
-              setCartOpen(true)
-            }}
-          />
+        <div className="sc lv" data-scrolled={scrolled ? "1" : "0"}>
+          <SiteHeader menu={SITE_MENU} current={STORE_PATH} cartCount={cart.getItemCount()} onOpenCart={openCart} />
           {children}
           <footer className="lv-footer">
+            <StoreCall />
             <HomeFooter menu={SITE_MENU} />
           </footer>
-          <StoreNotification notice={notice.notice} signal={notice.signal} />
+          <StoreNotification notice={notice.notice} signal={notice.signal} onOpenCart={openCart} />
           <CartDialog
             open={cartOpen}
             onClose={() => {

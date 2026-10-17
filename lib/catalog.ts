@@ -13,6 +13,18 @@ export function formatPrice(value: number) {
   return PRICE.format(value)
 }
 
+/** O preço em duas partes, para o "R$" aparecer menor que o valor. */
+export function priceParts(value: number) {
+  const parts = PRICE.formatToParts(value)
+  return {
+    currency: parts.find((p) => p.type === "currency")?.value ?? "",
+    amount: parts
+      .filter((p) => p.type !== "currency" && p.type !== "literal")
+      .map((p) => p.value)
+      .join(""),
+  }
+}
+
 /** As categorias na ordem em que aparecem nos filtros. */
 const CATEGORIES: [ProductCategory, string][] = [
   ["accessory", "Acessórios"],
@@ -20,6 +32,18 @@ const CATEGORIES: [ProductCategory, string][] = [
   ["other", "Outros"],
   ["service", "Serviços"],
 ]
+
+const CATEGORY_NAMES: Record<ProductCategory, string> = {
+  accessory: "Acessório",
+  part: "Peça",
+  service: "Serviço",
+  other: "Outro",
+}
+
+/** A categoria do produto no singular, como aparece na página dele. */
+export function categoryName(product: Product) {
+  return CATEGORY_NAMES[product.category] ?? "Produto"
+}
 
 /** Filtros do catálogo: Todos e as categorias que têm produto, na ordem da loja. Com uma categoria só, nenhum. */
 export function catalogFilters(products: Product[]): CatalogFilter[] {
@@ -46,6 +70,19 @@ export function isSoldOut(product: Product) {
 export function stockBadge(product: Product): "Esgotado" | "Últimas unidades" | null {
   if (isSoldOut(product)) return "Esgotado"
   return product.stock_quantity <= FEW_LEFT ? "Últimas unidades" : null
+}
+
+/** Outros produtos para a página de um produto: os com estoque, da mesma categoria primeiro, na ordem da lista. */
+export function relatedProducts(product: Product, products: Product[], limit = 4) {
+  const others = products.filter((p) => p.id !== product.id && !isSoldOut(p))
+  const same = others.filter((p) => p.category === product.category)
+  return [...same, ...others.filter((p) => p.category !== product.category)].slice(0, limit)
+}
+
+/** Quantas colunas o cartão do fim da grade ocupa para fechar a última linha; com a linha cheia, a linha toda. */
+export function closingSpan(count: number, columns: number) {
+  const left = count % columns
+  return left === 0 ? columns : columns - left
 }
 
 /** Quantos caracteres do código do produto entram no endereço (ver docs/adr/0002). */

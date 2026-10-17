@@ -1,6 +1,17 @@
 import { describe, expect, test } from "vitest"
 import type { Product } from "@/types/database"
-import { catalogFilters, filterCatalog, findProduct, productPath, shouldShowSearch, stockBadge } from "./catalog"
+import {
+  catalogFilters,
+  categoryName,
+  closingSpan,
+  filterCatalog,
+  findProduct,
+  priceParts,
+  productPath,
+  relatedProducts,
+  shouldShowSearch,
+  stockBadge,
+} from "./catalog"
 
 function product(name: string, overrides: Partial<Product> = {}): Product {
   return {
@@ -97,5 +108,34 @@ describe("catálogo da loja virtual", () => {
     expect(findProduct("qualquer-coisa-00000000", [pelicula])).toBeNull()
     expect(findProduct("pelicula-de-vidro-3d-", [pelicula])).toBeNull()
     expect(findProduct("pelicula-3f2a", [pelicula])).toBeNull()
+  })
+
+  test("a página do produto sugere outros com estoque, da mesma categoria primeiro", () => {
+    const capinha = product("Capinha")
+    const carregador = product("Carregador")
+    const esgotado = product("Fone", { stock_quantity: 0 })
+    const pelicula = product("Película", { category: "part" })
+    const cabo = product("Cabo")
+    const all = [pelicula, capinha, esgotado, carregador, cabo]
+    expect(relatedProducts(capinha, all)).toEqual([carregador, cabo, pelicula])
+    expect(relatedProducts(capinha, all, 2)).toEqual([carregador, cabo])
+  })
+
+  test("o cartão do fim fecha a última linha da grade, ou ocupa a linha toda quando ela já fechou", () => {
+    expect(closingSpan(9, 4)).toBe(3)
+    expect(closingSpan(9, 3)).toBe(3)
+    expect(closingSpan(9, 2)).toBe(1)
+    expect(closingSpan(10, 4)).toBe(2)
+    expect(closingSpan(8, 4)).toBe(4)
+  })
+
+  test("o preço se divide em moeda e valor, com o milhar e os centavos do real", () => {
+    expect(priceParts(39.9)).toEqual({ currency: "R$", amount: "39,90" })
+    expect(priceParts(1299.9)).toEqual({ currency: "R$", amount: "1.299,90" })
+  })
+
+  test("a categoria aparece no singular na página do produto", () => {
+    expect(categoryName(product("Capinha"))).toBe("Acessório")
+    expect(categoryName(product("Película", { category: "part" }))).toBe("Peça")
   })
 })

@@ -6,7 +6,7 @@ import { SITE_URL } from "@/components/home/shared/content"
 import { ProductDetail } from "@/components/loja/product-detail"
 import { StoreShell } from "@/components/loja/store-shell"
 import { getPublishedProducts } from "@/lib/actions/store-actions"
-import { STORE_PATH, findProduct, formatPrice, productPath } from "@/lib/catalog"
+import { STORE_PATH, findProduct, formatPrice, productPath, relatedProducts } from "@/lib/catalog"
 import type { Product } from "@/types/database"
 
 // Página de um produto da loja virtual (ADR 0002). O metadado e a página leem os produtos uma vez só;
@@ -33,7 +33,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
-  const found = findProduct((await params).produto, await published())
+  const products = await published()
+  const found = findProduct((await params).produto, products)
   // Produto desativado, desmarcado ou endereço sem produto: a loja virtual. Nome mudado: o endereço novo.
   if (!found) redirect(STORE_PATH)
   if ("redirect" in found) permanentRedirect(found.redirect)
@@ -61,7 +62,7 @@ export default async function ProductPage({ params }: Props) {
     <div className={scFontVariables}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: data }} />
       <StoreShell>
-        <ProductDetail product={product} url={url} />
+        <ProductDetail product={product} url={url} related={relatedProducts(product, products)} />
       </StoreShell>
     </div>
   )
