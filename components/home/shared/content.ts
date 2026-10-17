@@ -98,6 +98,14 @@ export const STATS = [
   { value: "0", label: "Vezes que você sai de casa" },
 ]
 
+// Menu das duas versões. As âncoras são as mesmas da home antiga, que o cabeçalho da loja usa.
+export const MENU = [
+  { label: "Serviços", href: "#servicos" },
+  { label: "Como funciona", href: "#como-funciona" },
+  { label: "Loja", href: "/loja" },
+  { label: "Localização", href: "#localizacao" },
+]
+
 export const BRANDS = ["Apple", "Samsung", "Motorola", "Xiaomi", "LG", "Asus", "Huawei", "Realme", "OnePlus", "Nokia"]
 
 export const STORE_CATEGORIES = ["Capinhas", "Carregadores", "Caixinhas de som JBL", "Fones bluetooth"]

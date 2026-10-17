@@ -50,6 +50,49 @@
 .vb-scene {
   position: relative;
 }
+.vb-anchor {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+/* menu compacto, aberto pelo botão do cabeçalho */
+.vb-menu {
+  position: fixed;
+  z-index: 31;
+  top: calc(max(18px, env(safe-area-inset-top, 0px)) + 44px);
+  right: max(24px, env(safe-area-inset-right, 0px));
+  min-width: 220px;
+  padding: 8px;
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-card);
+  background: rgba(10, 9, 8, 0.94);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  box-shadow: var(--shadow-lift);
+}
+.vb-menu[hidden] {
+  display: none;
+}
+.vb-menu ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vb-menu a {
+  display: block;
+  padding: 14px 16px;
+  border-radius: var(--radius-icon);
+  color: var(--stage-ink);
+  font: 500 15px/1.2 var(--font-text);
+  text-decoration: none;
+}
+.vb-menu a:hover,
+.vb-menu a:focus-visible {
+  background: var(--stage-control);
+}
 .vb-sticky {
   position: sticky;
   top: 0;

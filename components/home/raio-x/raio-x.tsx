@@ -5,7 +5,7 @@
 // cada camada apresenta um serviço, e ele se remonta "novo de novo".
 // Depois a página segue editorial: etapas, números, marcas, loja e contato.
 
-import { ArrowDown, ArrowUpRight, Check, Instagram, MapPin, MessageCircle, Package, Phone } from "lucide-react"
+import { ArrowDown, ArrowUpRight, Check, Instagram, MapPin, Menu, MessageCircle, Package, Phone, X } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import type { Product } from "@/types/database"
 import {
@@ -15,6 +15,7 @@ import {
   HOURS,
   INSTAGRAM_URL,
   MAPS_URL,
+  MENU,
   SERVICES,
   STATS,
   STEPS,
@@ -50,6 +51,8 @@ const SCENE_VH = T.hero + T.explode + LAYERS.length * T.layer + T.collapse + T.h
 
 export function RaioX({ products }: { products: Product[] }) {
   const quote = useQuoteRequest()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(-1)
@@ -107,6 +110,18 @@ export function RaioX({ products }: { products: Product[] }) {
     }
   }, [])
 
+  // Esc fecha o menu e devolve o foco ao botão.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return
+      setMenuOpen(false)
+      menuButtonRef.current?.focus()
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [menuOpen])
+
   const services = useMemo(() => LAYERS.map((l) => SERVICES.find((s) => s.key === l.service) as Service), [])
 
   return (
@@ -130,11 +145,35 @@ export function RaioX({ products }: { products: Product[] }) {
           <button type="button" className="sc-pill sc-pill--red sc-pill--sm" onClick={() => quote.open()}>
             Pedir orçamento <ArrowUpRight />
           </button>
+          <button
+            ref={menuButtonRef}
+            type="button"
+            className="sc-pill sc-pill--stage sc-pill--sm sc-pill--icon"
+            aria-expanded={menuOpen}
+            aria-controls="vb-menu"
+            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+          </button>
         </div>
       </header>
+      <nav id="vb-menu" className="vb-menu" aria-label="Menu" hidden={!menuOpen}>
+        <ul>
+          {MENU.map((item) => (
+            <li key={item.href}>
+              <a href={item.href} onClick={() => setMenuOpen(false)}>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       {/* ---------- a cena: abrir, explicar, remontar ---------- */}
       <div className="vb-scene" ref={sceneRef} style={{ height: `${(SCENE_VH + 1) * 100}svh` }}>
+        {/* âncora de Serviços: o começo das camadas, já com a primeira à mostra */}
+        <span id="servicos" className="vb-anchor" style={{ top: `${(T.hero + T.explode + T.layer * 0.25) * 100}svh` }} />
         <div className="vb-sticky">
           <div className="vb-grid" aria-hidden="true" />
 
@@ -212,7 +251,7 @@ export function RaioX({ products }: { products: Product[] }) {
       </div>
 
       {/* ---------- página editorial ---------- */}
-      <section className="vb-section vb-steps" id="etapas">
+      <section className="vb-section vb-steps" id="como-funciona">
         <div className="vb-section__head">
           <p className="sc-label vb-muted">Como funciona</p>
           <h2 className="sc-display vb-h2">Do defeito à solução em 4 passos</h2>
@@ -312,7 +351,7 @@ export function RaioX({ products }: { products: Product[] }) {
         )}
       </section>
 
-      <section className="vb-section vb-visit">
+      <section className="vb-section vb-visit" id="localizacao">
         <div className="vb-visit__main">
           <p className="sc-label vb-muted">Onde estamos</p>
           <h2 className="sc-display vb-visit__street">{ADDRESS.street}</h2>

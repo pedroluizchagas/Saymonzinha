@@ -60,6 +60,20 @@
 .va-header > * {
   pointer-events: auto;
 }
+.va-menu {
+  display: flex;
+  gap: 22px;
+}
+.va-menu a {
+  color: var(--stage-ink);
+  text-decoration: none;
+  opacity: 0.72;
+  transition: opacity 0.2s;
+}
+.va-menu a:hover,
+.va-menu a:focus-visible {
+  opacity: 1;
+}
 
 .va-controls {
   position: fixed;

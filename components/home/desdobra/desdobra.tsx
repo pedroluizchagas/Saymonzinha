@@ -16,6 +16,7 @@ import {
   HOURS,
   INSTAGRAM_URL,
   MAPS_URL,
+  MENU,
   SERVICES,
   STATS,
   STEPS,
@@ -30,10 +31,10 @@ import { ServiceVisual, type VisualKind } from "../shared/service-visual"
 // O CSS do sistema vem antes do da versão: as regras da versão sobrescrevem as do sistema.
 import "../sc-system.css"
 import "./desdobra.css"
+import { buildTimeline, type Timeline } from "./timeline"
 
 type Axis = "x" | "y"
 type Geometry = { axis: Axis; vw: number; vh: number; W: number; H: number; f: number }
-type Timeline = { heal: number; unfoldStart: number; unfoldEnd: number; contentEnd: number; foldEnd: number; total: number; travel: number }
 type SectionMark = { key: string; tab: string; top: number; glow: string; bar: string }
 
 const FINISHES = [
@@ -50,6 +51,9 @@ const TABS = [
   { key: "loja", label: "Loja", short: "Loja" },
   { key: "contato", label: "Contato", short: "Contato" },
 ]
+
+// Âncoras do endereço (as mesmas da home antiga) e a seção da tela do celular que cada uma mostra.
+const HASH_SECTIONS: Record<string, string> = { servicos: "servicos", "como-funciona": "etapas", localizacao: "contato" }
 
 const PANEL_TONES = ["red", "ink", "bone", "deep", "carbon", "bone"] as const
 const PANEL_GLOW = [
@@ -76,15 +80,6 @@ function computeGeometry(vw: number, vh: number): Geometry {
   const f = 13
   const H = Math.min(720, vh - 168, (vw - 96) / 1.478)
   return { axis: "x", vw, vh, W: H * 1.478, H, f }
-}
-
-function buildTimeline(vh: number, travel: number): Timeline {
-  const heal = 0.75 * vh
-  const unfoldStart = heal + 0.3 * vh
-  const unfoldEnd = unfoldStart + 1.1 * vh
-  const contentEnd = unfoldEnd + travel
-  const foldEnd = contentEnd + 1.1 * vh
-  return { heal, unfoldStart, unfoldEnd, contentEnd, foldEnd, total: foldEnd + 0.6 * vh, travel }
 }
 
 export function Desdobra({ products }: { products: Product[] }) {
@@ -127,8 +122,6 @@ export function Desdobra({ products }: { products: Product[] }) {
     if (!geo || !content) return
     const measure = () => {
       const travel = Math.max(0, content.scrollHeight - geo.H)
-      const tl = buildTimeline(geo.vh, travel)
-      timelineRef.current = tl
       marksRef.current = Array.from(content.querySelectorAll<HTMLElement>("[data-section]")).map((el) => ({
         key: el.dataset.section ?? "",
         tab: el.dataset.tab ?? el.dataset.section ?? "",
@@ -136,6 +129,8 @@ export function Desdobra({ products }: { products: Product[] }) {
         glow: el.dataset.glow ?? "",
         bar: el.dataset.bar ?? "white",
       }))
+      const tl = buildTimeline(geo.vh, travel, marksRef.current)
+      timelineRef.current = tl
       setPageHeight(tl.total + geo.vh)
       window.dispatchEvent(new Event("scroll"))
     }
@@ -213,19 +208,37 @@ export function Desdobra({ products }: { products: Product[] }) {
   }, [geo, reduced, pageHeight])
 
   const navigate = useCallback(
-    (tab: string) => {
+    (tab: string, behavior: ScrollBehavior = "smooth") => {
       const mark = marksRef.current.find((m) => m.tab === tab || m.key === tab)
       if (!mark) return
       if (reduced) {
-        clipRef.current?.scrollTo({ top: mark.top, behavior: "smooth" })
+        clipRef.current?.scrollTo({ top: mark.top, behavior })
         return
       }
-      const tl = timelineRef.current
-      if (!tl) return
-      window.scrollTo({ top: tl.unfoldEnd + Math.min(mark.top, tl.travel) + 1, behavior: "smooth" })
+      const top = timelineRef.current?.anchors[mark.key]
+      if (top !== undefined) window.scrollTo({ top, behavior })
     },
     [reduced],
   )
+
+  // Âncora no endereço ao chegar (vinda do cabeçalho da loja, por exemplo) e quando ela muda.
+  const hashHandledRef = useRef(false)
+  useEffect(() => {
+    if (pageHeight === null || hashHandledRef.current) return
+    hashHandledRef.current = true
+    const section = HASH_SECTIONS[window.location.hash.slice(1)]
+    // "instant" (os navegadores aceitam; os tipos do TS daqui ainda não): o html tem scroll suave,
+    // e "auto" faria a animação inteira rodar até a seção.
+    if (section) navigate(section, "instant" as ScrollBehavior)
+  }, [pageHeight, navigate])
+  useEffect(() => {
+    const onHash = () => {
+      const section = HASH_SECTIONS[window.location.hash.slice(1)]
+      if (section) navigate(section)
+    }
+    window.addEventListener("hashchange", onHash)
+    return () => window.removeEventListener("hashchange", onHash)
+  }, [navigate])
 
   // foco por teclado dentro da tela: rola a página até o elemento
   const onFocusIn = useCallback(
@@ -355,6 +368,24 @@ export function Desdobra({ products }: { products: Product[] }) {
           Saymon <b>Cell</b>
           <sup>®</sup>
         </a>
+        <nav className="va-menu" aria-label="Menu">
+          {MENU.map((item) => (
+            <a
+              key={item.href}
+              className="sc-label"
+              href={item.href}
+              onClick={(e) => {
+                const section = HASH_SECTIONS[item.href.slice(1)]
+                if (!section) return
+                e.preventDefault()
+                window.history.replaceState(null, "", item.href)
+                navigate(section)
+              }}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
         <div className="sc-header-actions">
           <a
             className="sc-pill sc-pill--stage sc-pill--sm sc-pill--icon"
