@@ -58,7 +58,12 @@ const TABS = [
 ]
 
 // Âncoras do endereço (as mesmas da home antiga) e a seção da tela do celular que cada uma mostra.
-const HASH_SECTIONS: Record<string, string> = { servicos: "servicos", "como-funciona": "etapas", localizacao: "contato" }
+const HASH_SECTIONS: Record<string, string> = {
+  servicos: "servicos",
+  "como-funciona": "etapas",
+  sobre: "sobre",
+  localizacao: "contato",
+}
 
 const PANEL_TONES = ["red", "ink", "bone", "deep", "carbon", "bone"] as const
 const PANEL_GLOW = [
@@ -214,15 +219,26 @@ export function Desdobra({ products, lite }: { products: Product[]; lite: boolea
     [reduced],
   )
 
-  // Âncora no endereço ao chegar (vinda do cabeçalho da loja, por exemplo) e quando ela muda.
-  const hashHandledRef = useRef(false)
+  // Âncora no endereço ao chegar (vinda do cabeçalho da loja, por exemplo) e quando ela muda. Na
+  // chegada, cada nova medida mantém a seção no lugar enquanto o conteúdo assenta (vindo de outra
+  // página do site, as fontes chegam depois e mudam a altura do conteúdo), até a pessoa mexer na página.
+  const arrivalRef = useRef<string | null | undefined>(undefined)
   useEffect(() => {
-    if (pageHeight === null || hashHandledRef.current) return
-    hashHandledRef.current = true
-    const section = HASH_SECTIONS[window.location.hash.slice(1)]
+    if (pageHeight === null) return
+    if (arrivalRef.current === undefined) {
+      arrivalRef.current = HASH_SECTIONS[window.location.hash.slice(1)] ?? null
+      if (arrivalRef.current) {
+        const release = () => {
+          arrivalRef.current = null
+          for (const type of ["wheel", "touchmove", "pointerdown", "keydown"]) window.removeEventListener(type, release)
+        }
+        for (const type of ["wheel", "touchmove", "pointerdown", "keydown"]) window.addEventListener(type, release, { passive: true })
+        window.setTimeout(release, 2500)
+      }
+    }
     // "instant" (os navegadores aceitam; os tipos do TS daqui ainda não): o html tem scroll suave,
     // e "auto" faria a animação inteira rodar até a seção.
-    if (section) navigate(section, "instant" as ScrollBehavior)
+    if (arrivalRef.current) navigate(arrivalRef.current, "instant" as ScrollBehavior)
   }, [pageHeight, navigate])
   useEffect(() => {
     const onHash = () => {
@@ -543,7 +559,10 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
           ))}
         </ol>
 
-        <p className="sc-label va-muted">{SECTIONS.why.label}</p>
+        {/* "Sobre Nós", no rodapé da loja, chega aqui */}
+        <p className="sc-label va-muted" data-section="sobre" data-tab="etapas" data-glow="rgba(255,2,0,.3)" data-bar="white">
+          {SECTIONS.why.label}
+        </p>
         <h2 className="sc-display sc-display--title">{SECTIONS.why.title}</h2>
         <ul className="va-guarantees">
           {GUARANTEES.map((g) => (

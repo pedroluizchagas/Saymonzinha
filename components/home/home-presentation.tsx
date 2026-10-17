@@ -6,7 +6,7 @@
 // gzip): baixar a outra só na hora da troca deixava o iPad de 1,5 a 2,5 s com a página oculta na
 // primeira visita, em produção.
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import {
   DESKTOP_MIN_WIDTH,
   JANK_COOKIE,
@@ -72,11 +72,14 @@ function watchForJank(onJank: () => void) {
 export function HomePresentation({ initial, products }: { initial: Presentation; products: Product[] }) {
   const [presentation, setPresentation] = useState(initial)
   const [confirmed, setConfirmed] = useState(false)
-  // Para onde rolar depois de uma troca: o topo ou os serviços com a página em uso, e a âncora do
-  // endereço quando a troca é na chegada (a rolagem do navegador até ela valia para a outra versão).
+  // Para onde rolar depois de uma troca: o topo ou os serviços com a página em uso. Na chegada, a
+  // âncora do endereço: a rolagem até ela (do navegador, ou do Next vindo de outra página do site)
+  // pode ter valido para a outra versão ou para o conteúdo antes de assentar.
   const scrollAfter = useRef<"top" | "servicos" | "hash" | null>(null)
 
-  useEffect(() => {
+  // Antes da pintura: vindo de outra página do site (a loja, por exemplo), a navegação é interna, o
+  // script de antes da pintura não roda, e a versão errada não pode aparecer.
+  useLayoutEffect(() => {
     const touch = window.matchMedia(TOUCH_QUERY)
     const wide = window.matchMedia(`(min-width: ${DESKTOP_MIN_WIDTH}px)`)
     const reduce = window.matchMedia(REDUCED_MOTION_QUERY)
@@ -95,11 +98,11 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
       })
       document.cookie = `${PRESENTATION_COOKIE}=${presentationCookieValue(next)}; ${PRESENTATION_COOKIE_ATTRIBUTES}${secure}`
       setConfirmed(true)
+      if (firstCheck) scrollAfter.current = "hash"
       if (next.version !== current.version || next.lite !== current.lite) {
         // Com a página em uso, a versão nova recomeça do topo; a Raio-X que fica leve por
         // engasgo vai para a lista de serviços, que é onde a pessoa estava.
-        if (firstCheck) scrollAfter.current = "hash"
-        else scrollAfter.current = next.version === current.version && next.version === "raio-x" ? "servicos" : "top"
+        if (!firstCheck) scrollAfter.current = next.version === current.version && next.version === "raio-x" ? "servicos" : "top"
         current = next
         setPresentation(next)
       }
@@ -144,6 +147,7 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
       }
       window.addEventListener("wheel", onMove, { once: true, passive: true })
       window.addEventListener("touchmove", onMove, { once: true, passive: true })
+      window.addEventListener("pointerdown", onMove, { once: true, passive: true })
       window.addEventListener("keydown", onMove, { once: true })
       const until = performance.now() + 1200
       const hold = () => {

@@ -20,19 +20,19 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground mb-4">Links Rápidos</h4>
             <nav className="flex flex-col gap-2">
-              <Link href="#servicos" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+              <Link href="/#servicos" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 Serviços
               </Link>
               <Link
-                href="#como-funciona"
+                href="/#como-funciona"
                 className="text-muted-foreground hover:text-primary transition-colors text-sm"
               >
                 Como Funciona
               </Link>
-              <Link href="#sobre" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+              <Link href="/#sobre" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 Sobre Nós
               </Link>
-              <Link href="#localizacao" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+              <Link href="/#localizacao" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 Localização
               </Link>
             </nav>
