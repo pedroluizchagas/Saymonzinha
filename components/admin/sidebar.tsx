@@ -31,7 +31,7 @@ interface SidebarProps {
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/leads", label: "Leads/Orçamentos", icon: FileText },
+  { href: "/admin/leads", label: "Pedidos de orçamento", icon: FileText },
   { href: "/admin/orders", label: "Ordens de Serviço", icon: ClipboardList },
   { href: "/admin/customers", label: "Clientes", icon: Users },
   { href: "/admin/pdv", label: "PDV", icon: ShoppingCart },
@@ -198,7 +198,7 @@ export function AdminSidebar({ user }: SidebarProps) {
         )}
       >
         <div className="bg-card rounded-t-2xl border-t border-x border-border overflow-hidden">
-          {/* Leads */}
+          {/* Pedidos de orçamento */}
           <Link
             href="/admin/leads"
             onClick={() => setMoreOpen(false)}
@@ -208,7 +208,7 @@ export function AdminSidebar({ user }: SidebarProps) {
               <FileText className="w-5 h-5 text-blue-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">Leads</p>
+              <p className="text-sm font-medium text-foreground">Pedidos de orçamento</p>
               <p className="text-xs text-muted-foreground">Gerenciar oportunidades</p>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground/50 flex-shrink-0" />

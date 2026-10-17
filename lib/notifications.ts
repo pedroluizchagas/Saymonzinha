@@ -136,7 +136,7 @@ export async function sendNotification(payload: NotificationPayload) {
 export async function notifyNewLead(customerName: string, deviceModel: string) {
   await sendNotification({
     type: "new_lead",
-    title: "Novo Lead Recebido!",
+    title: "Novo pedido de orçamento!",
     body: `${customerName} solicitou orcamento para ${deviceModel}`,
     url: "/admin/leads",
     tag: "new-lead",

@@ -283,7 +283,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                   Nenhuma notificacao ainda
                 </p>
                 <p className="text-xs text-muted-foreground/60 text-center mt-1">
-                  Novos leads e alertas de estoque aparecerao aqui
+                  Novos pedidos de orçamento e alertas de estoque aparecerão aqui
                 </p>
               </div>
             ) : (

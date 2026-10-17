@@ -60,7 +60,7 @@ interface DashboardKPIsProps {
 }
 
 const STATUS_LABELS: Record<ServiceOrderStatus, { label: string; color: string }> = {
-  lead: { label: "LEAD", color: "bg-gray-500" },
+  lead: { label: "PEDIDO", color: "bg-gray-500" },
   awaiting_device: { label: "AGUARDANDO", color: "bg-yellow-600" },
   in_analysis: { label: "ANALISE", color: "bg-blue-500" },
   awaiting_approval: { label: "APROVACAO", color: "bg-orange-500" },
@@ -219,7 +219,7 @@ export function DashboardKPIs({ data }: DashboardKPIsProps) {
               <div className="flex items-center gap-3">
                 <FileText className={`w-5 h-5 ${data.leads.pending > 0 ? "text-red-500" : "text-muted-foreground"}`} />
                 <div>
-                  <p className="font-medium text-foreground text-sm">Ver Leads</p>
+                  <p className="font-medium text-foreground text-sm">Ver pedidos de orçamento</p>
                   <p className={`text-xs ${data.leads.pending > 0 ? "text-red-500" : "text-muted-foreground"}`}>
                     {data.leads.pending} pendentes de contato
                   </p>
@@ -419,13 +419,13 @@ export function DashboardKPIs({ data }: DashboardKPIsProps) {
           <KPICard
             title="Taxa de Aprovacao"
             value={`${data.leads.conversionRate.toFixed(1)}%`}
-            subtitle={`${data.leads.converted} de ${data.leads.total} leads`}
+            subtitle={`${data.leads.converted} de ${data.leads.total} pedidos`}
             icon={Target}
             iconColor="text-orange-500"
             iconBg="bg-orange-500/10"
           />
           <KPICard
-            title="Novos Leads"
+            title="Novos pedidos de orçamento"
             value={data.leads.total.toString()}
             subtitle={`${data.leads.pending} aguardando contato`}
             icon={FileText}
@@ -457,7 +457,7 @@ export function DashboardKPIs({ data }: DashboardKPIsProps) {
               <QuickActionBanner
                 href="/admin/leads"
                 icon={FileText}
-                title="Ver Leads"
+                title="Ver pedidos de orçamento"
                 description={`${data.leads.pending} pendentes de contato`}
                 highlight={data.leads.pending > 0}
               />

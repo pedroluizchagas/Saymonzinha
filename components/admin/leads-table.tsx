@@ -121,7 +121,7 @@ export function LeadsTable({ leads: initialLeads }: LeadsTableProps) {
         {leads.length === 0 ? (
           <div className="text-center py-12">
             <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">Nenhum lead recebido ainda</p>
+            <p className="text-muted-foreground">Nenhum pedido de orçamento recebido ainda</p>
             <p className="text-sm text-muted-foreground mt-1">
               Os pré-orçamentos do site aparecerão aqui
             </p>

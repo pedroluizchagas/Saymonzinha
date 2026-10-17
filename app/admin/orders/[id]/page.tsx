@@ -37,7 +37,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const o = order as ServiceOrder
 
   const statusLabel = {
-    lead: { label: "Lead", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
+    lead: { label: "Pedido de orçamento", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
     awaiting_device: { label: "Aguardando Aparelho", color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" },
     in_analysis: { label: "Em Análise", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
     awaiting_approval: { label: "Aguardando Aprovação", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" },

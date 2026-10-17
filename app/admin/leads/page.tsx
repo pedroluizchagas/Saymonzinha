@@ -21,8 +21,8 @@ export default async function LeadsPage() {
     <div>
       <AdminHeader
         user={profile as Profile | null}
-        title="Leads / Pré-Orçamentos"
-        subtitle="Gerencie os orçamentos recebidos pelo site"
+        title="Pedidos de orçamento"
+        subtitle="Gerencie os pedidos de orçamento recebidos pelo site"
       />
 
       <div className="p-6">
