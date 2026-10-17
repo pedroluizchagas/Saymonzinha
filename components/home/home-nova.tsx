@@ -14,16 +14,22 @@ import { scFontVariables } from "./fonts"
 import { HomePresentation } from "./home-presentation"
 import "./sc-system.css"
 
+const RELOAD_FLAG = "home-versao-recarregou"
+
 // Roda antes da primeira pintura: aplica a regra da tela e grava o cookie. Se o servidor mandou a
-// versão errada (o iPad na primeira visita), esconde a página até a certa montar, por no máximo 3 s.
+// versão errada (o iPad na primeira visita), esconde a página e recarrega uma vez, já com o cookie,
+// para o servidor mandar a certa. Sem cookie ou sem recarga, o navegador troca a versão sozinho;
+// em qualquer caso a página reaparece em no máximo 3 s.
 function swapScript(serverVersion: HomeVersion) {
-  const cookie = JSON.stringify(`${PRESENTATION_COOKIE}=`)
-  const attributes = JSON.stringify(`; ${PRESENTATION_COOKIE_ATTRIBUTES}`)
+  const cookie = `${PRESENTATION_COOKIE}=`
   return `(function(){try{
 var v=matchMedia(${JSON.stringify(TOUCH_QUERY)}).matches||innerWidth<${DESKTOP_MIN_WIDTH}?"raio-x":"desdobra";
-document.cookie=${cookie}+v+${attributes}+(location.protocol==="https:"?"; Secure":"");
-if(v!==${JSON.stringify(serverVersion)}){var s=document.createElement("style");s.id=${JSON.stringify(SWAP_STYLE_ID)};
-s.textContent=".home-nova{visibility:hidden}";document.head.appendChild(s);setTimeout(function(){s.remove()},3000)}
+document.cookie=${JSON.stringify(cookie)}+v+${JSON.stringify(`; ${PRESENTATION_COOKIE_ATTRIBUTES}`)}+(location.protocol==="https:"?"; Secure":"");
+if(v===${JSON.stringify(serverVersion)})return;
+var s=document.createElement("style");s.id=${JSON.stringify(SWAP_STYLE_ID)};s.textContent=".home-nova{visibility:hidden}";
+document.head.appendChild(s);setTimeout(function(){s.remove()},3000);
+if(document.cookie.indexOf(${JSON.stringify(cookie)}+v)>=0&&!sessionStorage.getItem(${JSON.stringify(RELOAD_FLAG)})){
+sessionStorage.setItem(${JSON.stringify(RELOAD_FLAG)},"1");location.replace(location.href)}
 }catch(e){}})()`
 }
 
