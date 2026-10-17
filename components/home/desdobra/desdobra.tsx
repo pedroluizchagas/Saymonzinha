@@ -21,11 +21,11 @@ import {
   STEPS,
   STORE_CATEGORIES,
   WHATSAPP_DISPLAY,
-  serviceWhatsapp,
   whatsappLink,
 } from "../shared/content"
 import { makeCracks } from "../shared/crack"
 import { CallSlider, StatusBar, useClock } from "../shared/device-ui"
+import { useQuoteRequest } from "../shared/quote-dialog"
 import { ServiceVisual, type VisualKind } from "../shared/service-visual"
 import "./desdobra.css"
 
@@ -86,6 +86,7 @@ function buildTimeline(vh: number, travel: number): Timeline {
 }
 
 export function Desdobra({ products }: { products: Product[] }) {
+  const quote = useQuoteRequest()
   const rootRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const clipRef = useRef<HTMLDivElement>(null)
@@ -352,9 +353,20 @@ export function Desdobra({ products }: { products: Product[] }) {
           Saymon <b>Cell</b>
           <sup>®</sup>
         </a>
-        <a className="sc-pill sc-pill--red sc-pill--sm" href={whatsappLink()} target="_blank" rel="noopener noreferrer">
-          Pedir orçamento <ArrowUpRight />
-        </a>
+        <div className="sc-header-actions">
+          <a
+            className="sc-pill sc-pill--stage sc-pill--sm sc-pill--icon"
+            href={whatsappLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chamar no WhatsApp"
+          >
+            <MessageCircle aria-hidden="true" />
+          </a>
+          <button type="button" className="sc-pill sc-pill--red sc-pill--sm" onClick={() => quote.open()}>
+            Pedir orçamento <ArrowUpRight />
+          </button>
+        </div>
       </header>
 
       <div className="va-controls">
@@ -416,6 +428,7 @@ function ScreenCopy({ products, time }: { products: Product[]; time: string }) {
 }
 
 function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: (tab: string) => void; ref?: React.Ref<HTMLDivElement> }) {
+  const quote = useQuoteRequest()
   return (
     <div className="va-content" ref={ref}>
       <section className="va-hero" data-section="inicio" data-tab="inicio" data-glow="rgba(244,243,240,.26)" data-bar="split">
@@ -429,9 +442,9 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
               A tela quebrou ou a bateria viciou? A Saymon Cell busca, conserta e devolve seu aparelho novo de novo.
             </p>
             <div className="va-actions">
-              <a className="sc-pill sc-pill--red" href={whatsappLink()} target="_blank" rel="noopener noreferrer">
+              <button type="button" className="sc-pill sc-pill--red" onClick={() => quote.open()}>
                 Pedir orçamento <ArrowUpRight />
-              </a>
+              </button>
               <button type="button" className="sc-pill sc-pill--soft" onClick={() => onNav?.("etapas")}>
                 Como funciona
               </button>
@@ -483,9 +496,9 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
               <span className="sc-label">{service.tag}</span>
               <h3 className="sc-display sc-display--title">{service.title}</h3>
               <p className="sc-body">{service.description}</p>
-              <a className="sc-label sc-panel__link" href={serviceWhatsapp(service)} target="_blank" rel="noopener noreferrer">
-                Orçar no WhatsApp <ArrowUpRight />
-              </a>
+              <button type="button" className="sc-label sc-panel__link" onClick={() => quote.open(service.problem)}>
+                Pedir orçamento <ArrowUpRight />
+              </button>
             </div>
           </div>
         </article>
@@ -597,9 +610,14 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
       <section className="va-block va-end" data-section="fim" data-tab="contato" data-glow="rgba(255,2,0,.4)" data-bar="white">
         <div className="sc-cta">
           <h2 className="sc-display sc-display--row">Tela trincada? A gente busca.</h2>
-          <a className="sc-pill sc-pill--ink" href={whatsappLink()} target="_blank" rel="noopener noreferrer">
-            Chamar no WhatsApp <ArrowUpRight />
-          </a>
+          <div className="sc-cta__actions">
+            <button type="button" className="sc-pill sc-pill--red" onClick={() => quote.open()}>
+              Pedir orçamento <ArrowUpRight />
+            </button>
+            <a className="sc-pill sc-pill--ink" href={whatsappLink()} target="_blank" rel="noopener noreferrer">
+              Chamar no WhatsApp <ArrowUpRight />
+            </a>
+          </div>
         </div>
         <div className="va-footer">
           <span className="sc-label va-muted">© {new Date().getFullYear()} Saymon Cell · Assistência técnica</span>

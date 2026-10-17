@@ -59,7 +59,7 @@ export const SERVICES: Service[] = [
     tag: "Resgate",
     title: "Banho químico",
     description: "Recuperação de aparelhos que caíram na água.",
-    problem: "Banho químico",
+    problem: "Banho Químico",
   },
   {
     key: "placa",
@@ -73,13 +73,9 @@ export const SERVICES: Service[] = [
     tag: "Sistema",
     title: "Software e conta Google",
     description: "Formatação, remoção de conta Google e problemas de software.",
-    problem: "Remoção de Conta Google",
+    problem: "Formatação",
   },
 ]
-
-export function serviceWhatsapp(service: Service) {
-  return whatsappLink(`Olá Saymon Cell! Vi o site e quero um orçamento de ${service.title.toLowerCase()}.`)
-}
 
 export const STEPS = [
   { title: "Contato", description: "Você chama no WhatsApp e explica o problema do aparelho." },

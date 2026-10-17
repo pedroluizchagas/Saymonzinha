@@ -850,6 +850,9 @@
   gap: 24px;
   padding: 0 max(24px, 6vw) 120px;
 }
+.vb-footer__cta {
+  justify-self: center;
+}
 .vb-footer__legal {
   margin: 0;
 }

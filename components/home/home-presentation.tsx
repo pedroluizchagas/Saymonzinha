@@ -18,6 +18,7 @@ import {
 import type { Product } from "@/types/database"
 import { Desdobra } from "./desdobra/desdobra"
 import { RaioX } from "./raio-x/raio-x"
+import { QuoteRequestProvider } from "./shared/quote-dialog"
 
 export function HomePresentation({ initialVersion, products }: { initialVersion: HomeVersion; products: Product[] }) {
   const [version, setVersion] = useState(initialVersion)
@@ -55,5 +56,10 @@ export function HomePresentation({ initialVersion, products }: { initialVersion:
     if (confirmed) document.getElementById(SWAP_STYLE_ID)?.remove()
   }, [confirmed, version])
 
-  return version === "desdobra" ? <Desdobra products={products} /> : <RaioX products={products} />
+  // A janela do pedido fica fora da versão: o que foi preenchido sobrevive a uma troca de versão.
+  return (
+    <QuoteRequestProvider layout={version === "desdobra" ? "center" : "sheet"}>
+      {version === "desdobra" ? <Desdobra products={products} /> : <RaioX products={products} />}
+    </QuoteRequestProvider>
+  )
 }

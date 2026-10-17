@@ -5,7 +5,7 @@
 // cada camada apresenta um serviço, e ele se remonta "novo de novo".
 // Depois a página segue editorial: etapas, números, marcas, loja e contato.
 
-import { ArrowDown, ArrowUpRight, Check, Instagram, MapPin, Package, Phone } from "lucide-react"
+import { ArrowDown, ArrowUpRight, Check, Instagram, MapPin, MessageCircle, Package, Phone } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import type { Product } from "@/types/database"
 import {
@@ -20,12 +20,12 @@ import {
   STEPS,
   STORE_CATEGORIES,
   WHATSAPP_DISPLAY,
-  serviceWhatsapp,
   whatsappLink,
   type Service,
 } from "../shared/content"
 import { makeCracks } from "../shared/crack"
 import { CallSlider, useClock } from "../shared/device-ui"
+import { useQuoteRequest } from "../shared/quote-dialog"
 import "./raio-x.css"
 
 type LayerKey = "vidro" | "display" | "bateria" | "placa" | "chassi" | "tampa"
@@ -47,6 +47,7 @@ const T = { hero: 0.55, explode: 1.0, layer: 0.85, collapse: 1.0, hold: 0.5 }
 const SCENE_VH = T.hero + T.explode + LAYERS.length * T.layer + T.collapse + T.hold
 
 export function RaioX({ products }: { products: Product[] }) {
+  const quote = useQuoteRequest()
   const rootRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(-1)
@@ -114,9 +115,20 @@ export function RaioX({ products }: { products: Product[] }) {
           <sup>®</sup>
         </a>
         <span className="sc-label vb-header__mid">Assistência técnica · Divinópolis, MG</span>
-        <a className="sc-pill sc-pill--red sc-pill--sm" href={whatsappLink()} target="_blank" rel="noopener noreferrer">
-          Pedir orçamento <ArrowUpRight />
-        </a>
+        <div className="sc-header-actions">
+          <a
+            className="sc-pill sc-pill--stage sc-pill--sm sc-pill--icon"
+            href={whatsappLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chamar no WhatsApp"
+          >
+            <MessageCircle aria-hidden="true" />
+          </a>
+          <button type="button" className="sc-pill sc-pill--red sc-pill--sm" onClick={() => quote.open()}>
+            Pedir orçamento <ArrowUpRight />
+          </button>
+        </div>
       </header>
 
       {/* ---------- a cena: abrir, explicar, remontar ---------- */}
@@ -136,9 +148,9 @@ export function RaioX({ products }: { products: Product[] }) {
               Divinópolis, nem do sofá.
             </p>
             <div className="vb-hero__actions">
-              <a className="sc-pill sc-pill--red" href={whatsappLink()} target="_blank" rel="noopener noreferrer">
+              <button type="button" className="sc-pill sc-pill--red" onClick={() => quote.open()}>
                 Pedir orçamento <ArrowUpRight />
-              </a>
+              </button>
               <span className="sc-label vb-hero__cue">
                 Role para abrir o aparelho <ArrowDown />
               </span>
@@ -178,15 +190,14 @@ export function RaioX({ products }: { products: Product[] }) {
                 <span className="sc-display vb-card__num">{String(i + 1).padStart(2, "0")}</span>
                 <h2 className="sc-display vb-card__title">{service.title}</h2>
                 <p className="sc-body vb-card__desc">{service.description}</p>
-                <a
+                <button
+                  type="button"
                   className="sc-pill sc-pill--red"
-                  href={serviceWhatsapp(service)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={() => quote.open(service.problem)}
                   tabIndex={active === i ? 0 : -1}
                 >
-                  Orçar no WhatsApp <ArrowUpRight />
-                </a>
+                  Pedir orçamento <ArrowUpRight />
+                </button>
               </article>
             ))}
             <ol className="vb-dots" aria-hidden="true">
@@ -330,6 +341,9 @@ export function RaioX({ products }: { products: Product[] }) {
       </section>
 
       <footer className="vb-footer">
+        <button type="button" className="sc-pill sc-pill--red vb-footer__cta" onClick={() => quote.open()}>
+          Pedir orçamento <ArrowUpRight />
+        </button>
         <div className="vb-call" role="group" aria-label="Chamada recebida da Saymon Cell">
           <span className="vb-call__avatar" aria-hidden="true">
             {/* eslint-disable-next-line @next/next/no-img-element */}

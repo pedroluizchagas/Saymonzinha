@@ -1,0 +1,225 @@
+/* Janela do pedido de orçamento (ver quote-dialog.tsx).
+   Centralizada na Desdobra; na Raio-X sobe de baixo, como uma folha. */
+
+.qd {
+  width: min(calc(100% - 32px), 520px);
+  max-height: min(92svh, 760px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-device);
+  overflow: auto;
+  overscroll-behavior: contain;
+  color-scheme: dark;
+}
+.qd::backdrop {
+  background: rgba(10, 9, 8, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.qd[data-layout="sheet"] {
+  width: 100%;
+  max-width: 640px;
+  max-height: 92svh;
+  margin: auto auto 0;
+  border-bottom: 0;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+.qd[open] {
+  animation: qd-in 0.35s var(--ease-out);
+}
+.qd[data-layout="sheet"][open] {
+  animation-name: qd-up;
+}
+@keyframes qd-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+@keyframes qd-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+.qd__panel {
+  display: grid;
+  gap: var(--space-16);
+  padding: var(--space-24);
+  padding-bottom: max(var(--space-24), env(safe-area-inset-bottom));
+}
+.qd__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  color: var(--stage-muted);
+}
+.qd__close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: var(--stage-control);
+  color: var(--stage-ink);
+  cursor: pointer;
+}
+.qd__close svg {
+  width: 18px;
+  height: 18px;
+}
+.qd__title {
+  font-size: clamp(32px, 8vw, 44px);
+  line-height: 0.92;
+}
+
+.qd__form {
+  display: grid;
+  gap: var(--space-16);
+}
+.qd__progress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+.qd__progress span {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--stage-line);
+  transition: background-color 0.3s;
+}
+.qd__progress span[data-on="1"] {
+  background: var(--red);
+}
+
+.qd__field {
+  display: grid;
+  gap: var(--space-8);
+}
+.qd__field > label,
+.qd__choices > legend {
+  color: var(--stage-muted);
+}
+.qd input:not([type="radio"]),
+.qd select,
+.qd textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-icon);
+  background: var(--stage-control);
+  color: var(--stage-ink);
+  /* 16px evita o zoom automático do iOS ao focar o campo */
+  font: 400 16px/1.4 var(--font-text);
+}
+.qd textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+.qd ::placeholder {
+  color: var(--smoke);
+}
+.qd [aria-invalid="true"] {
+  border-color: var(--red);
+}
+.qd__error {
+  margin: 0;
+  color: var(--red-text);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.qd__choices {
+  display: grid;
+  gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.qd__choices > legend {
+  margin-bottom: var(--space-8);
+  padding: 0;
+}
+.qd__choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding: 14px;
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-row);
+  background: var(--stage-control);
+  cursor: pointer;
+}
+.qd__choice:has(input:checked) {
+  border-color: var(--red);
+}
+.qd__choice input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--red);
+  flex: none;
+}
+.qd__choice strong {
+  display: block;
+  font-weight: 600;
+}
+.qd__choice small {
+  display: block;
+  margin-top: 2px;
+  color: var(--stage-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.qd__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-8);
+  padding-top: var(--space-4);
+}
+.qd__foot .sc-pill--red {
+  min-width: 160px;
+}
+.qd .sc-pill:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.qd__done {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-12);
+}
+.qd__check {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--call-green);
+  color: var(--ink);
+}
+.qd__check svg {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 480px) {
+  .qd__foot .sc-pill--red {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qd[open] {
+    animation: none;
+  }
+}
