@@ -5,7 +5,6 @@ import {
   DESKTOP_MIN_WIDTH,
   PRESENTATION_COOKIE,
   PRESENTATION_COOKIE_ATTRIBUTES,
-  SWAP_GLOBAL,
   SWAP_STYLE_ID,
   TOUCH_QUERY,
   type HomeVersion,
@@ -16,15 +15,14 @@ import { HomePresentation } from "./home-presentation"
 import "./sc-system.css"
 
 // Roda antes da primeira pintura: aplica a regra da tela e grava o cookie. Se o servidor mandou a
-// versão errada (o iPad na primeira visita), esconde a página e avisa a versão certa, para o
-// navegador já começar a baixá-la; a página reaparece com ela, ou em no máximo 3 s.
-// (Recarregar a página foi testado e é mais lento em produção: paga a resposta do servidor duas vezes.)
+// versão errada (o iPad na primeira visita), esconde a página até o navegador montar a certa,
+// por no máximo 3 s. (Recarregar a página foi testado e é mais lento em produção: paga a
+// resposta do servidor duas vezes.)
 function swapScript(serverVersion: HomeVersion) {
   return `(function(){try{
 var v=matchMedia(${JSON.stringify(TOUCH_QUERY)}).matches||innerWidth<${DESKTOP_MIN_WIDTH}?"raio-x":"desdobra";
 document.cookie=${JSON.stringify(`${PRESENTATION_COOKIE}=`)}+v+${JSON.stringify(`; ${PRESENTATION_COOKIE_ATTRIBUTES}`)}+(location.protocol==="https:"?"; Secure":"");
 if(v===${JSON.stringify(serverVersion)})return;
-window[${JSON.stringify(SWAP_GLOBAL)}]=v;
 var s=document.createElement("style");s.id=${JSON.stringify(SWAP_STYLE_ID)};s.textContent=".home-nova{visibility:hidden}";
 document.head.appendChild(s);setTimeout(function(){s.remove()},3000)
 }catch(e){}})()`

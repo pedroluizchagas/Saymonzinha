@@ -1,37 +1,27 @@
 "use client"
 
 // Confere no navegador a versão que o servidor escolheu e troca ao vivo quando a tela muda
-// (ver docs/adr/0001). Só a versão em uso fica montada; a outra só é baixada se precisar trocar.
+// (ver docs/adr/0001). Só a versão em uso fica montada, então só os ouvintes dela rodam.
+// As duas vêm no mesmo pacote (cerca de 15 KB a mais, com gzip): baixar a outra só na hora da
+// troca deixava o iPad de 1,5 a 2,5 s com a página oculta na primeira visita, em produção.
 
-import dynamic from "next/dynamic"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   DESKTOP_MIN_WIDTH,
   PRESENTATION_COOKIE,
   PRESENTATION_COOKIE_ATTRIBUTES,
-  SWAP_GLOBAL,
   SWAP_STYLE_ID,
   TOUCH_QUERY,
   choosePresentation,
   type HomeVersion,
 } from "@/lib/home-presentation"
 import type { Product } from "@/types/database"
-
-const Desdobra = dynamic(() => import("./desdobra/desdobra").then((m) => m.Desdobra))
-const RaioX = dynamic(() => import("./raio-x/raio-x").then((m) => m.RaioX))
-
-// Se o script antes da pintura viu que o servidor errou, a versão certa começa a baixar já,
-// em paralelo com a hidratação da errada, em vez de só depois dela.
-if (typeof window !== "undefined") {
-  const swap = (window as unknown as Record<string, unknown>)[SWAP_GLOBAL]
-  if (swap === "raio-x") void import("./raio-x/raio-x")
-  if (swap === "desdobra") void import("./desdobra/desdobra")
-}
+import { Desdobra } from "./desdobra/desdobra"
+import { RaioX } from "./raio-x/raio-x"
 
 export function HomePresentation({ initialVersion, products }: { initialVersion: HomeVersion; products: Product[] }) {
   const [version, setVersion] = useState(initialVersion)
   const [confirmed, setConfirmed] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const touch = window.matchMedia(TOUCH_QUERY)
@@ -60,21 +50,10 @@ export function HomePresentation({ initialVersion, products }: { initialVersion:
     }
   }, [initialVersion])
 
-  // Revela a página quando a versão certa já está montada (o código dela pode ainda estar baixando).
+  // Revela a página depois do render que já mostra a versão certa.
   useEffect(() => {
-    if (!confirmed) return
-    let frame = 0
-    const reveal = () => {
-      if (containerRef.current?.firstElementChild) document.getElementById(SWAP_STYLE_ID)?.remove()
-      else frame = requestAnimationFrame(reveal)
-    }
-    reveal()
-    return () => cancelAnimationFrame(frame)
+    if (confirmed) document.getElementById(SWAP_STYLE_ID)?.remove()
   }, [confirmed, version])
 
-  return (
-    <div ref={containerRef}>
-      {version === "desdobra" ? <Desdobra products={products} /> : <RaioX products={products} />}
-    </div>
-  )
+  return version === "desdobra" ? <Desdobra products={products} /> : <RaioX products={products} />
 }
