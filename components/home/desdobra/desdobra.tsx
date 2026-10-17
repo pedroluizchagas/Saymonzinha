@@ -27,6 +27,8 @@ import { makeCracks } from "../shared/crack"
 import { CallSlider, StatusBar, useClock } from "../shared/device-ui"
 import { useQuoteRequest } from "../shared/quote-dialog"
 import { ServiceVisual, type VisualKind } from "../shared/service-visual"
+// O CSS do sistema vem antes do da versão: as regras da versão sobrescrevem as do sistema.
+import "../sc-system.css"
 import "./desdobra.css"
 
 type Axis = "x" | "y"

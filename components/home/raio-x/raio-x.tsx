@@ -26,6 +26,8 @@ import {
 import { makeCracks } from "../shared/crack"
 import { CallSlider, useClock } from "../shared/device-ui"
 import { useQuoteRequest } from "../shared/quote-dialog"
+// O CSS do sistema vem antes do da versão: as regras da versão sobrescrevem as do sistema.
+import "../sc-system.css"
 import "./raio-x.css"
 
 type LayerKey = "vidro" | "display" | "bateria" | "placa" | "chassi" | "tampa"

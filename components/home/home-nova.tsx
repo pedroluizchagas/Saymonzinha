@@ -10,9 +10,9 @@ import {
   type HomeVersion,
 } from "@/lib/home-presentation"
 import type { Product } from "@/types/database"
+import "./sc-system.css"
 import { scFontVariables } from "./fonts"
 import { HomePresentation } from "./home-presentation"
-import "./sc-system.css"
 
 // Roda antes da primeira pintura: aplica a regra da tela e grava o cookie. Se o servidor mandou a
 // versão errada (o iPad na primeira visita), esconde a página até o navegador montar a certa,

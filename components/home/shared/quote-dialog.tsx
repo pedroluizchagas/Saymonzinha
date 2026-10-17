@@ -28,6 +28,7 @@ import {
   type QuoteRequestErrors,
   type QuoteRequestForm,
 } from "./quote-request"
+import "../sc-system.css"
 import "./quote-dialog.css"
 
 type QuoteRequest = {
