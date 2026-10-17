@@ -73,7 +73,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
         notify({ title: "Todas as unidades já estão no carrinho", detail: product.name, tone: "info" })
         return
       }
-      addItem(product, Math.min(quantity, room), { open: false })
+      addItem(product, Math.min(quantity, room))
       notify({
         title: quantity > room ? `Só ${room} ${room === 1 ? "unidade adicionada" : "unidades adicionadas"}: é o que há em estoque` : "Adicionado ao carrinho",
         detail: product.name,

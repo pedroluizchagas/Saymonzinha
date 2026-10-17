@@ -3,7 +3,6 @@ import type { Metadata, Viewport } from "next"
 import { Inter, Poppins } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { CartProvider } from "@/contexts/cart-context"
-import { CartDrawer } from "@/components/store/cart-drawer"
 import "./globals.css"
 
 const inter = Inter({
@@ -118,7 +117,6 @@ export default function RootLayout({
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
         <CartProvider>
           {children}
-          <CartDrawer />
         </CartProvider>
         <Analytics />
       </body>

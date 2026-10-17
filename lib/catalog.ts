@@ -2,8 +2,8 @@
 
 import type { Product, ProductCategory } from "@/types/database"
 
-/** Endereço da loja virtual nova. Fica em /nova-loja até o lançamento, quando passa a ser /loja. */
-export const STORE_PATH = "/nova-loja"
+/** Endereço da loja virtual (até o lançamento, ela foi aprovada em /nova-loja, que hoje redireciona). */
+export const STORE_PATH = "/loja"
 
 export type CatalogFilter = { value: ProductCategory | "all"; label: string }
 
