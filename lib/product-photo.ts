@@ -13,8 +13,8 @@ function toBlob(canvas: HTMLCanvasElement, type: string, quality: number) {
 }
 
 /**
- * Reduz a foto para no máximo PRODUCT_PHOTO_MAX_SIDE no lado maior, sobre fundo branco. Sai em WebP;
- * onde o navegador não gera WebP (o Safari), em JPEG.
+ * Reduz a foto para no máximo PRODUCT_PHOTO_MAX_SIDE no lado maior, sobre fundo branco, em JPEG. O
+ * JPEG, e não o WebP, porque a prévia do link (opengraph-image) não desenha WebP.
  */
 async function shrinkPhoto(file: File): Promise<Blob> {
   const url = URL.createObjectURL(file)
@@ -33,8 +33,7 @@ async function shrinkPhoto(file: File): Promise<Blob> {
     context.fillStyle = "#ffffff"
     context.fillRect(0, 0, canvas.width, canvas.height)
     context.drawImage(img, 0, 0, canvas.width, canvas.height)
-    const webp = await toBlob(canvas, "image/webp", 0.82)
-    const photo = webp?.type === "image/webp" ? webp : await toBlob(canvas, "image/jpeg", 0.85)
+    const photo = await toBlob(canvas, "image/jpeg", 0.85)
     if (!photo) throw new Error("Não deu para preparar essa foto. Tente outra.")
     return photo
   } finally {
@@ -45,7 +44,7 @@ async function shrinkPhoto(file: File): Promise<Blob> {
 /** Reduz e envia a foto; devolve o endereço público para guardar no produto. */
 export async function uploadProductPhoto(file: File): Promise<string> {
   const photo = await shrinkPhoto(file)
-  const path = `${crypto.randomUUID()}.${photo.type === "image/webp" ? "webp" : "jpg"}`
+  const path = `${crypto.randomUUID()}.jpg`
   const storage = createClient().storage.from(PRODUCT_PHOTOS_BUCKET)
   // O nome é sempre novo, então a foto pode ficar em cache por um ano.
   const { error } = await storage.upload(path, photo, { contentType: photo.type, cacheControl: "31536000" })
