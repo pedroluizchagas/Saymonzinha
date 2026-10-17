@@ -1,7 +1,8 @@
 "use client"
 
 // Cabeçalho do site fora da home (a loja virtual): a marca, o menu da home, o WhatsApp, "Pedir
-// orçamento" e o carrinho com a contagem. No celular, o menu é compacto, como na Raio-X.
+// orçamento" e o carrinho com a contagem, que pula quando um produto entra. Transparente no topo e com
+// fundo depois que a página rola (data-scrolled na moldura). No celular, o menu é compacto, como na Raio-X.
 
 import { Menu, ShoppingBag, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
@@ -62,7 +63,8 @@ export function SiteHeader({
         >
           <ShoppingBag aria-hidden="true" />
           {cartCount > 0 && (
-            <span className="lv-cart__count" aria-hidden="true">
+            // A chave muda com a contagem, para o número pular de novo.
+            <span className="lv-cart__count" key={cartCount} aria-hidden="true">
               {cartCount > 99 ? "99+" : cartCount}
             </span>
           )}

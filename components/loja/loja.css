@@ -1,26 +1,47 @@
-/* Loja virtual (ver store-shell.tsx, catalog.tsx e product-detail.tsx), no sistema visual da home:
-   tema Noite, uma versão só.
-   Vem depois de sc-system.css. */
+/* =====================================================================
+   Loja virtual (store-shell, catalog, product-detail, cart-dialog), no sistema visual da home:
+   tema Noite, uma versão só, sem cena presa e sem 3D.
+   Da Desdobra: o letreiro dividido, o halo, o aparelho (o carrinho no computador), a chamada.
+   Da Raio-X: o tapete de corte, os índices "01", a linha do tempo, a faixa vermelha.
+   Movimento só de opacidade e deslocamento, preso à rolagem onde o navegador sabe fazer isso sozinho.
+   Vem depois de sc-system.css.
+   ===================================================================== */
 
 .lv {
+  --lv-gutter: clamp(16px, 5vw, 80px);
+  --lv-header-h: 60px;
+  position: relative;
   min-height: 100vh;
+  overflow-x: clip;
   background: var(--stage);
   color: var(--stage-ink);
 }
+.lv-muted {
+  color: var(--stage-muted);
+}
+.lv-red-text {
+  color: var(--red-text);
+}
 
-/* Cabeçalho do site */
+/* ---------- cabeçalho do site: transparente no topo, com fundo ao rolar ---------- */
+
 .lv-header {
-  position: sticky;
-  z-index: 20;
-  top: 0;
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 30;
   display: flex;
   align-items: center;
   gap: var(--space-12);
-  padding: max(12px, env(safe-area-inset-top, 0px)) 16px 12px;
-  border-bottom: 1px solid var(--stage-line);
-  background: rgba(10, 9, 8, 0.88);
-  backdrop-filter: blur(var(--blur-glass));
-  -webkit-backdrop-filter: blur(var(--blur-glass));
+  padding: max(14px, env(safe-area-inset-top, 0px)) var(--lv-gutter) 14px;
+  transition:
+    background-color 0.3s,
+    box-shadow 0.3s;
+}
+.lv[data-scrolled="1"] .lv-header {
+  background: rgba(10, 9, 8, 0.82);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 1px 0 var(--stage-line);
 }
 .lv-header .sc-logo {
   flex: none;
@@ -33,12 +54,8 @@
 }
 .lv-nav a,
 .lv-menu a {
-  color: var(--stage-muted);
-  text-decoration: none;
-}
-.lv-nav a[aria-current="page"],
-.lv-menu a[aria-current="page"] {
   color: var(--stage-ink);
+  text-decoration: none;
 }
 .lv-cart {
   position: relative;
@@ -51,21 +68,30 @@
   height: 18px;
   padding: 0 4px;
   border-radius: 9px;
-  background: var(--red);
+  background: var(--red-strong);
   color: var(--white);
   font: 700 11px/18px var(--font-text);
   text-align: center;
+  animation: lv-bump 0.5s var(--ease-out);
+}
+@keyframes lv-bump {
+  0% {
+    transform: scale(0.3);
+  }
+  55% {
+    transform: scale(1.3);
+  }
 }
 .lv-menu {
   position: absolute;
   top: calc(100% + 8px);
-  right: 16px;
+  right: var(--lv-gutter);
   min-width: 220px;
   padding: 8px;
   border: 1px solid var(--stage-line);
   border-radius: var(--radius-card);
   background: rgba(10, 9, 8, 0.96);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-lift);
 }
 .lv-menu[hidden] {
   display: none;
@@ -80,8 +106,10 @@
   display: block;
   padding: 14px 16px;
   border-radius: var(--radius-icon);
-  color: var(--stage-ink);
   font: 500 15px/1.2 var(--font-text);
+}
+.lv-menu a[aria-current="page"] {
+  color: var(--red-text);
 }
 .lv-menu a:hover,
 .lv-menu a:focus-visible {
@@ -93,9 +121,6 @@
   .lv-header,
   .lv-header .sc-header-actions {
     gap: 6px;
-  }
-  .lv-header {
-    padding-inline: 12px;
   }
   .lv-header .sc-logo {
     font-size: 18px;
@@ -114,16 +139,33 @@
   }
 }
 @media (min-width: 1024px) {
-  .lv-header {
-    padding-inline: 32px;
-  }
+  /* O menu da Desdobra: rótulos em mono, a página aberta com o ponto vermelho. */
   .lv-nav {
     display: flex;
-    gap: 28px;
+    gap: 22px;
     margin-left: auto;
-    font: 500 12px/1 var(--font-mono);
-    letter-spacing: 0.14em;
+  }
+  .lv-nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 500 11px/1.2 var(--font-mono);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    opacity: 0.72;
+    transition: opacity 0.2s;
+  }
+  .lv-nav a:hover,
+  .lv-nav a:focus-visible,
+  .lv-nav a[aria-current="page"] {
+    opacity: 1;
+  }
+  .lv-nav a[aria-current="page"]::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--red);
   }
   .lv-header .sc-header-actions {
     margin-left: 28px;
@@ -134,52 +176,224 @@
   }
 }
 
-/* Topo */
 .lv-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 28px 16px 72px;
-}
-.lv-title {
-  display: grid;
-  gap: var(--space-8);
-  margin: 0;
-}
-.lv-title__kicker {
-  color: var(--stage-muted);
-}
-.lv-title__name {
-  font-size: clamp(64px, 17vw, 132px);
-  line-height: 0.86;
-}
-.lv-intro {
-  max-width: 52ch;
-  margin: var(--space-12) 0 0;
-  color: var(--stage-muted);
+  padding-top: calc(var(--lv-header-h) + env(safe-area-inset-top, 0px));
 }
 
-/* Filtros e busca */
-.lv-controls {
+/* ---------- preço: o "R$" pequeno e alto ---------- */
+
+.lv-price {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 0.84;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.lv-price__cur {
+  display: inline-block;
+  margin-right: 0.12em;
+  font-size: 0.46em;
+  letter-spacing: 0.02em;
+  transform: translateY(-0.78em);
+}
+
+/* ---------- letreiro: "LOJA … VIRTUAL" dividido, como SAYMON … CELL na Desdobra ---------- */
+
+.lv-mast {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(28px, 4vw, 56px) var(--lv-gutter) clamp(26px, 3vw, 40px);
+}
+/* o tapete de corte da bancada (Raio-X) e o halo atrás do "VIRTUAL" */
+.lv-mast__mat,
+.lv-mast::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--lv-header-h)) 0 -80px;
+  z-index: -1;
+  pointer-events: none;
+}
+.lv-mast__mat {
+  background-image:
+    linear-gradient(var(--stage-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--stage-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: calc(50% + 28px) 0;
+  opacity: 0.6;
+  -webkit-mask-image: radial-gradient(60% 70% at 62% 40%, #000 10%, transparent 78%);
+  mask-image: radial-gradient(60% 70% at 62% 40%, #000 10%, transparent 78%);
+}
+.lv-mast::before {
+  background: radial-gradient(38% 46% at 80% 52%, rgba(255, 2, 0, 0.26), transparent 72%);
+}
+.lv-mast__stage {
+  display: grid;
+  gap: 18px;
+}
+.lv-mast__title {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  font: inherit;
+}
+.lv-mast__kicker {
+  color: var(--stage-muted);
+}
+.lv-mast__words {
+  display: block;
+  /* "LOJA VIRTUAL" ocupa a largura do conteúdo numa linha só (a palavra inteira mede 4,28 em). */
+  font: 900 calc((100vw - 2 * var(--lv-gutter)) / 4.34) / 0.8 var(--font-display);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.lv-mast__word {
+  display: inline-block;
+}
+.lv-mast__word--red {
+  color: var(--red);
+}
+.lv-mast__count {
+  display: none;
+  margin: 0;
+  color: var(--stage-muted);
+}
+.lv-mast__lead {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--stage-muted);
+}
+/* retirada, entrega e pagamento: três colunas no celular, a ficha no meio do letreiro no computador */
+.lv-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--stage-line);
+  border-bottom: 1px solid var(--stage-line);
+}
+.lv-facts div {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 12px 10px 12px 12px;
+  border-left: 1px solid var(--stage-line);
+}
+.lv-facts div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.lv-facts dt {
+  color: var(--stage-muted);
+}
+.lv-facts dd {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+}
+@media (max-width: 1199px) {
+  /* no celular e no tablet, o texto vem logo depois do título e a ficha por último; o fio de baixo da
+     ficha já separa o letreiro da vitrine */
+  .lv-mast__lead {
+    order: 1;
+  }
+  .lv-facts {
+    order: 2;
+  }
+  .lv-shelf__bar {
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+@media (min-width: 1200px) {
+  .lv-mast__stage {
+    /* tamanho do letreiro: "LOJA" mede 1,46 em e "VIRTUAL" 2,70 em; a ficha fica no meio do vão */
+    --lv-mast-f: min(12.8vw, 240px);
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 22px;
+  }
+  .lv-mast__title,
+  .lv-mast__count,
+  .lv-facts {
+    grid-area: 1 / 1;
+  }
+  .lv-mast__words {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    font-size: var(--lv-mast-f);
+  }
+  .lv-mast__count {
+    display: block;
+    align-self: start;
+    justify-self: end;
+  }
+  .lv-facts {
+    grid-template-columns: 1fr;
+    align-self: end;
+    justify-self: start;
+    width: 340px;
+    margin-left: calc(50% - 0.62 * var(--lv-mast-f) - 170px);
+    margin-bottom: 0.4vw;
+    border-bottom: 0;
+  }
+  .lv-facts div,
+  .lv-facts div:first-child {
+    grid-template-columns: 96px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+    padding: 11px 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--stage-line);
+  }
+  .lv-facts dd {
+    font-size: 14px;
+  }
+  .lv-mast__lead {
+    grid-row: 2;
+  }
+}
+
+/* ---------- vitrine: barra, filtros e busca ---------- */
+
+.lv-shelf {
+  padding: 0 var(--lv-gutter) clamp(72px, 9vw, 128px);
+}
+.lv-shelf__bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-12);
-  margin-top: var(--space-24);
+  gap: 12px 16px;
+  margin-bottom: clamp(18px, 2.2vw, 30px);
+  padding-top: 14px;
+  border-top: 1px solid var(--stage-line);
 }
-.lv-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-8);
-}
-.lv-filter {
-  border: 1px solid var(--stage-line);
-  background: transparent;
+.lv-shelf__title {
+  margin: 0 auto 0 0;
   color: var(--stage-ink);
 }
+@media (min-width: 1200px) {
+  .lv-shelf__count:not([data-filtered]) {
+    display: none;
+  }
+}
+/* os filtros como a tab bar da Desdobra: a categoria escolhida em branco */
+.lv-filters {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--stage-control);
+  box-shadow: inset 0 0 0 1px var(--stage-line);
+}
+.lv-filter {
+  --pill-bg: transparent;
+  --pill-fg: var(--stage-ink);
+}
 .lv-filter[aria-pressed="true"] {
-  border-color: var(--red);
-  background: var(--red);
-  color: var(--white);
+  --pill-bg: var(--white);
+  --pill-fg: var(--ink);
 }
 .lv-search {
   position: relative;
@@ -208,94 +422,6 @@
   /* 16px evita o zoom automático do iOS ao focar o campo */
   font: 400 16px/1.4 var(--font-text);
 }
-
-/* Grade de produtos */
-.lv-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin: var(--space-24) 0 0;
-  padding: 0;
-  list-style: none;
-}
-@media (min-width: 640px) {
-  .lv-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-@media (min-width: 1024px) {
-  .lv-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-  }
-}
-.lv-card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  border: 1px solid var(--stage-line);
-  border-radius: var(--radius-card);
-  background: var(--stage-control);
-}
-.lv-card__link {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  flex: 1;
-  color: inherit;
-  text-decoration: none;
-}
-.lv-card__link:focus-visible {
-  outline: 2px solid var(--red);
-  outline-offset: -2px;
-}
-.lv-card__photo {
-  position: relative;
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  background: var(--bone);
-}
-.lv-card__photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.lv-card__photo[data-empty] {
-  background: var(--ink);
-}
-.lv-card__photo[data-empty] img {
-  width: 38%;
-  height: auto;
-  opacity: 0.9;
-}
-.lv-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 5px 9px;
-  border-radius: var(--radius-pill);
-  background: var(--red);
-  color: var(--white);
-}
-.lv-card__body {
-  display: grid;
-  align-content: start;
-  gap: 6px;
-  padding: 12px;
-}
-.lv-card__name {
-  margin: 0;
-  font: 600 14px/1.3 var(--font-text);
-}
-.lv-card__price {
-  margin: 0;
-  font: 800 26px/1 var(--font-display);
-}
-.lv-card__add {
-  justify-content: center;
-  margin: 0 12px 12px;
-}
 .lv-none button {
   border: 0;
   background: none;
@@ -305,85 +431,673 @@
   cursor: pointer;
 }
 
-/* Página do produto */
-.lv-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--stage-muted);
-  text-decoration: none;
-}
-.lv-back svg {
-  width: 14px;
-  height: 14px;
-}
-.lv-product__grid {
+/* ---------- grade ---------- */
+
+.lv-grid {
   display: grid;
-  gap: var(--space-24);
-  margin-top: var(--space-16);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 30px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-@media (min-width: 900px) {
-  .lv-product__grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
-    gap: var(--space-44);
+@media (min-width: 720px) {
+  .lv-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 40px 14px;
   }
 }
-.lv-product__photo {
+@media (min-width: 1100px) {
+  .lv-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 48px 16px;
+  }
+}
+@media (min-width: 1600px) {
+  .lv-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* foto do produto: inteira, numa área clara; o branco da foto se funde ao osso */
+.lv-photo {
   position: relative;
-  display: grid;
-  place-items: center;
+  display: block;
   aspect-ratio: 1;
   overflow: hidden;
   border-radius: var(--radius-card);
   background: var(--bone);
+  isolation: isolate;
 }
-.lv-product__photo img {
+.lv-photo img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  mix-blend-mode: multiply;
 }
-.lv-product__photo[data-empty] {
-  background: var(--ink);
+/* sem foto: o desenho da marca numa área escura, com o brilho vermelho da Desdobra */
+.lv-photo[data-empty] {
+  background:
+    radial-gradient(80% 60% at 50% 100%, rgba(255, 2, 0, 0.34), transparent 72%),
+    var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-on-dark);
 }
-.lv-product__photo[data-empty] img {
+.lv-photo[data-empty] img {
+  inset: 0;
   width: 34%;
   height: auto;
+  margin: auto;
+  mix-blend-mode: normal;
 }
-.lv-product__info {
+
+.lv-tile {
+  position: relative;
+  container-type: inline-size;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 12px;
+  height: 100%;
+}
+.lv-tile__link {
   display: grid;
   align-content: start;
-  gap: var(--space-16);
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
 }
-.lv-product__name {
+/* o link (sem posição própria) cobre o cartão inteiro pelo ::after; o botão de adicionar fica por cima */
+.lv-tile__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--radius-card);
+}
+.lv-tile__link:focus-visible {
+  outline: none;
+}
+.lv-tile__link:focus-visible::after {
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
+}
+.lv-tile__index {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  color: var(--smoke);
+}
+/* o selo vem depois do nome no HTML e sobe para o canto da foto (o cartão é o bloco posicionado) */
+.lv-tile__badge {
+  z-index: 1;
+}
+/* cartão estreito (celular): o selo de estoque fica no lugar do índice */
+@container (max-width: 240px) {
+  .lv-tile:has(.lv-tile__badge) .lv-tile__index {
+    display: none;
+  }
+  .lv-tile__badge {
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+}
+.lv-tile__photo[data-empty] .lv-tile__index {
+  color: var(--stone);
+}
+.lv-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--red-strong);
+  color: var(--white);
+}
+.lv-tile__name {
   margin: 0;
-  font-size: clamp(40px, 9vw, 72px);
-  line-height: 0.9;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font: 500 15px/1.3 var(--font-text);
+  text-wrap: pretty;
 }
-.lv-product__price {
+.lv-tile__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.lv-tile__price {
+  font-size: clamp(24px, 2.2vw, 31px);
+}
+.lv-add {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--stage-control);
+  color: var(--stage-ink);
+  box-shadow: inset 0 0 0 1px var(--stage-line);
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    color 0.25s,
+    box-shadow 0.25s,
+    transform 0.35s var(--ease-out);
+}
+.lv-add svg {
+  width: 20px;
+  height: 20px;
+}
+.lv-add:active {
+  transform: scale(0.9);
+}
+.lv-add[data-added] {
+  background: var(--red-strong);
+  color: var(--white);
+  box-shadow: none;
+}
+.lv-add[data-added] svg {
+  animation: lv-pop 0.45s var(--ease-out);
+}
+@keyframes lv-pop {
+  from {
+    transform: scale(0.4) rotate(-20deg);
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .lv-tile__photo img {
+    transition: transform 0.6s var(--ease-out);
+  }
+  .lv-tile:hover .lv-tile__photo img {
+    transform: scale(1.05);
+  }
+  .lv-tile:hover .lv-tile__index {
+    color: var(--red-strong);
+  }
+  .lv-add:hover {
+    background: var(--red-strong);
+    color: var(--white);
+    box-shadow: none;
+  }
+}
+
+/* cartão do fim: fecha a última linha da grade (as colunas vêm de closingSpan) */
+.lv-ask {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  min-height: 100%;
+  padding: clamp(18px, 2.4vw, 32px);
+  border-radius: var(--radius-card);
+  background:
+    radial-gradient(90% 80% at 100% 0%, rgba(255, 255, 255, 0.1), transparent 60%),
+    var(--red-deep);
+  color: var(--white);
+  grid-column: span var(--span-2, 2);
+}
+@media (min-width: 720px) {
+  .lv-ask {
+    grid-column: span var(--span-3, 3);
+  }
+}
+@media (min-width: 1100px) {
+  .lv-ask {
+    grid-column: span var(--span-4, 4);
+  }
+}
+@media (min-width: 1600px) {
+  .lv-ask {
+    grid-column: span var(--span-5, 5);
+  }
+}
+.lv-ask > * {
   margin: 0;
-  font: 800 clamp(36px, 7vw, 52px) / 1 var(--font-display);
 }
-.lv-product__description,
-.lv-product__note {
+.lv-ask .sc-label {
+  color: rgba(255, 255, 255, 0.78);
+}
+.lv-ask__title {
+  /* a primeira linha vale para navegador sem medida de contêiner */
+  font-size: clamp(30px, 4vw, 72px);
+  font-size: clamp(30px, 11cqw, 96px);
+}
+.lv-ask__text {
+  max-width: 40ch;
+  color: rgba(255, 255, 255, 0.88);
+}
+.lv-ask__link {
+  width: fit-content;
+  margin-top: 4px;
+}
+.lv-ask__short {
+  display: none;
+}
+@container (max-width: 260px) {
+  .lv-ask__text,
+  .lv-ask__long {
+    display: none;
+  }
+  .lv-ask__short {
+    display: inline;
+  }
+}
+@container (min-width: 520px) {
+  .lv-ask__title {
+    font-size: clamp(44px, 8.4cqw, 96px);
+  }
+}
+
+/* ---------- seções editoriais (Raio-X) ---------- */
+
+.lv-section {
+  padding: clamp(84px, 11vw, 160px) var(--lv-gutter);
+}
+.lv-head {
+  display: grid;
+  gap: 16px;
+  max-width: 980px;
+  margin-bottom: clamp(40px, 6vw, 84px);
+}
+.lv-head > * {
   margin: 0;
-  color: var(--stage-muted);
 }
-.lv-product__note {
-  font-size: 13px;
-}
-.lv-product__buy {
+.lv-head--row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-12);
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: none;
 }
-.lv-product__add {
+.lv-head--row .sc-label {
+  margin: 0 0 14px;
+}
+.lv-h2 {
+  font-size: clamp(50px, 7.4vw, 120px);
+}
+.lv-h3 {
+  margin: 0;
+  font-size: clamp(26px, 2.5vw, 38px);
+  line-height: 0.9;
+}
+
+.lv-steps {
+  border-top: 1px solid var(--stage-line);
+}
+.lv-timeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  view-timeline: --lv-steps block;
+}
+.lv-timeline::before,
+.lv-timeline::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--stage-line);
+}
+/* a linha fica vermelha conforme a seção passa pela tela */
+.lv-timeline::after {
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.lv-timeline li {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding-top: 34px;
+}
+.lv-timeline li > * {
+  margin: 0;
+}
+.lv-timeline li::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 0 5px var(--stage);
+}
+
+/* faixa vermelha: retirada e entrega */
+.lv-band {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(4, auto);
+  align-content: end;
+  row-gap: 14px;
+  min-height: clamp(340px, 34vw, 500px);
+  padding-block: clamp(40px, 5vw, 64px);
+  background: var(--red);
+  color: var(--on-red);
+}
+/* o fio entre as colunas vai de cima a baixo da faixa */
+.lv-band::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.18);
+}
+.lv-band__col {
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  align-items: end;
+  justify-items: start;
+  padding-inline: var(--lv-gutter);
+}
+.lv-band__col > * {
+  margin: 0;
+}
+.lv-band__col .sc-body {
+  max-width: 44ch;
+}
+.lv-band__title {
+  font-size: clamp(70px, 9.4vw, 160px);
+  line-height: 0.8;
+}
+.lv-band .sc-pill {
+  margin-top: 8px;
+}
+
+/* ---------- rodapé com a chamada recebida ---------- */
+
+.lv-footer {
+  display: grid;
+  gap: 28px;
+  padding: clamp(56px, 7vw, 96px) var(--lv-gutter) max(40px, env(safe-area-inset-bottom, 0px));
+  color: var(--stage-muted);
+}
+.lv-footer .sc-footer {
+  padding-top: 28px;
+  border-top: 1px solid var(--stage-line);
+}
+.lv-footer a {
+  color: var(--stage-ink);
+}
+.lv-call {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(260px, 380px);
+  align-items: center;
+  gap: 18px;
+  padding: 16px;
+  border-radius: 30px;
+  background: var(--carbon);
+  color: var(--white);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 40px 80px -40px rgba(255, 2, 0, 0.55);
+}
+.lv-call__avatar {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: sc-ring 2.4s var(--ease-out) infinite;
+}
+.lv-call__avatar img {
+  width: 46%;
+}
+.lv-call__text > * {
+  margin: 0;
+}
+.lv-call__text .sc-ui {
+  margin-bottom: 4px;
+  font-size: 17px;
+}
+.lv-call__text .sc-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lv-call__text svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ---------- página do produto ---------- */
+
+.lv-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 18px var(--lv-gutter) 0;
+  color: var(--stage-muted);
+}
+.lv-crumbs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--stage-ink);
+  text-decoration: none;
+}
+.lv-crumbs a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lv-crumbs svg {
+  width: 14px;
+  height: 14px;
+}
+.lv-pd__grid {
+  display: grid;
+  gap: 28px;
+  padding: 18px var(--lv-gutter) clamp(56px, 7vw, 96px);
+}
+.lv-pd__media {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+/* marcas de corte nos cantos da foto, como uma prancha técnica */
+.lv-pd__marks {
+  --mark: rgba(17, 17, 17, 0.4);
+  position: absolute;
+  inset: 16px;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--mark) 0 0) top left / 22px 1.5px,
+    linear-gradient(var(--mark) 0 0) top left / 1.5px 22px,
+    linear-gradient(var(--mark) 0 0) top right / 22px 1.5px,
+    linear-gradient(var(--mark) 0 0) top right / 1.5px 22px,
+    linear-gradient(var(--mark) 0 0) bottom left / 22px 1.5px,
+    linear-gradient(var(--mark) 0 0) bottom left / 1.5px 22px,
+    linear-gradient(var(--mark) 0 0) bottom right / 22px 1.5px,
+    linear-gradient(var(--mark) 0 0) bottom right / 1.5px 22px;
+  background-repeat: no-repeat;
+}
+.lv-pd__photo[data-empty] .lv-pd__marks {
+  --mark: rgba(255, 255, 255, 0.3);
+}
+/* o selo fica dentro das marcas de corte */
+.lv-pd__photo .lv-badge {
+  top: 26px;
+  right: 26px;
+  z-index: 2;
+}
+.lv-pd__caption {
+  color: var(--stage-muted);
+}
+.lv-pd__info {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+.lv-pd__info > * {
+  margin: 0;
+}
+.lv-pd__meta {
+  color: var(--stage-muted);
+}
+.lv-pd__stock[data-stock="few"],
+.lv-pd__stock[data-stock="out"] {
+  color: var(--red-text);
+}
+.lv-pd__name {
+  font-size: clamp(46px, 6vw, 104px);
+  overflow-wrap: anywhere;
+}
+.lv-pd__price {
+  font-size: clamp(50px, 5.6vw, 88px);
+}
+.lv-pd__description {
+  max-width: 52ch;
+  color: var(--stage-muted);
+}
+.lv-pd__actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+.lv-pd__buy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.lv-pd__add {
   flex: 1 1 200px;
-  justify-content: center;
+  min-height: 52px;
+  font-size: 14px;
 }
-.lv-product__ask {
-  justify-content: center;
+.lv-pd__ask {
+  min-height: 48px;
 }
+.lv-pd__facts {
+  margin: 8px 0 0;
+  border-top: 1px solid var(--stage-line);
+}
+.lv-pd__facts div {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 6px 16px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--stage-line);
+}
+.lv-pd__facts dt {
+  color: var(--stage-muted);
+}
+.lv-pd__facts dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+@media (min-width: 900px) {
+  .lv-pd__grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(40px, 5vw, 96px);
+  }
+  .lv-pd__media {
+    position: sticky;
+    top: calc(var(--lv-header-h) + 24px);
+  }
+}
+
+.lv-more {
+  /* embaixo, só um respiro: o rodapé já abre com o seu espaço */
+  padding: clamp(56px, 7vw, 96px) var(--lv-gutter) clamp(8px, 1.5vw, 24px);
+  border-top: 1px solid var(--stage-line);
+}
+.lv-more .lv-head {
+  margin-bottom: clamp(28px, 4vw, 48px);
+}
+.lv-more .lv-h2 {
+  font-size: clamp(40px, 5vw, 80px);
+}
+@media (min-width: 720px) {
+  .lv-grid--more {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* barra de comprar, fixa embaixo no celular quando o botão sai da tela (vidro escuro da tab bar) */
+.lv-buybar {
+  position: fixed;
+  z-index: 25;
+  left: 12px;
+  right: 12px;
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 7px 7px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-dark);
+  backdrop-filter: blur(var(--blur-glass)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.5);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 10px 30px -12px rgba(0, 0, 0, 0.55);
+  color: var(--white);
+  transition:
+    transform 0.35s var(--ease-out),
+    opacity 0.25s;
+}
+.lv-buybar[data-on="0"] {
+  opacity: 0;
+  transform: translateY(calc(100% + 24px));
+  pointer-events: none;
+}
+@media (max-width: 899px) {
+  .lv-buybar {
+    display: flex;
+  }
+}
+.lv-buybar__text {
+  display: grid;
+  flex: 1;
+  gap: 3px;
+  min-width: 0;
+}
+.lv-buybar__name {
+  overflow: hidden;
+  font: 500 12px/1.3 var(--font-text);
+  color: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.lv-buybar__price {
+  font-size: 24px;
+}
+
+/* quantidade */
 .lv-qty {
   display: inline-flex;
   align-items: center;
@@ -401,6 +1115,10 @@
   color: var(--stage-ink);
   cursor: pointer;
 }
+.lv-pd__buy .lv-qty button {
+  width: 50px;
+  height: 50px;
+}
 .lv-qty button:disabled {
   opacity: 0.35;
   cursor: default;
@@ -414,13 +1132,19 @@
   text-align: center;
   font: 600 16px/1 var(--font-text);
 }
+.lv-qty--sm button {
+  width: 36px;
+  height: 36px;
+}
 
-/* Loja virtual sem produtos */
+/* ---------- loja virtual sem produtos ---------- */
+
 .lv-empty {
   display: grid;
+  justify-items: start;
   gap: var(--space-16);
   max-width: 560px;
-  margin-top: var(--space-29);
+  margin: 0 var(--lv-gutter) clamp(72px, 9vw, 128px);
   padding: var(--space-24);
   border: 1px solid var(--stage-line);
   border-radius: var(--radius-card);
@@ -429,34 +1153,32 @@
 .lv-empty p {
   margin: 0;
 }
+.lv-empty__avatar {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--red);
+}
+.lv-empty__avatar img {
+  width: 46%;
+}
 .lv-empty__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-8);
 }
 
-/* Rodapé */
-.lv-footer {
-  padding: 40px 16px max(40px, env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid var(--stage-line);
-  color: var(--stage-muted);
-}
-.lv-footer .sc-footer {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-.lv-footer a {
-  color: var(--stage-ink);
-}
+/* ---------- "Adicionado ao carrinho": a notificação da tela de bloqueio ---------- */
 
-/* "Adicionado ao carrinho" */
 .lv-notif {
   position: fixed;
   z-index: 40;
-  top: max(12px, env(safe-area-inset-top, 0px));
+  top: calc(var(--lv-header-h) + env(safe-area-inset-top, 0px) + 8px);
   left: 50%;
-  width: min(calc(100% - 24px), 380px);
-  transform: translate(-50%, calc(-100% - 24px));
+  width: min(calc(100% - 24px), 400px);
+  transform: translate(-50%, -14px) scale(0.98);
   opacity: 0;
   pointer-events: none;
   transition:
@@ -466,14 +1188,26 @@
 .lv-notif[data-on="1"] {
   transform: translate(-50%, 0);
   opacity: 1;
+  pointer-events: auto;
 }
 .lv-notif .sc-notif {
-  /* mais opaco que o vidro da tela de bloqueio, para o cabeçalho não aparecer por trás */
+  /* mais opaco que o vidro da tela de bloqueio, para a página não aparecer por trás */
   background: rgba(244, 243, 240, 0.96);
 }
 .lv-notif .sc-notif__title,
 .lv-notif .sc-notif__meta {
   display: block;
+}
+.lv-notif__icon[data-photo] {
+  background: var(--white);
+}
+.lv-notif__icon[data-photo] img {
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: multiply;
+}
+.lv-notif__open {
+  align-self: center;
 }
 @media (prefers-reduced-motion: reduce) {
   .lv-notif {
@@ -482,16 +1216,54 @@
   }
 }
 
-/* Carrinho (ver cart-dialog.tsx); a janela em si está em modal.css */
+/* ---------- carrinho (ver cart-dialog.tsx); a janela em si está em modal.css ---------- */
+
 .lv-cartd__panel {
   display: grid;
   gap: var(--space-16);
   padding: var(--space-24);
   padding-bottom: max(var(--space-24), env(safe-area-inset-bottom));
 }
+/* no celular, a folha ganha a alça de puxar */
+.lv-cartd[data-layout="sheet"] .lv-cartd__panel::before {
+  content: "";
+  justify-self: center;
+  width: 40px;
+  height: 5px;
+  margin: -12px 0 -4px;
+  border-radius: 3px;
+  background: var(--stage-line);
+}
+/* no computador, um celular em pé ao lado da página */
+.sc.sc-modal.lv-cartd[data-layout="side"] {
+  width: min(100%, 448px);
+  padding: 18px 22px 18px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+.lv-cartd[data-layout="side"] .lv-cartd__device {
+  height: 100%;
+}
+.lv-cartd[data-layout="side"] .lv-cartd__screen {
+  color: var(--white);
+}
+.lv-cartd[data-layout="side"] .sc-statusbar {
+  z-index: 3;
+  height: 46px;
+  padding-inline: 26px;
+  background: linear-gradient(var(--ink) 62%, transparent);
+}
 .lv-cartd[data-layout="side"] .lv-cartd__panel {
-  min-height: 100%;
+  position: absolute;
+  inset: 0;
   align-content: start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 50px 20px 0;
+  scrollbar-width: none;
 }
 .lv-cartd__head {
   display: flex;
@@ -499,6 +1271,9 @@
   justify-content: space-between;
   gap: var(--space-12);
   color: var(--stage-muted);
+}
+.lv-cartd__head .sc-label {
+  margin: 0;
 }
 .lv-cartd__close,
 .lv-cartd__remove {
@@ -520,8 +1295,8 @@
 }
 .lv-cartd__title {
   margin: 0;
-  font-size: clamp(32px, 8vw, 44px);
-  line-height: 0.92;
+  font-size: clamp(34px, 9vw, 46px);
+  line-height: 0.88;
 }
 .lv-cartd__notice {
   margin: 0;
@@ -540,30 +1315,16 @@
 }
 .lv-cartd__item {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-columns: 68px minmax(0, 1fr);
   gap: var(--space-12);
   padding-bottom: var(--space-12);
   border-bottom: 1px solid var(--stage-line);
 }
 .lv-cartd__thumb {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  overflow: hidden;
   border-radius: var(--radius-icon);
-  background: var(--bone);
-}
-.lv-cartd__thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.lv-cartd__thumb[data-empty] {
-  background: var(--ink);
 }
 .lv-cartd__thumb[data-empty] img {
-  width: 50%;
-  height: auto;
+  width: 46%;
 }
 .lv-cartd__info {
   display: grid;
@@ -583,17 +1344,15 @@
   display: flex;
   align-items: center;
   gap: var(--space-8);
+  margin-top: 4px;
 }
 .lv-cartd__subtotal {
   margin-left: auto;
-  font: 800 20px/1 var(--font-display);
-}
-.lv-qty--sm button {
-  width: 36px;
-  height: 36px;
+  font-size: 22px;
 }
 .lv-cartd__choices {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-8);
   margin: 0;
   padding: 0;
@@ -605,24 +1364,43 @@
   color: var(--stage-muted);
 }
 .lv-cartd__choice {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-12);
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 10px;
   padding: 14px;
   border: 1px solid var(--stage-line);
   border-radius: var(--radius-row);
   background: var(--stage-control);
   cursor: pointer;
+  transition:
+    border-color 0.25s,
+    background-color 0.25s;
 }
 .lv-cartd__choice:has(input:checked) {
   border-color: var(--red);
+  background: color-mix(in oklab, var(--stage-control), var(--red) 8%);
+}
+.lv-cartd__choice:has(input:focus-visible) {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
 }
 .lv-cartd__choice input {
+  position: absolute;
+  top: 14px;
+  right: 14px;
   width: 18px;
   height: 18px;
-  margin: 2px 0 0;
+  margin: 0;
   accent-color: var(--red);
-  flex: none;
+}
+.lv-cartd__choice > svg {
+  width: 22px;
+  height: 22px;
+  color: var(--stage-muted);
+}
+.lv-cartd__choice:has(input:checked) > svg {
+  color: var(--red);
 }
 .lv-cartd__choice strong {
   display: block;
@@ -630,14 +1408,48 @@
 }
 .lv-cartd__choice small {
   display: block;
-  margin-top: 2px;
+  margin-top: 3px;
   color: var(--stage-muted);
-  font-size: 13px;
+  font-size: 12.5px;
   line-height: 1.4;
 }
+.lv-cartd__preview summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: var(--stage-muted);
+  cursor: pointer;
+  list-style: none;
+}
+.lv-cartd__preview summary::-webkit-details-marker {
+  display: none;
+}
+.lv-cartd__preview summary svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.3s var(--ease-out);
+}
+.lv-cartd__preview[open] summary svg {
+  transform: rotate(180deg);
+}
+.lv-cartd__preview .lv-chat {
+  margin-top: 12px;
+}
 .lv-cartd__foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   display: grid;
   gap: var(--space-12);
+  margin: 0 calc(-1 * var(--space-24));
+  padding: 22px var(--space-24) max(var(--space-16), env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--stage) 22px);
+}
+.lv-cartd[data-layout="side"] .lv-cartd__foot {
+  margin: 0 -20px;
+  padding: 22px 20px 26px;
+  background: linear-gradient(transparent, var(--ink) 22px);
 }
 .lv-cartd__total {
   display: flex;
@@ -645,11 +1457,13 @@
   justify-content: space-between;
   margin: 0;
 }
-.lv-cartd__total strong {
-  font: 800 34px/1 var(--font-display);
+.lv-cartd__total .lv-price {
+  font-size: 44px;
 }
 .lv-cartd__send {
-  justify-content: center;
+  min-height: 52px;
+  white-space: normal;
+  text-align: center;
 }
 .lv-cartd__note {
   margin: 0;
@@ -666,21 +1480,212 @@
 .lv-cartd__done p {
   margin: 0;
 }
+.lv-cartd__done .lv-chat {
+  justify-self: stretch;
+}
+.lv-cartd__done > .sc-body {
+  color: var(--stage-muted);
+}
 .lv-cartd__after {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-8);
 }
-.lv-cartd__check {
+
+/* a conversa do WhatsApp: o verde fica só aqui, onde ele é o WhatsApp (ver o brand book) */
+.lv-chat {
   display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--call-green);
-  color: var(--ink);
+  gap: 8px;
+  padding: 14px 12px;
+  border-radius: var(--radius-row);
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1.5px) 0 0 / 14px 14px,
+    var(--carbon);
+  box-shadow: inset 0 0 0 1px var(--line-on-dark);
 }
-.lv-cartd__check svg {
-  width: 24px;
-  height: 24px;
+.lv-chat__day {
+  justify-self: center;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--ink-raised);
+  color: var(--stone);
+}
+.lv-chat__bubble {
+  justify-self: end;
+  max-width: 94%;
+  margin: 0;
+  padding: 8px 10px 6px;
+  border-radius: 12px 12px 3px 12px;
+  background: color-mix(in oklab, var(--call-green) 30%, var(--carbon));
+  color: var(--white);
+  font: 400 13.5px/1.42 var(--font-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.lv-chat__time {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  text-align: right;
+}
+
+/* ---------- movimento ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* o letreiro abre como o wordmark da Desdobra: as palavras chegam de dentro para as pontas */
+  .lv-mast__word {
+    animation: lv-word-a 1s var(--ease-out) both;
+  }
+  .lv-mast__word--red {
+    animation-name: lv-word-b;
+    animation-delay: 0.06s;
+  }
+  .lv-mast__kicker,
+  .lv-mast__count,
+  .lv-facts,
+  .lv-mast__lead {
+    animation: lv-fade-up 0.8s var(--ease-out) 0.3s both;
+  }
+  @keyframes lv-word-a {
+    from {
+      opacity: 0;
+      transform: translate(14%, 6%);
+    }
+  }
+  @keyframes lv-word-b {
+    from {
+      opacity: 0;
+      transform: translate(-8%, 6%);
+    }
+  }
+  @keyframes lv-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+  @supports (animation-timeline: scroll()) {
+    @media (min-width: 1200px) {
+      .lv-mast__words {
+        animation: lv-open linear both;
+        animation-timeline: scroll();
+        animation-range: 0 70vh;
+      }
+      .lv-mast__words .lv-mast__word {
+        animation:
+          lv-word-a 1s var(--ease-out) both,
+          lv-part-a linear both;
+        animation-timeline: auto, scroll();
+        animation-range: normal, 0 70vh;
+      }
+      .lv-mast__words .lv-mast__word--red {
+        animation:
+          lv-word-b 1s var(--ease-out) 0.06s both,
+          lv-part-b linear both;
+        animation-timeline: auto, scroll();
+        animation-range: normal, 0 70vh;
+      }
+    }
+  }
+  @keyframes lv-open {
+    to {
+      opacity: 0.35;
+    }
+  }
+  @keyframes lv-part-a {
+    to {
+      translate: -7vw 0;
+    }
+  }
+  @keyframes lv-part-b {
+    to {
+      translate: 7vw 0;
+    }
+  }
+
+  /* cartões e linha do tempo presos à rolagem, só onde o navegador faz isso sozinho */
+  @supports (animation-timeline: view()) {
+    .lv-grid > li {
+      animation: lv-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .lv-timeline::after {
+      animation: lv-line linear both;
+      animation-timeline: --lv-steps;
+      animation-range: entry 40% cover 60%;
+    }
+    .lv-band__title {
+      animation: lv-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 90%;
+    }
+  }
+  @keyframes lv-rise {
+    from {
+      opacity: 0;
+      transform: translateY(36px);
+    }
+  }
+  @keyframes lv-line {
+    to {
+      transform: scaleX(1);
+    }
+  }
+}
+
+/* ---------- celular ---------- */
+
+@media (max-width: 809px) {
+  .lv-timeline {
+    grid-template-columns: 1fr;
+  }
+  .lv-timeline::before,
+  .lv-timeline::after {
+    top: 0;
+    bottom: 0;
+    left: 6px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+  .lv-timeline::after {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  .lv-timeline li {
+    padding: 0 0 0 34px;
+  }
+  @keyframes lv-line {
+    to {
+      transform: scaleY(1);
+    }
+  }
+  .lv-band {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    row-gap: 0;
+    min-height: 0;
+    padding-block: 0;
+  }
+  .lv-band::before {
+    display: none;
+  }
+  .lv-band__col {
+    grid-row: auto;
+    grid-template-rows: none;
+    gap: 14px;
+    padding-block: 48px;
+  }
+  .lv-band__col + .lv-band__col {
+    border-top: 1px solid rgba(0, 0, 0, 0.18);
+  }
+  .lv-call {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .lv-call__slider {
+    grid-column: 1 / -1;
+  }
 }
