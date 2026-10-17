@@ -2,7 +2,7 @@
 
 // Janela do pedido de orçamento (ver GLOSSARY.md): abre por cima da página a partir de qualquer
 // "Pedir orçamento" das duas versões. Na Raio-X sobe de baixo; na Desdobra aparece centralizada.
-// Salva o pedido no painel e abre o WhatsApp com a mensagem pronta, como o formulário da home atual.
+// Salva o pedido no painel e abre o WhatsApp com a mensagem pronta, como o formulário antigo fazia.
 
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, X } from "lucide-react"
 import {

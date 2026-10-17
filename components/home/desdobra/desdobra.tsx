@@ -9,6 +9,7 @@
 import { ArrowDown, ArrowUpRight, Check, Instagram, MessageCircle, Moon, Package, Sun } from "lucide-react"
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import type { Product } from "@/types/database"
+import { ARRIVAL_HOLD_MS, onFirstInteraction } from "../shared/arrival"
 import {
   ADDRESS,
   BRANDS,
@@ -57,7 +58,8 @@ const TABS = [
   { key: "contato", label: "Contato", short: "Contato" },
 ]
 
-// Âncoras do endereço (as mesmas da home antiga) e a seção da tela do celular que cada uma mostra.
+// Âncoras do endereço (as do cabeçalho e do rodapé da loja) e a seção da tela do celular que cada
+// uma mostra.
 const HASH_SECTIONS: Record<string, string> = {
   servicos: "servicos",
   "como-funciona": "etapas",
@@ -222,23 +224,26 @@ export function Desdobra({ products, lite }: { products: Product[]; lite: boolea
   // Âncora no endereço ao chegar (vinda do cabeçalho da loja, por exemplo) e quando ela muda. Na
   // chegada, cada nova medida mantém a seção no lugar enquanto o conteúdo assenta (vindo de outra
   // página do site, as fontes chegam depois e mudam a altura do conteúdo), até a pessoa mexer na página.
-  const arrivalRef = useRef<string | null | undefined>(undefined)
+  // Seção da chegada: undefined antes de ler o endereço; null sem âncora ou depois de soltar.
+  const arrivalSectionRef = useRef<string | null | undefined>(undefined)
   useEffect(() => {
     if (pageHeight === null) return
-    if (arrivalRef.current === undefined) {
-      arrivalRef.current = HASH_SECTIONS[window.location.hash.slice(1)] ?? null
-      if (arrivalRef.current) {
+    if (arrivalSectionRef.current === undefined) {
+      arrivalSectionRef.current = HASH_SECTIONS[window.location.hash.slice(1)] ?? null
+      if (arrivalSectionRef.current) {
         const release = () => {
-          arrivalRef.current = null
-          for (const type of ["wheel", "touchmove", "pointerdown", "keydown"]) window.removeEventListener(type, release)
+          arrivalSectionRef.current = null
         }
-        for (const type of ["wheel", "touchmove", "pointerdown", "keydown"]) window.addEventListener(type, release, { passive: true })
-        window.setTimeout(release, 2500)
+        const stop = onFirstInteraction(release)
+        window.setTimeout(() => {
+          stop()
+          release()
+        }, ARRIVAL_HOLD_MS)
       }
     }
     // "instant" (os navegadores aceitam; os tipos do TS daqui ainda não): o html tem scroll suave,
     // e "auto" faria a animação inteira rodar até a seção.
-    if (arrivalRef.current) navigate(arrivalRef.current, "instant" as ScrollBehavior)
+    if (arrivalSectionRef.current) navigate(arrivalSectionRef.current, "instant" as ScrollBehavior)
   }, [pageHeight, navigate])
   useEffect(() => {
     const onHash = () => {

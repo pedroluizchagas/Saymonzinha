@@ -23,6 +23,7 @@ import {
 import type { Product } from "@/types/database"
 import { Desdobra } from "./desdobra/desdobra"
 import { RaioX } from "./raio-x/raio-x"
+import { ARRIVAL_HOLD_MS, onFirstInteraction } from "./shared/arrival"
 import { QuoteRequestProvider } from "./shared/quote-dialog"
 
 // Engasgo: nos primeiros 2,5 s de rolagem, média abaixo de 42 quadros por segundo ou mais de 20%
@@ -128,8 +129,11 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
   }, [initial])
 
   // Revela a página depois do render que já mostra a apresentação certa e faz a rolagem pendente.
+  // Antes da confirmação, nada: o React pode rodar este efeito do primeiro render, ainda com a versão
+  // do servidor, antes de montar a certa, e a âncora da versão certa ainda não existe.
   useEffect(() => {
-    if (confirmed) document.getElementById(SWAP_STYLE_ID)?.remove()
+    if (!confirmed) return
+    document.getElementById(SWAP_STYLE_ID)?.remove()
     const target = scrollAfter.current
     scrollAfter.current = null
     if (target === "top") window.scrollTo(0, 0)
@@ -137,19 +141,14 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
     // Na Desdobra as âncoras não são ids (ela mesma rola até a seção); aqui só a Raio-X responde.
     const anchor = target === "hash" && window.location.hash ? document.getElementById(window.location.hash.slice(1)) : null
     if (anchor) {
-      // A rolagem suave do navegador até a âncora pode ainda estar em curso, e as fontes podem chegar
-      // depois e mudar a altura do que vem antes: por 1,2 s a âncora é mantida no lugar, enquanto
-      // a pessoa não mexer na página.
+      // A rolagem até a âncora pode ainda estar em curso (suave, e com um destino que valia para o
+      // conteúdo de antes), e as fontes podem chegar depois e mudar a altura do que vem antes.
       const go = () => anchor.scrollIntoView({ behavior: "instant" as ScrollBehavior })
       let moved = false
-      const onMove = () => {
+      onFirstInteraction(() => {
         moved = true
-      }
-      window.addEventListener("wheel", onMove, { once: true, passive: true })
-      window.addEventListener("touchmove", onMove, { once: true, passive: true })
-      window.addEventListener("pointerdown", onMove, { once: true, passive: true })
-      window.addEventListener("keydown", onMove, { once: true })
-      const until = performance.now() + 1200
+      })
+      const until = performance.now() + ARRIVAL_HOLD_MS
       const hold = () => {
         if (moved) return
         if (Math.abs(anchor.getBoundingClientRect().top) > 1) go()

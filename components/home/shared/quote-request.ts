@@ -7,7 +7,7 @@ import { BRANDS, whatsappLink } from "./content"
 
 export const DEVICE_BRANDS = [...BRANDS, "Outro"]
 
-// Os mesmos problemas do formulário da home atual, mais o banho químico, que é um serviço da loja.
+// Os problemas do formulário antigo, mais o banho químico, que é um serviço da loja.
 export const PROBLEM_TYPES = [
   "Troca de Tela",
   "Substituição de Bateria",
@@ -81,7 +81,7 @@ export function checkQuoteRequest(form: QuoteRequestForm): QuoteRequestCheck {
   if (form.description.trim()) lead.problem_description = form.description.trim()
   if (form.delivery === "delivery") lead.delivery_address = form.address.trim()
 
-  // A mesma mensagem do formulário da home atual, com os nomes do glossário.
+  // A mensagem que o formulário antigo montava, com os nomes do glossário.
   const message =
     "Olá Saymon Cell! Acabei de enviar um pedido de orçamento pelo site.\n\n" +
     `*Nome:* ${lead.customer_name}\n` +
