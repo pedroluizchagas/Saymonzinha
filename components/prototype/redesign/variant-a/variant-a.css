@@ -1,0 +1,934 @@
+/* =====================================================================
+   PROTÓTIPO · Variante A "Desdobra"
+   Variáveis dirigidas pelo scroll (variant-a.tsx):
+   --heal 0→1 (vidro), --open 0→1 (dobra), --phi 180→0deg (giro da metade A),
+   --shift (centraliza a parte visível), --vis (largura/altura visível),
+   --scroll (deslocamento do conteúdo dentro da tela).
+   ===================================================================== */
+
+.va {
+  --screen-w: 1064px;
+  --screen-h: 720px;
+  --frame: 13px;
+  --closed-w: 545px;
+  --closed-h: 746px;
+  --D-w: calc(var(--screen-w) + 2 * var(--frame));
+  --D-h: calc(var(--screen-h) + 2 * var(--frame));
+  --heal: 0;
+  --open: 0;
+  --phi: 180deg;
+  --shift: calc(var(--D-w) / -4);
+  --vis: calc(var(--D-w) / 2);
+  --scroll: 0px;
+  position: relative;
+  min-height: 100svh;
+  overflow-x: clip;
+}
+.va[data-axis="y"] {
+  --shift: calc(var(--D-h) / -4);
+  --vis: calc(var(--D-h) / 2);
+}
+
+.va-scroller {
+  position: relative;
+  min-height: 100svh;
+}
+.va-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+.va[data-ready="0"] .va-stage {
+  visibility: hidden;
+}
+
+/* ---------- palco: cabeçalho e controles ---------- */
+
+.va-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: max(18px, env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) 0
+    max(24px, env(safe-area-inset-left, 0px));
+  pointer-events: none;
+}
+.va-header > * {
+  pointer-events: auto;
+}
+
+.va-controls {
+  position: fixed;
+  left: max(24px, env(safe-area-inset-left, 0px));
+  bottom: max(20px, env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+}
+.va[data-axis="y"] .va-controls {
+  display: none;
+}
+.va-controls__sep {
+  width: 1px;
+  height: 14px;
+  background: var(--stage-line);
+}
+.va-stage-toggle {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--stage-ink);
+  cursor: pointer;
+}
+.va-stage-toggle svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ---------- wordmark gigante ao redor do aparelho ---------- */
+
+.va-wordmark {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  pointer-events: none;
+}
+.va-wordmark__saymon,
+.va-wordmark__cell {
+  position: absolute;
+  top: 50%;
+  opacity: calc(1 - var(--open) * 1.5);
+  will-change: transform, opacity;
+}
+.va[data-axis="x"] .va-wordmark__saymon {
+  right: calc(50% + var(--closed-w) / 2 - var(--wm-overlap, 120px));
+  font-size: var(--wm-saymon, 200px);
+  transform: translate(calc(var(--open) * -16vw), -64%);
+}
+.va[data-axis="x"] .va-wordmark__cell {
+  left: calc(50% + var(--closed-w) / 2 - var(--wm-overlap, 120px));
+  font-size: var(--wm-cell, 300px);
+  transform: translate(calc(var(--open) * 16vw), -36%);
+}
+.va[data-axis="y"] .va-wordmark__saymon {
+  top: auto;
+  left: 50%;
+  bottom: calc(50% + var(--closed-h) / 2 + 14px);
+  font-size: var(--wm-saymon, 130px);
+  transform: translate(-50%, calc(var(--open) * -24vh));
+}
+.va[data-axis="y"] .va-wordmark__cell {
+  left: 50%;
+  top: calc(50% + var(--closed-h) / 2 + 10px);
+  font-size: var(--wm-cell, 160px);
+  transform: translate(-50%, calc(var(--open) * 24vh));
+}
+
+/* halo e sombra no chão */
+.va-glow {
+  z-index: 0;
+  width: calc(var(--vis) * 1.35);
+  height: calc(var(--D-h) * 1.15);
+  aspect-ratio: auto;
+}
+.va[data-axis="y"] .va-glow {
+  width: calc(var(--D-w) * 1.5);
+  height: calc(var(--vis) * 1.25);
+}
+.va[data-stage="papel"] .va-glow {
+  opacity: 0.55;
+}
+.va-floor {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55), transparent);
+  filter: blur(6px);
+  translate: -50% 0;
+}
+.va[data-axis="x"] .va-floor {
+  width: calc(var(--vis) * 0.9);
+  transform: translateY(calc(var(--D-h) / 2 - 6px));
+}
+.va[data-axis="y"] .va-floor {
+  width: calc(var(--D-w) * 0.9);
+  transform: translateY(calc(var(--vis) / 2 - 6px));
+}
+
+/* ---------- o aparelho dobrável ---------- */
+
+.va-device {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: var(--D-w);
+  height: var(--D-h);
+  margin-left: calc(var(--D-w) / -2);
+  margin-top: calc(var(--D-h) / -2 + 10px);
+  perspective: 1900px;
+}
+.va[data-axis="x"] .va-device {
+  transform: translateX(var(--shift));
+}
+.va[data-axis="y"] .va-device {
+  margin-top: calc(var(--D-h) / -2 + 6px);
+  transform: translateY(var(--shift));
+}
+
+.va-half,
+.va-unified {
+  position: absolute;
+  inset: 0;
+}
+.va {
+  --hinge-r: calc(var(--radius-device) * (1 - var(--open)));
+}
+.va-half--b {
+  clip-path: inset(0 0 0 50% round var(--hinge-r) 0 0 var(--hinge-r));
+}
+.va[data-axis="y"] .va-half--b {
+  clip-path: inset(50% 0 0 0 round var(--hinge-r) var(--hinge-r) 0 0);
+}
+.va-half--a {
+  transform-style: preserve-3d;
+  transform: rotateY(var(--phi));
+}
+.va[data-axis="y"] .va-half--a {
+  transform: rotateX(calc(var(--phi) * -1));
+}
+.va-face {
+  position: absolute;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.va-face--front {
+  inset: 0;
+  clip-path: inset(0 50% 0 0 round 0 var(--hinge-r) var(--hinge-r) 0);
+}
+.va[data-axis="y"] .va-face--front {
+  clip-path: inset(0 0 50% 0 round 0 0 var(--hinge-r) var(--hinge-r));
+}
+.va-face--back {
+  left: 0;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  transform: rotateY(180deg);
+}
+.va[data-axis="y"] .va-face--back {
+  width: 100%;
+  height: 50%;
+  transform: rotateX(180deg);
+}
+
+.va-unified {
+  visibility: hidden;
+}
+.va[data-unified="1"] .va-unified {
+  visibility: visible;
+}
+.va[data-unified="1"] .va-half {
+  visibility: hidden;
+}
+
+/* moldura: cada metade é o aparelho inteiro recortado na dobradiça */
+.va-shell,
+.va-cover {
+  position: absolute;
+  inset: 0;
+  --bezel: calc(var(--frame) - var(--rim));
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45),
+    0 0 0 0.5px rgba(0, 0, 0, 0.6);
+}
+.va-device .sc-device {
+  --finish: var(--finish-current, var(--finish-grafite));
+}
+.va[data-axis="y"] {
+  --radius-device: 40px;
+  --radius-screen: 30px;
+}
+.va[data-axis="y"] .va-shell,
+.va[data-axis="y"] .va-cover {
+  --rim: 3px;
+}
+.va-screen {
+  background: var(--ink);
+}
+.va-clip {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  border-radius: inherit;
+}
+.va-content-wrap {
+  position: absolute;
+  inset: 0 0 auto;
+  transform: translateY(var(--scroll));
+  will-change: transform;
+}
+.va-crease {
+  position: absolute;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.va[data-axis="x"] .va-crease {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 22px;
+  translate: -50% 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05) 42%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 58%,
+    transparent
+  );
+}
+.va[data-axis="y"] .va-crease {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 22px;
+  translate: 0 -50%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(255, 255, 255, 0.05) 42%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 58%,
+    transparent
+  );
+}
+
+/* barra de status: cor por seção (data-bar no root) */
+.va-screen .sc-statusbar > span:first-child {
+  color: var(--bar-l, var(--white));
+  transition: color 0.3s;
+}
+.va-screen .sc-statusbar__right {
+  color: var(--bar-r, var(--white));
+  transition: color 0.3s;
+}
+.va[data-bar="ink"] {
+  --bar-l: var(--ink);
+  --bar-r: var(--ink);
+}
+.va[data-bar="white"] {
+  --bar-l: var(--white);
+  --bar-r: var(--white);
+}
+.va[data-bar="split"] {
+  --bar-l: var(--ink);
+  --bar-r: var(--white);
+}
+.va[data-bar="split-ink"] {
+  --bar-l: var(--white);
+  --bar-r: var(--ink);
+}
+@container screen (max-width: 640px) {
+  .va[data-bar="split"] .va-screen .sc-statusbar__right {
+    color: var(--ink);
+  }
+  .va[data-bar="split-ink"] .va-screen .sc-statusbar__right {
+    color: var(--white);
+  }
+}
+
+/* tab bar: aparece quando o aparelho termina de abrir */
+.va-tabbar-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  z-index: 7;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.5s var(--ease-out);
+}
+.va-tabbar-wrap .sc-tabbar {
+  pointer-events: auto;
+}
+.va[data-unified="0"] .va-tabbar-wrap {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.va-tab-short {
+  display: none;
+}
+@container screen (max-width: 560px) {
+  .va-tab-long {
+    display: none;
+  }
+  .va-tab-short {
+    display: inline;
+  }
+  .va-tabbar-wrap .sc-tab {
+    padding: 8px 9px;
+  }
+}
+
+/* ---------- tela externa: bloqueio e chamada ---------- */
+
+.va-cover__screen {
+  container: cover / size;
+}
+.va-punch {
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  z-index: 9;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #000;
+  box-shadow:
+    inset 0 0 0 2px #121212,
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  translate: -50% 0;
+}
+.va-cover__lock,
+.va-cover__call {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.4s;
+}
+.va[data-cover="call"] .va-cover__lock,
+.va[data-cover="lock"] .va-cover__call {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.va-lock {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--white);
+}
+.va-lock__wall {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+  filter: brightness(0.72) blur(0.6px);
+}
+.va-lock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    var(--ink) 0%,
+    var(--ink) 26%,
+    rgba(11, 11, 11, 0.35) 48%,
+    rgba(11, 11, 11, 0) 64%,
+    rgba(11, 11, 11, 0.55) 100%
+  );
+}
+.va-lock .sc-statusbar {
+  color: var(--white);
+}
+.va-lock__top {
+  position: absolute;
+  top: 10.5cqh;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  text-align: center;
+}
+.va-lock__clock {
+  font-size: min(25cqw, 18cqh);
+  color: var(--bone);
+}
+.va-lock__date {
+  margin: 8px 0 0;
+  color: var(--stone);
+}
+.va-lock__notifs {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  bottom: calc(5cqh + 72px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.va-lock__fixed {
+  max-height: 0;
+  margin-bottom: -8px;
+  padding-block: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(10px) scale(0.97);
+  transition:
+    max-height 0.6s var(--ease-out),
+    margin 0.6s var(--ease-out),
+    padding 0.6s var(--ease-out),
+    opacity 0.5s var(--ease-out),
+    transform 0.6s var(--ease-out);
+}
+.va-lock__fixed[data-on="1"] {
+  max-height: 80px;
+  margin-bottom: 0;
+  padding-block: 9px;
+  opacity: 1;
+  transform: none;
+}
+.va-icon--green {
+  background: var(--call-green);
+}
+.va-icon--ink {
+  background: var(--ink);
+}
+.va-lock__dock {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  bottom: 5cqh;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.va-lock__hint svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* vidro trincado que se conserta: cada traço recolhe até o ponto de impacto */
+.va-crack {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.7));
+}
+.va-crack path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-linecap: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: clamp(0, calc((var(--heal) - var(--d, 0)) / (1 - var(--d, 0))), 1);
+}
+.va-crack__impact {
+  fill: rgba(255, 255, 255, 0.92);
+  opacity: calc(1 - var(--heal) * 1.4);
+}
+.va-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--heal) * 100%);
+  z-index: 5;
+  height: 2px;
+  background: var(--red);
+  box-shadow:
+    0 0 22px 6px rgba(255, 2, 0, 0.55),
+    0 0 2px 1px rgba(255, 2, 0, 0.9);
+  opacity: clamp(0, calc(min(var(--heal), 1 - var(--heal)) * 30), 1);
+  pointer-events: none;
+}
+
+@container cover (max-height: 500px) {
+  .va-lock__top {
+    top: 13cqh;
+  }
+  .va-lock__clock {
+    font-size: 22cqh;
+  }
+  .va-lock__date {
+    margin-top: 4px;
+  }
+  .va-lock__secondary {
+    display: none;
+  }
+  .va-lock__notifs {
+    bottom: calc(4cqh + 62px);
+  }
+  .va-lock__dock {
+    bottom: 4cqh;
+  }
+}
+
+.va-call {
+  padding-top: max(56px, 11cqh);
+}
+.va-call__name {
+  font-size: min(14cqw, 10cqh);
+}
+@container cover (max-height: 500px) {
+  .va-call {
+    padding: 36px 22px 16px;
+  }
+  .va-call .sc-call__avatar {
+    width: 24cqh;
+  }
+  .va-call .sc-call__foot {
+    gap: 8px;
+  }
+}
+
+/* ---------- conteúdo dentro da tela aberta ---------- */
+
+.va-content {
+  position: relative;
+  background: var(--ink);
+  color: var(--white);
+}
+.va-content ol,
+.va-content ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.va-muted {
+  color: var(--stone);
+}
+
+.va-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: var(--screen-h);
+  background: var(--bone);
+  color: var(--ink);
+}
+.va-hero__text {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 88px 29px 96px;
+}
+.va-hero__text > .sc-label {
+  margin: 0;
+}
+.va-hero__bottom {
+  display: grid;
+  gap: 18px;
+}
+.va-hero__lead {
+  max-width: 380px;
+  color: #34312d;
+}
+.va-dot {
+  color: var(--red);
+}
+.va-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.va-hero__media {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(70% 42% at 50% 100%, rgba(255, 2, 0, 0.38), transparent 72%),
+    var(--ink);
+}
+.va-hero__media img {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+}
+.va-hero__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--ink) 0%, rgba(11, 11, 11, 0.9) 38%, transparent 62%);
+}
+
+.va-block {
+  padding: 72px 29px 64px;
+}
+.va-numbers {
+  display: grid;
+  gap: 30px;
+  background: var(--ink);
+}
+.va-numbers > .sc-label {
+  margin: 0;
+}
+.va-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px 18px;
+}
+
+.va-services-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 88px;
+  padding-bottom: 29px;
+  border-top: 1px solid var(--line-on-dark);
+  background: var(--ink);
+}
+
+.va-steps {
+  display: grid;
+  gap: 16px;
+  background: var(--ink);
+}
+.va-steps > .sc-label {
+  margin: 0;
+}
+.va-steps > .sc-label:not(:first-child) {
+  margin-top: 30px;
+}
+.va-rows {
+  display: grid;
+  gap: 8px;
+}
+.va-rows .sc-display {
+  margin: 0;
+}
+.va-guarantees {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.va-guarantees li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: var(--radius-row);
+  background: var(--line-on-dark);
+}
+.va-guarantees svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--red);
+}
+.va-guarantees .sc-ui {
+  margin: 0 0 4px;
+  color: var(--white);
+}
+.va-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.va-store {
+  display: grid;
+  gap: 28px;
+  background: var(--bone);
+  color: var(--ink);
+}
+.va-store__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.va-store__head .sc-label {
+  margin: 0 0 14px;
+  color: var(--smoke);
+}
+.va-products {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.va-product {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 10px 10px 14px;
+  border-radius: var(--radius-row);
+  background: var(--white);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: var(--shadow-card);
+}
+.va-product .sc-label {
+  color: var(--smoke);
+}
+.va-product__img {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ebe8e2;
+  color: var(--smoke);
+}
+.va-product__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.va-visit {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  min-height: calc(var(--screen-h) * 0.82);
+  background: var(--red);
+  color: var(--on-red);
+}
+.va-visit__address,
+.va-visit__hours {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 72px 29px 44px;
+}
+.va-visit__address > * {
+  margin: 0;
+}
+.va-visit__address .sc-pill {
+  width: fit-content;
+  margin-top: 6px;
+}
+.va-visit__hours {
+  gap: 10px;
+  background: var(--ink);
+  color: var(--white);
+}
+.va-visit__hours > p {
+  margin: 0;
+}
+.va-visit__hours dl {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 22px;
+}
+.va-visit__hours dl div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-on-dark);
+}
+.va-visit__hours dt {
+  color: var(--stone);
+}
+.va-visit__hours dd {
+  margin: 0;
+}
+
+.va-end {
+  display: grid;
+  gap: 28px;
+  padding-bottom: 116px;
+  background: var(--ink);
+}
+.va-end .sc-display {
+  margin: 0;
+}
+.va-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+}
+.va-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--white);
+  text-decoration: none;
+}
+.va-footer svg {
+  width: 12px;
+  height: 12px;
+}
+
+@container screen (max-width: 640px) {
+  .va-hero {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(300px, 1fr);
+    height: auto;
+    min-height: var(--screen-h);
+  }
+  .va-hero__text {
+    gap: 48px;
+    padding: 76px 22px 30px;
+  }
+  .va-block {
+    padding: 64px 22px 56px;
+  }
+  .va-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .va-guarantees {
+    grid-template-columns: 1fr;
+  }
+  .va-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .va-visit {
+    grid-template-columns: 1fr;
+  }
+  .va-visit__address,
+  .va-visit__hours {
+    padding: 56px 22px 36px;
+  }
+  .va-end {
+    padding-bottom: 104px;
+  }
+}
+
+/* ---------- movimento reduzido: aparelho aberto, rolagem nativa ---------- */
+
+.va[data-motion="reduced"] .va-scroller {
+  height: 100svh;
+}
+.va[data-motion="reduced"] .va-half,
+.va[data-motion="reduced"] .va-wordmark,
+.va[data-motion="reduced"] .va-floor {
+  display: none;
+}
+.va[data-motion="reduced"] .va-device {
+  transform: none;
+}
+.va[data-motion="reduced"] .va-unified {
+  visibility: visible;
+}
+.va[data-motion="reduced"] .va-unified .va-clip {
+  overflow-y: auto;
+}
+.va[data-motion="reduced"] .va-content-wrap {
+  position: relative;
+  transform: none;
+}
+.va[data-motion="reduced"] .va-tabbar-wrap {
+  opacity: 1;
+  transform: none;
+}

@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
+    "prototype:redesign": "if [ -f .env.local ]; then next dev -p 3123; else NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54399 NEXT_PUBLIC_SUPABASE_ANON_KEY=prototype next dev -p 3123; fi",
     "start": "next start"
   },
   "dependencies": {
