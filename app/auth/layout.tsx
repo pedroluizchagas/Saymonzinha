@@ -15,12 +15,14 @@ export const viewport: Viewport = {
   themeColor: PWA_THEME_COLOR,
 }
 
+// As telas de entrada ocupam a tela inteira e cuidam das áreas seguras por dentro (AuthScreen): um
+// recuo aqui somaria a área segura à altura da tela e faria a página rolar no app instalado.
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen-safe safe-area-top safe-area-bottom safe-area-x">
+    <>
       {children}
       <SWRegister />
       <InstallPrompt />
-    </div>
+    </>
   )
 }

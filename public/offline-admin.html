@@ -10,7 +10,12 @@
          conexão volta. -->
     <style>
       * { box-sizing: border-box }
-      html { color-scheme: dark }
+      html { color-scheme: dark; background: #0a0908 }
+      /* iOS 26 no app instalado: com o documento mais baixo que a tela, o iOS entrega uma área mais curta,
+         na altura da barra de status (WebKit 301108); a mesma regra do painel (app/globals.css) */
+      @media (display-mode: standalone) {
+        html { min-height: min(100lvh, calc(100% + env(safe-area-inset-top, 0px))) }
+      }
       body {
         margin: 0;
         min-height: 100vh;

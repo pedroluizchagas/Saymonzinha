@@ -187,18 +187,6 @@
   }
 }
 
-/* Padding inferior no conteudo principal para compensar a barra de abas flutuante do celular
-   (cerca de 58px de barra + 12px de margem + a safe area de baixo + folga) */
-.main-content-bottom {
-  padding-bottom: calc(6rem + var(--sab));
-}
-
-@media (min-width: 1024px) {
-  .main-content-bottom {
-    padding-bottom: 0;
-  }
-}
-
 /* Estende o fundo de um elemento fixo ate a borda fisica da tela.
    Cobre apenas o safe-area real do dispositivo (ex: home indicator do iOS).
    Em dispositivos sem safe-area (maioria dos Android) nao gera espaco extra.
@@ -223,6 +211,9 @@
 /* PWA standalone mode                                */
 /* -------------------------------------------------- */
 
+/* No app instalado a pagina rola como num site: quem rola e o documento. Travar html e body em 100%,
+   com o body rolando por dentro, prendia o painel inteiro na altura que o sistema informa, e no iOS 26
+   essa altura vem curta (ver o html abaixo). */
 @media all and (display-mode: standalone) {
   /* Background se estende atras da barra de status transparente */
   html,
@@ -230,30 +221,32 @@
     background-color: var(--background);
   }
 
-  body {
-    /* Evita o bounce/overscroll no iOS standalone */
+  html {
+    /* iOS 26, app na tela de inicio com a barra de status translucida e viewport-fit=cover: enquanto
+       o documento e mais baixo que a tela, o iOS entrega uma area mais curta, na altura da barra de
+       status (WebKit 301108). A pagina para antes da borda de baixo, e o que e fixo no rodape, como a
+       barra de abas, sobe junto. Com o documento pelo menos da altura da tela, o iOS entrega a tela
+       inteira. O min() segura a altura na tela (100lvh) quando a barra de status e opaca e a area
+       segura de cima nao conta; no Android e no computador, a conta da a propria altura da janela. */
+    min-height: min(100lvh, calc(100% + var(--sat)));
+    /* Sem o efeito elastico nem o puxar para recarregar no fim da rolagem */
     overscroll-behavior-y: none;
+  }
+
+  body {
     -webkit-user-select: none;
     user-select: text;
-    /* Esconde scrollbar no PWA mobile */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
   }
+}
 
-  body::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Previne pull-to-refresh no iOS */
+/* No celular instalado, sem barra de rolagem a vista (no computador ela continua) */
+@media (display-mode: standalone) and (pointer: coarse) {
   html {
-    overflow: hidden;
-    height: 100%;
+    scrollbar-width: none;
   }
 
-  body {
-    overflow: auto;
-    height: 100%;
-    -webkit-overflow-scrolling: touch;
+  html::-webkit-scrollbar {
+    display: none;
   }
 }
 

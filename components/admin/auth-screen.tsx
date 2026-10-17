@@ -12,7 +12,8 @@ import { useClock } from "@/components/home/shared/device-ui"
 export function AuthScreen({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   const time = useClock()
   return (
-    <div className="relative isolate grid min-h-screen-safe place-items-center overflow-hidden px-4 py-8 lg:py-12">
+    // a tela inteira, com o fundo por baixo da barra de status; o conteúdo fica dentro das áreas seguras
+    <div className="relative isolate grid min-h-screen-safe place-items-center overflow-hidden pt-[max(2rem,var(--sat))] pr-[max(1rem,var(--sar))] pb-[max(2rem,var(--sab))] pl-[max(1rem,var(--sal))] lg:py-12">
       {/* o halo e o tapete de corte da bancada */}
       <div
         aria-hidden="true"

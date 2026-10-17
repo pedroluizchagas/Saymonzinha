@@ -45,7 +45,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen-safe bg-sc-stage">
       <AdminSidebar user={profile as Profile | null} />
-      <main className="lg:ml-64 main-content-offset main-content-bottom min-h-screen-safe safe-area-x">
+      <main className="pn-main lg:ml-64 main-content-offset min-h-screen-safe safe-area-x">
         {children}
       </main>
       <SWRegister />

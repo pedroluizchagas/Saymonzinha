@@ -1,4 +1,4 @@
-const SW_VERSION = "5.0.0"
+const SW_VERSION = "5.0.1"
 const CACHE_NAME = "saymoncell-v" + SW_VERSION
 const APP_PREFIXES = ["/admin", "/auth"]
 const PRECACHE_URLS = [
