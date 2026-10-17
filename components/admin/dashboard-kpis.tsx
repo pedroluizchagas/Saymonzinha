@@ -419,7 +419,7 @@ export function DashboardKPIs({ data }: DashboardKPIsProps) {
           <KPICard
             title="Taxa de Aprovacao"
             value={`${data.leads.conversionRate.toFixed(1)}%`}
-            subtitle={`${data.leads.converted} de ${data.leads.total} pedidos`}
+            subtitle={`${data.leads.converted} de ${data.leads.total} pedidos de orçamento`}
             icon={Target}
             iconColor="text-orange-500"
             iconBg="bg-orange-500/10"

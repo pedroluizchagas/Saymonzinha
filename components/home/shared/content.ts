@@ -110,6 +110,17 @@ export const STATS = [
   { value: "1", label: "Ano na nova sede" },
 ]
 
+/** Rótulos e títulos das seções, os mesmos nas duas versões (ver docs/adr/0001). */
+export const SECTIONS = {
+  region: "Assistência técnica · Divinópolis, MG",
+  steps: { label: "Como funciona", title: `Do defeito à solução em ${STEPS.length} passos` },
+  why: { label: "Por que a Saymon Cell", title: "10 anos cuidando do que conecta você" },
+  brands: { label: "Marcas que atendemos" },
+  store: { label: "Loja", title: "Acessórios" },
+  visit: { label: "Onde estamos", contact: "WhatsApp e telefone" },
+  call: { label: "Chamada recebida · sobre o seu conserto", message: "Olá Saymon Cell! Vim pelo site e quero consertar meu celular." },
+}
+
 // Menu das duas versões. As âncoras são as mesmas da home antiga, que o cabeçalho da loja usa.
 export const MENU = [
   { label: "Serviços", href: "#servicos" },

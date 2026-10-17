@@ -123,7 +123,7 @@ export function LeadsTable({ leads: initialLeads }: LeadsTableProps) {
             <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">Nenhum pedido de orçamento recebido ainda</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Os pré-orçamentos do site aparecerão aqui
+              Os pedidos de orçamento do site aparecerão aqui
             </p>
           </div>
         ) : (
@@ -183,7 +183,7 @@ export function LeadsTable({ leads: initialLeads }: LeadsTableProps) {
                       <Badge variant="outline" className="bg-secondary/50">
                         {lead.delivery_type === 'store'
                           ? 'Na loja'
-                          : 'Delivery'}
+                          : 'Busca e entrega'}
                       </Badge>
                     </TableCell>
                     <TableCell>

@@ -20,6 +20,7 @@ import {
   PARKING_NOTE,
   PHONE_URL,
   PICKUP_NOTE,
+  SECTIONS,
   SERVICES,
   STATS,
   STEPS,
@@ -75,6 +76,7 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
       s.setProperty("--heal", "0")
       s.setProperty("--intro", "0")
       setActive(-1)
+      setPhase("hero")
       const onScroll = () => {
         root.dataset.scrolled = window.scrollY > 40 ? "1" : "0"
       }
@@ -149,7 +151,7 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
           Saymon <b>Cell</b>
           <sup>®</sup>
         </a>
-        <span className="sc-label vb-header__mid">Assistência técnica · Divinópolis, MG</span>
+        <span className="sc-label vb-header__mid">{SECTIONS.region}</span>
         <div className="sc-header-actions">
           <a
             className="sc-pill sc-pill--stage sc-pill--sm sc-pill--icon"
@@ -279,8 +281,8 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
       {/* ---------- página editorial ---------- */}
       <section className="vb-section vb-steps" id="como-funciona">
         <div className="vb-section__head">
-          <p className="sc-label vb-muted">Como funciona</p>
-          <h2 className="sc-display vb-h2">Do defeito à solução em 4 passos</h2>
+          <p className="sc-label vb-muted">{SECTIONS.steps.label}</p>
+          <h2 className="sc-display vb-h2">{SECTIONS.steps.title}</h2>
         </div>
         <ol className="vb-timeline">
           {STEPS.map((step, i) => (
@@ -302,8 +304,8 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
         ))}
       </section>
 
-      <section className="vb-marquee" aria-label="Marcas que atendemos">
-        <p className="sc-label vb-muted vb-marquee__label">Marcas que atendemos</p>
+      <section className="vb-marquee" aria-label={SECTIONS.brands.label}>
+        <p className="sc-label vb-muted vb-marquee__label">{SECTIONS.brands.label}</p>
         <div className="vb-marquee__track">
           {[0, 1].map((copy) => (
             <div className="vb-marquee__row" key={copy} aria-hidden={copy === 1}>
@@ -320,8 +322,8 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
 
       <section className="vb-section vb-why">
         <div className="vb-section__head">
-          <p className="sc-label vb-muted">Por que a Saymon Cell</p>
-          <h2 className="sc-display vb-h2">10 anos cuidando do que conecta você</h2>
+          <p className="sc-label vb-muted">{SECTIONS.why.label}</p>
+          <h2 className="sc-display vb-h2">{SECTIONS.why.title}</h2>
         </div>
         <ul className="vb-why__grid">
           {GUARANTEES.map((g, i) => (
@@ -338,8 +340,8 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
       <section className="vb-section vb-store">
         <div className="vb-section__head vb-section__head--row">
           <div>
-            <p className="sc-label">Loja</p>
-            <h2 className="sc-display vb-h2">Acessórios</h2>
+            <p className="sc-label">{SECTIONS.store.label}</p>
+            <h2 className="sc-display vb-h2">{SECTIONS.store.title}</h2>
           </div>
           <a className="sc-pill sc-pill--ink" href="/loja">
             Ver a loja <ArrowUpRight />
@@ -379,7 +381,7 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
 
       <section className="vb-section vb-visit" id="localizacao">
         <div className="vb-visit__main">
-          <p className="sc-label vb-muted">Onde estamos</p>
+          <p className="sc-label vb-muted">{SECTIONS.visit.label}</p>
           <h2 className="sc-display vb-visit__street">{ADDRESS.street}</h2>
           <p className="sc-body">
             {ADDRESS.unit} · {ADDRESS.district} · {ADDRESS.city} · CEP {ADDRESS.zip}
@@ -405,7 +407,7 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
             </div>
           ))}
           <div>
-            <dt className="sc-label vb-muted">WhatsApp</dt>
+            <dt className="sc-label vb-muted">{SECTIONS.visit.contact}</dt>
             <dd className="sc-display vb-h3">{WHATSAPP_DISPLAY}</dd>
           </div>
         </dl>
@@ -423,11 +425,11 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
           <div className="vb-call__text">
             <p className="sc-ui">Saymon Cell</p>
             <p className="sc-label vb-muted">
-              <Phone aria-hidden="true" /> Chamada recebida · sobre o seu conserto
+              <Phone aria-hidden="true" /> {SECTIONS.call.label}
             </p>
           </div>
           <div className="vb-call__slider">
-            <CallSlider href={whatsappLink("Olá Saymon Cell! Vim pelo site e quero consertar meu celular.")} />
+            <CallSlider href={whatsappLink(SECTIONS.call.message)} />
           </div>
         </div>
         <HomeFooter />

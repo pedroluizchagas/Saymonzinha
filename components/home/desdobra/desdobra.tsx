@@ -21,6 +21,7 @@ import {
   PARKING_NOTE,
   PHONE_URL,
   PICKUP_NOTE,
+  SECTIONS,
   SERVICES,
   STATS,
   STEPS,
@@ -457,7 +458,7 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
     <div className="va-content" ref={ref}>
       <section className="va-hero" data-section="inicio" data-tab="inicio" data-glow="rgba(244,243,240,.26)" data-bar="split">
         <div className="va-hero__text">
-          <p className="sc-label">Assistência técnica — Divinópolis, MG</p>
+          <p className="sc-label">{SECTIONS.region}</p>
           <div className="va-hero__bottom">
             <h2 className="sc-display sc-display--hero">
               Conserto sem sair de casa<span className="va-dot">.</span>
@@ -530,7 +531,8 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
       ))}
 
       <section className="va-block va-steps" data-section="etapas" data-tab="etapas" data-glow="rgba(255,2,0,.3)" data-bar="white">
-        <p className="sc-label va-muted">Como funciona</p>
+        <p className="sc-label va-muted">{SECTIONS.steps.label}</p>
+        <h2 className="sc-display sc-display--title">{SECTIONS.steps.title}</h2>
         <ol className="va-rows">
           {STEPS.map((step, i) => (
             <li className="sc-row" key={step.title}>
@@ -541,7 +543,8 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
           ))}
         </ol>
 
-        <p className="sc-label va-muted">Por que a Saymon Cell</p>
+        <p className="sc-label va-muted">{SECTIONS.why.label}</p>
+        <h2 className="sc-display sc-display--title">{SECTIONS.why.title}</h2>
         <ul className="va-guarantees">
           {GUARANTEES.map((g) => (
             <li key={g.title}>
@@ -554,7 +557,7 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
           ))}
         </ul>
 
-        <p className="sc-label va-muted">Marcas que atendemos</p>
+        <p className="sc-label va-muted">{SECTIONS.brands.label}</p>
         <div className="va-chips">
           {BRANDS.map((b) => (
             <span className="sc-chip" key={b}>
@@ -567,8 +570,8 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
       <section className="va-block va-store" data-section="loja" data-tab="loja" data-glow="rgba(244,243,240,.3)" data-bar="ink">
         <div className="va-store__head">
           <div>
-            <p className="sc-label">Loja</p>
-            <h2 className="sc-display sc-display--section">Acessórios</h2>
+            <p className="sc-label">{SECTIONS.store.label}</p>
+            <h2 className="sc-display sc-display--section">{SECTIONS.store.title}</h2>
           </div>
           <a className="sc-pill sc-pill--ink" href="/loja">
             Ver a loja <ArrowUpRight />
@@ -606,7 +609,7 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
 
       <section className="va-visit" data-section="contato" data-tab="contato" data-glow="rgba(255,2,0,.62)" data-bar="ink">
         <div className="va-visit__address">
-          <p className="sc-label">Onde estamos</p>
+          <p className="sc-label">{SECTIONS.visit.label}</p>
           <h2 className="sc-display sc-display--title">{ADDRESS.street}</h2>
           <p className="sc-body">
             {ADDRESS.unit} · {ADDRESS.district}
@@ -628,7 +631,7 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
               </div>
             ))}
           </dl>
-          <p className="sc-label va-muted">WhatsApp e telefone</p>
+          <p className="sc-label va-muted">{SECTIONS.visit.contact}</p>
           <a className="sc-display sc-display--row va-phone" href={PHONE_URL}>
             {WHATSAPP_DISPLAY}
           </a>
@@ -667,7 +670,7 @@ function LockScreen({ time, healed }: { time: string; healed: boolean }) {
       <StatusBar time={time} level={healed ? 100 : 12} />
       <div className="va-lock__top">
         <div className="sc-clock va-lock__clock">{time}</div>
-        <p className="sc-ui va-lock__date">Assistência técnica · Divinópolis</p>
+        <p className="sc-ui va-lock__date">{SECTIONS.region}</p>
       </div>
       <div className="va-lock__notifs">
         <div className="sc-notif va-lock__fixed" data-on={healed ? "1" : "0"} aria-hidden={!healed}>
@@ -694,7 +697,7 @@ function LockScreen({ time, healed }: { time: string; healed: boolean }) {
               Busca e entrega em Divinópolis
             </span>
             <span className="sc-notif__meta" style={{ display: "block" }}>
-              Consulte disponibilidade
+              Consulte disponibilidade e valor
             </span>
           </span>
           <span className="sc-notif__time">agora</span>
@@ -741,13 +744,13 @@ function CallScreen({ time }: { time: string }) {
     <div className="sc-call va-call">
       <StatusBar time={time} />
       <h2 className="sc-display sc-display--title va-call__name">Saymon Cell</h2>
-      <p className="sc-ui sc-call__sub">Chamada recebida · sobre o seu conserto</p>
+      <p className="sc-ui sc-call__sub">{SECTIONS.call.label}</p>
       <div className="sc-call__avatar">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/home/glyph.png" alt="" />
       </div>
       <div className="sc-call__foot">
-        <CallSlider href={whatsappLink("Olá Saymon Cell! Vim pelo site e quero consertar meu celular.")} />
+        <CallSlider href={whatsappLink(SECTIONS.call.message)} />
         <span className="sc-label va-muted">WhatsApp {WHATSAPP_DISPLAY}</span>
       </div>
     </div>
