@@ -7,14 +7,16 @@
  import { Button } from "@/components/ui/button"
  import { Input } from "@/components/ui/input"
  import { Label } from "@/components/ui/label"
- import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
  import { Switch } from "@/components/ui/switch"
- import { Loader2, CreditCard } from "lucide-react"
+ import { Loader2 } from "lucide-react"
+ import { SettingsField, SettingsList, SettingsRow, countLabel } from "@/components/admin/settings-list"
+
+ const COLUMNS = "md:grid-cols-[minmax(0,1fr)_9rem_4rem_1rem]"
  
  export function SettingsPaymentMethods() {
    const supabase = createClient()
    const [methods, setMethods] = useState<PaymentMethod[]>([])
-   const [loading, setLoading] = useState(false)
+   const [loading, setLoading] = useState(true)
    const [name, setName] = useState("")
    const [fee, setFee] = useState("")
    const [savingId, setSavingId] = useState<string | null>(null)
@@ -52,26 +54,32 @@
    }
  
    return (
-     <Card className="bg-card border-border">
+     <Card>
        <CardHeader>
-         <div className="flex items-center gap-3">
-           <div className="p-2 bg-primary/10 rounded-lg">
-             <CreditCard className="w-5 h-5 text-primary" />
-           </div>
-           <CardTitle className="text-lg text-foreground">Formas de Pagamento</CardTitle>
-         </div>
+         <p className="sc-label text-sc-stone">Cadastradas</p>
+         <CardTitle>
+           {loading && methods.length === 0 ? "Carregando" : countLabel(methods.length, "forma de pagamento", "formas de pagamento")}
+         </CardTitle>
        </CardHeader>
        <CardContent className="space-y-6">
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+         <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-[minmax(0,1fr)_9rem_auto]">
            <div className="space-y-2">
-             <Label className="text-foreground">Nome</Label>
-             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Cartão Crédito 2x" />
+             <Label htmlFor="pagamento-nome">Nova forma de pagamento</Label>
+             <Input id="pagamento-nome" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Cartão de crédito 2x" />
            </div>
            <div className="space-y-2">
-             <Label className="text-foreground">% Taxa</Label>
-             <Input type="number" step="0.01" value={fee} onChange={(e) => setFee(e.target.value)} placeholder="0.00" />
+             <Label htmlFor="pagamento-taxa">Taxa (%)</Label>
+             <Input
+               id="pagamento-taxa"
+               type="number"
+               step="0.01"
+               inputMode="decimal"
+               value={fee}
+               onChange={(e) => setFee(e.target.value)}
+               placeholder="0,00"
+             />
            </div>
-           <div className="flex items-end">
+           <div>
              <Button onClick={addMethod} disabled={savingId === "new"}>
                {savingId === "new" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                Adicionar
@@ -79,58 +87,34 @@
            </div>
          </div>
  
-         <div className="border border-border rounded-lg overflow-hidden">
-           <Table>
-             <TableHeader>
-               <TableRow>
-                 <TableHead>Nome</TableHead>
-                 <TableHead>% Taxa</TableHead>
-                 <TableHead>Ativo</TableHead>
-                 <TableHead></TableHead>
-               </TableRow>
-             </TableHeader>
-             <TableBody>
-               {loading ? (
-                 <TableRow>
-                   <TableCell colSpan={4}>
-                     <div className="flex items-center gap-2">
-                       <Loader2 className="w-4 h-4 animate-spin" />
-                       Carregando...
-                     </div>
-                   </TableCell>
-                 </TableRow>
-               ) : methods.length === 0 ? (
-                 <TableRow>
-                   <TableCell colSpan={4} className="text-muted-foreground">
-                     Nenhum método cadastrado
-                   </TableCell>
-                 </TableRow>
-               ) : (
-                 methods.map((m) => (
-                   <TableRow key={m.id}>
-                     <TableCell>
-                       <Input defaultValue={m.name} onBlur={(e) => updateMethod(m, { name: e.target.value })} />
-                     </TableCell>
-                     <TableCell className="w-40">
-                       <Input
-                         type="number"
-                         step="0.01"
-                         defaultValue={String(m.fee_percentage ?? 0)}
-                         onBlur={(e) => updateMethod(m, { fee_percentage: Number(e.target.value) || 0 })}
-                       />
-                     </TableCell>
-                     <TableCell className="w-32">
-                       <Switch checked={!!m.is_active} onCheckedChange={(v) => updateMethod(m, { is_active: v })} />
-                     </TableCell>
-                     <TableCell className="w-28">
-                       {savingId === m.id ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                     </TableCell>
-                   </TableRow>
-                 ))
-               )}
-             </TableBody>
-           </Table>
-         </div>
+         <SettingsList
+           head={["Nome", "Taxa (%)", "Ativa"]}
+           columns={COLUMNS}
+           loading={loading && methods.length === 0}
+           empty={methods.length === 0 && "Nenhuma forma de pagamento cadastrada."}
+         >
+           {methods.map((m) => (
+             <SettingsRow key={m.id} columns={COLUMNS} saving={savingId === m.id}>
+               <SettingsField label="Nome" className="col-span-2 md:col-span-1">
+                 <Input defaultValue={m.name} onBlur={(e) => updateMethod(m, { name: e.target.value })} />
+               </SettingsField>
+               <SettingsField label="Taxa (%)">
+                 <Input
+                   type="number"
+                   step="0.01"
+                   inputMode="decimal"
+                   defaultValue={String(m.fee_percentage ?? 0)}
+                   onBlur={(e) => updateMethod(m, { fee_percentage: Number(e.target.value) || 0 })}
+                 />
+               </SettingsField>
+               <SettingsField label="Ativa">
+                 <span className="flex h-11 items-center">
+                   <Switch checked={!!m.is_active} onCheckedChange={(v) => updateMethod(m, { is_active: v })} />
+                 </span>
+               </SettingsField>
+             </SettingsRow>
+           ))}
+         </SettingsList>
        </CardContent>
      </Card>
    )

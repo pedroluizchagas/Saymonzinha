@@ -1,12 +1,12 @@
  "use client"
  
  import { useEffect, useMemo, useState } from "react"
+ import { formatPrice } from "@/lib/catalog"
  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
  import { Button } from "@/components/ui/button"
  import { Input } from "@/components/ui/input"
- import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
  import { Label } from "@/components/ui/label"
- import { Loader2, Plus, Trash2 } from "lucide-react"
+ import { Loader2, Minus, Plus, Trash2 } from "lucide-react"
  import { searchProducts } from "@/lib/actions/pdv-actions"
  import { addServiceOrderItem, getServiceOrderItems, removeServiceOrderItem, updateServiceOrderItemQuantity } from "@/lib/actions/service-order-actions"
  import type { Product, ServiceOrderItem } from "@/types/database"
@@ -78,112 +78,115 @@
    }
  
    return (
-     <Card className="bg-card border-border">
+     <Card>
        <CardHeader>
-         <CardTitle className="text-lg text-foreground">Peças / Produtos na OS</CardTitle>
+         <CardTitle>Peças e produtos</CardTitle>
        </CardHeader>
-       <CardContent className="space-y-4">
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-           <div className="md:col-span-2 space-y-2">
-             <Label>Buscar produto</Label>
-             <Input
-               value={query}
-               onChange={(e) => setQuery(e.target.value)}
-               placeholder="Digite nome ou código de barras"
-               className="bg-background"
-             />
-             {loading && <p className="text-sm text-muted-foreground flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin" />Buscando...</p>}
-             {!loading && results.length > 0 && (
-               <div className="border rounded-md max-h-56 overflow-auto">
-                 {results.map((p) => (
-                   <div key={p.id} className="flex items-center justify-between p-2 hover:bg-muted">
-                     <div>
-                       <p className="text-sm font-medium">{p.name}</p>
-                       <p className="text-xs text-muted-foreground">R$ {Number(p.sale_price).toFixed(2)} · Estoque: {p.stock_quantity}</p>
-                     </div>
-                     <Button size="sm" variant="outline" className="bg-transparent" onClick={() => addItem(p)}>
-                       <Plus className="w-4 h-4 mr-2" /> Adicionar
-                     </Button>
+       <CardContent className="space-y-5">
+         <div className="space-y-2">
+           <Label htmlFor="os-item-busca">Buscar produto</Label>
+           <Input
+             id="os-item-busca"
+             value={query}
+             onChange={(e) => setQuery(e.target.value)}
+             placeholder="Nome ou código de barras"
+           />
+           {loading && <p className="text-sm text-muted-foreground flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin" />Buscando</p>}
+           {!loading && results.length > 0 && (
+             <ul className="max-h-64 divide-y divide-sc-line overflow-auto rounded-[14px] border border-sc-line">
+               {results.map((p) => (
+                 <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                   <div className="min-w-0">
+                     <p className="truncate text-sm font-medium">{p.name}</p>
+                     <p className="sc-label mt-1 text-sc-smoke">
+                       {formatPrice(Number(p.sale_price))} · {p.stock_quantity} em estoque
+                     </p>
                    </div>
-                 ))}
-               </div>
-             )}
-           </div>
+                   <Button size="sm" variant="secondary" onClick={() => addItem(p)} aria-label={`Adicionar ${p.name} à OS`}>
+                     <Plus /> Adicionar
+                   </Button>
+                 </li>
+               ))}
+             </ul>
+           )}
          </div>
  
          <div className="space-y-2">
-           <Label>Itens adicionados</Label>
-           <div className="border rounded-md overflow-hidden">
-             <Table>
-               <TableHeader>
-                 <TableRow className="border-border">
-                   <TableHead>Descrição</TableHead>
-                   <TableHead className="text-center">Qtde</TableHead>
-                   <TableHead className="text-right">Unitário</TableHead>
-                   <TableHead className="text-right">Total</TableHead>
-                   <TableHead className="text-center">Ações</TableHead>
-                 </TableRow>
-               </TableHeader>
-               <TableBody>
-                 {items.length === 0 ? (
-                   <TableRow>
-                     <TableCell colSpan={5} className="text-center text-muted-foreground">
-                       Nenhum item
-                     </TableCell>
-                   </TableRow>
-                 ) : (
-                   items.map((it) => (
-                     <TableRow key={it.id} className="border-border">
-                       <TableCell>
-                         <p className="text-sm">{it.description}</p>
-                         {it.product?.barcode && <p className="text-xs text-muted-foreground">Cod: {it.product.barcode}</p>}
-                       </TableCell>
-                       <TableCell className="text-center">
-                         <div className="flex items-center justify-center gap-2">
-                           <Button
-                             variant="outline"
-                             size="sm"
-                             className="bg-transparent"
-                             onClick={() => updateQty(it.id, Math.max(1, it.quantity - 1))}
-                           >
-                             -
-                           </Button>
-                           <Input
-                             value={it.quantity}
-                             onChange={(e) => {
-                               const v = Number(e.target.value || 1)
-                               updateQty(it.id, Math.max(1, v))
-                             }}
-                             type="number"
-                             min={1}
-                             className="w-16 text-center"
-                           />
-                           <Button variant="outline" size="sm" className="bg-transparent" onClick={() => updateQty(it.id, it.quantity + 1)}>
-                             +
-                           </Button>
-                         </div>
-                       </TableCell>
-                       <TableCell className="text-right">R$ {Number(it.unit_price).toFixed(2)}</TableCell>
-                       <TableCell className="text-right">R$ {Number(it.total_price).toFixed(2)}</TableCell>
-                       <TableCell className="text-center">
-                         <Button variant="ghost" size="icon" onClick={() => removeItem(it.id)}>
-                           <Trash2 className="w-4 h-4" />
-                         </Button>
-                       </TableCell>
-                     </TableRow>
-                   ))
-                 )}
-               </TableBody>
-             </Table>
-           </div>
+           <p className="sc-label text-sc-stone">Na OS</p>
+           {items.length === 0 ? (
+             <p className="rounded-[14px] border border-dashed border-sc-line px-4 py-6 text-center text-sm text-muted-foreground">
+               Nenhuma peça ou produto na OS.
+             </p>
+           ) : (
+             <ul className="divide-y divide-sc-line rounded-[14px] border border-sc-line">
+               {items.map((it) => (
+                 // no celular: o nome e o total numa linha, a quantidade e o botão de tirar na outra;
+                 // do sm em diante, tudo numa linha só
+                 <li
+                   key={it.id}
+                   className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto_7.5rem_auto]"
+                 >
+                   <div className="min-w-0">
+                     <p className="truncate text-sm">{it.description}</p>
+                     <p className="sc-label mt-1 text-sc-smoke">
+                       {formatPrice(Number(it.unit_price))} cada
+                       {it.product?.barcode ? ` · cód. ${it.product.barcode}` : ""}
+                     </p>
+                   </div>
+                   <p className="text-right text-sm font-semibold tabular-nums sm:col-start-3 sm:row-start-1">
+                     {formatPrice(Number(it.total_price))}
+                   </p>
+                   <div className="flex w-fit items-center rounded-full border border-sc-line p-0.5 sm:col-start-2 sm:row-start-1">
+                     <Button
+                       variant="ghost"
+                       size="icon-sm"
+                       disabled={it.quantity <= 1}
+                       onClick={() => updateQty(it.id, Math.max(1, it.quantity - 1))}
+                       aria-label={`Uma unidade a menos de ${it.description}`}
+                     >
+                       <Minus />
+                     </Button>
+                     <input
+                       value={it.quantity}
+                       onChange={(e) => {
+                         const v = Number(e.target.value || 1)
+                         updateQty(it.id, Math.max(1, v))
+                       }}
+                       type="number"
+                       min={1}
+                       inputMode="numeric"
+                       aria-label={`Quantidade de ${it.description}`}
+                       className="w-9 bg-transparent text-center text-sm tabular-nums outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                     />
+                     <Button
+                       variant="ghost"
+                       size="icon-sm"
+                       onClick={() => updateQty(it.id, it.quantity + 1)}
+                       aria-label={`Uma unidade a mais de ${it.description}`}
+                     >
+                       <Plus />
+                     </Button>
+                   </div>
+                   <Button
+                     variant="ghost"
+                     size="icon-sm"
+                     className="justify-self-end hover:bg-sc-ember hover:text-sc-red sm:col-start-4 sm:row-start-1"
+                     onClick={() => removeItem(it.id)}
+                     aria-label={`Tirar ${it.description} da OS`}
+                   >
+                     <Trash2 />
+                   </Button>
+                 </li>
+               ))}
+             </ul>
+           )}
          </div>
  
-         <div className="flex items-center justify-between">
+         <div className="flex items-center justify-between border-t border-sc-line pt-4">
            <p className="text-sm text-muted-foreground">Subtotal dos itens</p>
-           <p className="text-sm font-semibold">R$ {subtotal.toFixed(2)}</p>
+           <p className="text-sm font-semibold tabular-nums">{formatPrice(subtotal)}</p>
          </div>
        </CardContent>
      </Card>
    )
  }
- 

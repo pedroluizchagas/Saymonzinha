@@ -193,7 +193,7 @@ export function NotificationManager() {
       )}
     >
       {status === "subscribed" ? (
-        <Bell className="w-5 h-5 text-primary" />
+        <Bell className="w-5 h-5 text-sc-red" />
       ) : status === "denied" ? (
         <BellOff className="w-5 h-5 text-muted-foreground" />
       ) : (
@@ -202,13 +202,13 @@ export function NotificationManager() {
 
       {/* Indicador de status */}
       {status === "subscribed" && (
-        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-card" />
+        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-sc-bone rounded-full border-2 border-card" />
       )}
       {(status === "prompt" || status === "unsubscribed") && (
-        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-card animate-pulse" />
+        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-sc-red rounded-full border-2 border-card animate-pulse" />
       )}
       {status === "denied" && (
-        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-card" />
+        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-sc-smoke rounded-full border-2 border-card" />
       )}
     </button>
   )

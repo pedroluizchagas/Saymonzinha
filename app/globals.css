@@ -3,81 +3,53 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Tema personalizado Saymon Cell - Preto, Vermelho e Branco */
-:root {
-  --background: oklch(0.98 0 0);
-  --foreground: oklch(0.15 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0 0);
-  --primary: #ff0200;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.96 0 0);
-  --secondary-foreground: oklch(0.15 0 0);
-  --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.65 0.2 145);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: #ff0200;
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.9 0 0);
-  --ring: #ff0200;
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
+/* Tema do painel e do login: o sistema visual da home (tema Noite), aplicado aos componentes do
+   shadcn. Os valores vêm de components/home/sc-system.css; as cores da marca também viram utilitários
+   com o prefixo sc- (bg-sc-carbon, text-sc-red, border-sc-line...), como pede o brand book. O vermelho
+   tem duas forças: --primary é o red-strong, para fundo com texto branco; texto vermelho pequeno usa
+   text-sc-red. */
+:root,
 .dark {
-  --background: oklch(0.1 0 0);
-  --foreground: oklch(0.98 0 0);
-  --card: oklch(0.14 0 0);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.14 0 0);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: #ff0200;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.2 0 0);
-  --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.6 0 0);
-  --accent: oklch(0.65 0.2 145);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: #ff0200;
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.25 0 0);
+  --background: #0a0908;
+  --foreground: #f4f3f0;
+  --card: #141210;
+  --card-foreground: #f4f3f0;
+  --popover: #1a1816;
+  --popover-foreground: #f4f3f0;
+  --primary: #e50000;
+  --primary-foreground: #ffffff;
+  --secondary: #1a1816;
+  --secondary-foreground: #f4f3f0;
+  --muted: #1a1816;
+  --muted-foreground: #a6a29b;
+  --accent: #1a1816;
+  --accent-foreground: #f4f3f0;
+  --destructive: #e50000;
+  --destructive-foreground: #ffffff;
+  --border: #2a2724;
+  --input: #2a2724;
   --ring: #ff0200;
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --chart-1: #ff0200;
+  --chart-2: #f4f3f0;
+  --chart-3: #a6a29b;
+  --chart-4: #b3170f;
+  --chart-5: #6f6b65;
+  --radius: 0.875rem;
+  --sidebar: #0a0908;
+  --sidebar-foreground: #f4f3f0;
+  --sidebar-primary: #e50000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1a1816;
+  --sidebar-accent-foreground: #f4f3f0;
+  --sidebar-border: #2a2724;
+  --sidebar-ring: #ff0200;
 }
 
 @theme inline {
-  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
-  --font-heading: 'Poppins', 'Poppins Fallback', system-ui, sans-serif;
+  --font-sans: var(--sc-font-text), "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--sc-font-text), "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--sc-font-display), "Sofia Sans Extra Condensed", "Arial Narrow", sans-serif;
+  --font-mono: var(--sc-font-mono), "Geist Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -105,7 +77,7 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 6px);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -114,6 +86,21 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* a paleta da marca (ver sc-system.css e o brand book) */
+  --color-sc-stage: #0a0908;
+  --color-sc-ink: #0b0b0b;
+  --color-sc-carbon: #141210;
+  --color-sc-raised: #1a1816;
+  --color-sc-line: #2a2724;
+  --color-sc-bone: #f4f3f0;
+  --color-sc-stone: #a6a29b;
+  --color-sc-smoke: #6f6b65;
+  --color-sc-red: #ff0200;
+  --color-sc-red-strong: #e50000;
+  --color-sc-red-deep: #b3170f;
+  --color-sc-ember: #2b0503;
+  --color-sc-green: #34c759;
 }
 
 @layer base {
@@ -130,31 +117,6 @@
   h5,
   h6 {
     font-family: var(--font-heading);
-  }
-  h1.text-primary,
-  h2.text-primary,
-  h3.text-primary,
-  h4.text-primary,
-  h5.text-primary,
-  h6.text-primary,
-  h1 .text-primary,
-  h2 .text-primary,
-  h3 .text-primary,
-  h4 .text-primary,
-  h5 .text-primary,
-  h6 .text-primary,
-  .font-bold.text-primary,
-  .font-semibold.text-primary {
-    background-image: linear-gradient(
-      90deg,
-      #ff4d4f 0%,
-      #ff0200 60%,
-      #b00000 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
   }
 }
 
@@ -225,27 +187,15 @@
   }
 }
 
-/* Padding inferior no conteudo principal para compensar o bottom nav mobile
-   4rem = altura do bottom nav (h-16) + safe area bottom + folga */
+/* Padding inferior no conteudo principal para compensar a barra de abas flutuante do celular
+   (cerca de 58px de barra + 12px de margem + a safe area de baixo + folga) */
 .main-content-bottom {
-  padding-bottom: calc(4rem + var(--sab) + 0.5rem);
+  padding-bottom: calc(6rem + var(--sab));
 }
 
 @media (min-width: 1024px) {
   .main-content-bottom {
     padding-bottom: 0;
-  }
-}
-
-/* Posiciona o bottom sheet logo acima do bottom nav + safe area.
-   Usado no popup "Mais" do mobile. */
-.bottom-sheet-offset {
-  bottom: calc(4rem + var(--sab));
-}
-
-@media (min-width: 1024px) {
-  .bottom-sheet-offset {
-    bottom: auto;
   }
 }
 
@@ -351,10 +301,10 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--muted-foreground);
+  background: #2a2724;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  background: #6f6b65;
 }

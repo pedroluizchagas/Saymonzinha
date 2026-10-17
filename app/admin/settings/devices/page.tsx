@@ -19,11 +19,11 @@
      <div>
        <AdminHeader
          user={profile as Profile | null}
-         title="Marcas e Modelos"
-         subtitle="Cadastre e gerencie aparelhos atendidos"
+         title="Marcas e modelos"
+         subtitle="Configurações · os aparelhos que a loja atende"
        />
  
-       <div className="p-6">
+       <div className="px-4 pb-6 md:px-8">
          <SettingsDevices />
        </div>
      </div>

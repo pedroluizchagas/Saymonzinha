@@ -33,11 +33,11 @@ export default async function NewOrderPage({
     <div>
       <AdminHeader
         user={profile as Profile | null}
-        title="Nova Ordem de Serviço"
-        subtitle="Cadastre uma nova OS no sistema"
+        title="Nova OS"
+        subtitle="Ordem de serviço · o aparelho que chegou para conserto"
       />
 
-      <div className="p-6">
+      <div className="px-4 pb-6 md:px-8">
         <NewOrderForm problemTypes={(problemTypes as ProblemType[]) || []} leadData={leadData} />
       </div>
     </div>

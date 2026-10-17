@@ -20,10 +20,10 @@
        <AdminHeader
          user={profile as Profile | null}
          title="Equipe"
-         subtitle="Gerencie usuários, funções e ativação"
+         subtitle="Configurações · quem usa o painel e com qual função"
        />
  
-       <div className="p-6">
+       <div className="px-4 pb-6 md:px-8">
          <SettingsTeam />
        </div>
      </div>

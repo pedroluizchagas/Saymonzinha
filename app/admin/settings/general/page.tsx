@@ -19,12 +19,12 @@
      <div>
        <AdminHeader
          user={profile as Profile | null}
-         title="Configurações Gerais"
-         subtitle="Preferências do sistema e da loja"
+         title="Geral"
+         subtitle="Configurações · preferências da loja"
        />
  
-       <div className="p-6">
-         <Card className="bg-card border-border max-w-3xl">
+       <div className="px-4 pb-6 md:px-8">
+         <Card className="max-w-3xl">
            <CardHeader>
              <CardTitle className="text-foreground">Em breve</CardTitle>
              <CardDescription className="text-muted-foreground">

@@ -17,9 +17,9 @@
  
    return (
      <div>
-       <AdminHeader user={profile as Profile | null} title="Novo Cliente" subtitle="Cadastre um novo cliente" />
+       <AdminHeader user={profile as Profile | null} title="Novo cliente" subtitle="Clientes · cadastro" />
  
-       <div className="p-6">
+       <div className="px-4 pb-6 md:px-8">
          <NewCustomerForm />
        </div>
      </div>

@@ -19,9 +19,9 @@ export default async function ProductsPage() {
 
   return (
     <div>
-      <AdminHeader user={profile as Profile | null} title="Produtos" subtitle="Gerencie seu estoque" />
+      <AdminHeader user={profile as Profile | null} title="Produtos" subtitle="O estoque e o que está na loja virtual" />
 
-      <div className="p-6">
+      <div className="px-4 pb-6 md:px-8">
         <ProductsList products={(products as Product[]) || []} />
       </div>
     </div>

@@ -2,58 +2,91 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Offline • Saymon Cell Admin</title>
-    <meta name="theme-color" content="#ff0200" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Sem conexão · Painel Saymon Cell</title>
+    <meta name="theme-color" content="#0a0908" />
+    <!-- Página que o service worker mostra quando o painel abre sem internet. Sem as fontes do site
+         (podem não estar guardadas), com a cara da tela de bloqueio do painel; recarrega sozinha quando a
+         conexão volta. -->
     <style>
-      :root { color-scheme: light dark }
+      * { box-sizing: border-box }
+      html { color-scheme: dark }
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
-        background: #0a0a0a;
-        color: #fafafa;
-        display: grid;
         min-height: 100vh;
+        min-height: 100dvh;
+        display: grid;
         place-items: center;
+        padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+        background:
+          radial-gradient(120% 55% at 50% 112%, rgba(255, 2, 0, 0.42), transparent 62%),
+          #0a0908;
+        color: #f4f3f0;
+        font: 400 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
-      .card {
-        width: min(560px, 92vw);
-        border: 1px solid #262626;
-        border-radius: 16px;
-        padding: 24px;
-        background: #111111;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+      main { width: min(400px, 100%); text-align: center }
+      .icon {
+        display: grid;
+        place-items: center;
+        width: 76px;
+        height: 76px;
+        margin: 0 auto 28px;
+        border-radius: 18px;
+        background: #ff0200;
+        box-shadow: 0 30px 60px -30px rgba(255, 2, 0, 0.6);
       }
-      h1 { font-size: 1.25rem; margin: 0 0 4px }
-      p { margin: 0 0 16px; color: #a3a3a3 }
-      .actions { display: flex; gap: 12px; margin-top: 8px }
-      a, button {
+      .icon img { height: 44px; width: auto }
+      .label {
+        margin: 0 0 12px;
+        color: #a6a29b;
+        font: 500 11px/1.2 ui-monospace, "SFMono-Regular", Menlo, monospace;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font: 900 64px/0.84 "Arial Narrow", "Roboto Condensed", "Helvetica Neue", sans-serif;
+        font-stretch: condensed;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+      }
+      p.text { margin: 18px 0 28px; color: #a6a29b }
+      .actions { display: grid; gap: 10px }
+      button, a {
         appearance: none;
-        border: 1px solid #262626;
-        background: #171717;
-        color: #fafafa;
-        padding: 10px 14px;
-        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 22px;
+        border: 0;
+        border-radius: 999px;
+        font: 500 14px/1.3 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         text-decoration: none;
         cursor: pointer;
       }
-      .primary {
-        border-color: #ff0200;
-        background: #ff0200;
-        color: white;
-      }
-      .muted { color: #a3a3a3; font-size: .875rem }
+      button { background: #e50000; color: #fff }
+      a { background: rgba(255, 255, 255, 0.08); color: #f4f3f0 }
+      :focus-visible { outline: 2px solid #ff0200; outline-offset: 2px }
     </style>
   </head>
   <body>
-    <div class="card">
-      <h1>Sua conexão caiu</h1>
-      <p>Não foi possível carregar o painel do admin porque você está offline.</p>
+    <main>
+      <span class="icon" aria-hidden="true"><img src="/home/glyph.png" alt="" /></span>
+      <p class="label">Painel Saymon Cell</p>
+      <h1>Sem conexão</h1>
+      <p class="text">O painel volta sozinho quando a internet voltar. Se preferir, tente agora.</p>
       <div class="actions">
-        <button class="primary" onclick="location.reload()">Tentar novamente</button>
-        <a href="/" aria-label="Ir para a página inicial">Página inicial</a>
+        <button type="button" onclick="location.reload()">Tentar de novo</button>
+        <a href="/">Ir para o site</a>
       </div>
-      <p class="muted">Quando a conexão voltar, o painel será recarregado automaticamente.</p>
-    </div>
+    </main>
+    <script>
+      // Recarrega quando a conexão volta, como o texto promete.
+      window.addEventListener("online", function () {
+        location.reload()
+      })
+    </script>
   </body>
-  </html>
+</html>

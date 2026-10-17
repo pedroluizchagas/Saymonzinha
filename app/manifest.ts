@@ -1,18 +1,21 @@
 import type { MetadataRoute } from "next"
+import { PWA_THEME_COLOR } from "@/lib/pwa"
 
+// O painel instalado como app (PWA): o ícone é o glifo da marca sobre o vermelho e a abertura fica no
+// preto do palco, como o painel.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Saymon Cell Admin",
+    name: "Painel Saymon Cell",
     short_name: "Saymon Cell",
     description:
-      "Painel administrativo do Saymon Cell com acesso rapido as ordens de servico, clientes e financas.",
+      "O painel da Saymon Cell: pedidos de orçamento, ordens de serviço, clientes, vendas e o financeiro da loja.",
     start_url: "/admin",
     scope: "/",
     id: "/admin",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#000000",
-    theme_color: "#ff0200",
+    background_color: PWA_THEME_COLOR,
+    theme_color: PWA_THEME_COLOR,
     lang: "pt-BR",
     dir: "ltr",
     categories: ["business", "utilities"],
@@ -45,18 +48,18 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     screenshots: [
       {
-        src: "/images/logo.png",
-        sizes: "512x512",
+        src: "/pwa/screenshot-narrow.png",
+        sizes: "780x1688",
         type: "image/png",
         form_factor: "narrow",
-        label: "Painel administrativo Saymon Cell - Mobile",
+        label: "A entrada do painel no celular",
       },
       {
-        src: "/images/logo.png",
-        sizes: "512x512",
+        src: "/pwa/screenshot-wide.png",
+        sizes: "1280x800",
         type: "image/png",
         form_factor: "wide",
-        label: "Painel administrativo Saymon Cell - Desktop",
+        label: "A entrada do painel no computador",
       },
     ],
   }

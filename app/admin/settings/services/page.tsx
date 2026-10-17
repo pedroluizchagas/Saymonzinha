@@ -19,11 +19,11 @@
      <div>
        <AdminHeader
          user={profile as Profile | null}
-         title="Tipos de Serviço"
-         subtitle="Gerencie os serviços oferecidos e preços estimados"
+         title="Tipos de serviço"
+         subtitle="Configurações · os consertos e os preços estimados"
        />
  
-       <div className="p-6">
+       <div className="px-4 pb-6 md:px-8">
          <SettingsProblemTypes />
        </div>
      </div>

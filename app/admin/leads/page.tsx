@@ -19,13 +19,9 @@ export default async function LeadsPage() {
 
   return (
     <div>
-      <AdminHeader
-        user={profile as Profile | null}
-        title="Pedidos de orçamento"
-        subtitle="Gerencie os pedidos de orçamento recebidos pelo site"
-      />
+      <AdminHeader user={profile as Profile | null} title="Pedidos de orçamento" subtitle="Os pedidos que chegam pelo site" />
 
-      <div className="p-6">
+      <div className="px-4 pb-6 md:px-8">
         <LeadsTable leads={(leads as Lead[]) || []} />
       </div>
     </div>

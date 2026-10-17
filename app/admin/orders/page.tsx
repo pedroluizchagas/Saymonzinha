@@ -25,24 +25,16 @@ export default async function OrdersPage() {
 
   return (
     <div>
-      <AdminHeader
-        user={profile as Profile | null}
-        title="Ordens de Serviço"
-        subtitle="Gerencie os reparos em andamento"
-      />
+      <AdminHeader user={profile as Profile | null} title="Ordens de serviço" subtitle="Os consertos em andamento, por etapa">
+        <Button asChild>
+          <Link href="/admin/orders/new">
+            <Plus aria-hidden="true" />
+            Nova OS
+          </Link>
+        </Button>
+      </AdminHeader>
 
-      <div className="p-4 md:p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Button asChild>
-              <Link href="/admin/orders/new">
-                <Plus className="w-4 h-4 mr-2" />
-                Nova OS
-              </Link>
-            </Button>
-          </div>
-        </div>
-
+      <div className="px-4 pb-6 md:px-8">
         <OrdersKanban orders={(orders as ServiceOrder[]) || []} />
       </div>
     </div>

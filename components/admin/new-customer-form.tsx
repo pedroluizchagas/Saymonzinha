@@ -50,62 +50,59 @@
  
    return (
      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-       <Card className="bg-card border-border">
+       <Card>
          <CardHeader>
-           <CardTitle className="text-lg text-foreground flex items-center gap-2">
-             <UserPlus className="w-5 h-5" />
-             Dados do Cliente
-           </CardTitle>
+           <CardTitle>Dados do Cliente</CardTitle>
          </CardHeader>
          <CardContent className="space-y-4">
            {error && <div className="text-sm text-destructive">{error}</div>}
  
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div className="space-y-2">
-               <Label className="text-foreground">Nome *</Label>
+               <Label>Nome *</Label>
                <Input
                  value={name}
                  onChange={(e) => setName(e.target.value)}
-                 className="bg-background border-input"
+                
                  required
                />
              </div>
              <div className="space-y-2">
-               <Label className="text-foreground">Telefone *</Label>
+               <Label>Telefone *</Label>
                <Input
                  value={phone}
                  onChange={(e) => setPhone(e.target.value)}
-                 className="bg-background border-input"
+                
                  required
                />
              </div>
            </div>
  
            <div className="space-y-2">
-             <Label className="text-foreground">Email</Label>
+             <Label>Email</Label>
              <Input
                type="email"
                value={email}
                onChange={(e) => setEmail(e.target.value)}
-               className="bg-background border-input"
+              
              />
            </div>
  
            <div className="space-y-2">
-             <Label className="text-foreground">Endereço</Label>
+             <Label>Endereço</Label>
              <Input
                value={address}
                onChange={(e) => setAddress(e.target.value)}
-               className="bg-background border-input"
+              
              />
            </div>
  
            <div className="space-y-2">
-             <Label className="text-foreground">Observações</Label>
+             <Label>Observações</Label>
              <Textarea
                value={notes}
                onChange={(e) => setNotes(e.target.value)}
-               className="bg-background border-input"
+              
              />
            </div>
  

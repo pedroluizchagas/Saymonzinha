@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server"
 import { AdminHeader } from "@/components/admin/header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Users } from "lucide-react"
 import Link from "next/link"
 import type { Profile, Customer } from "@/types/database"
@@ -25,51 +24,65 @@ export default async function CustomersPage() {
     return new Date(date).toLocaleDateString("pt-BR")
   }
 
+  const list = (customers as Customer[] | null) ?? []
+
   return (
     <div>
-      <AdminHeader user={profile as Profile | null} title="Clientes" subtitle="Gerencie sua base de clientes" />
+      <AdminHeader user={profile as Profile | null} title="Clientes" subtitle="A base de contatos da loja">
+        <Button asChild>
+          <Link href="/admin/customers/new">
+            <Plus aria-hidden="true" />
+            Novo cliente
+          </Link>
+        </Button>
+      </AdminHeader>
 
-      <div className="p-4 md:p-6">
-        <div className="flex items-center justify-between mb-6">
-          <Button asChild>
-            <Link href="/admin/customers/new">
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Cliente
-            </Link>
-          </Button>
-        </div>
-
-        <Card className="bg-card border-border">
+      <div className="px-4 pb-6 md:px-8">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-lg text-foreground">Lista de Clientes</CardTitle>
+            <p className="sc-label text-sc-stone">Cadastrados</p>
+            <CardTitle>{list.length === 1 ? "1 cliente" : `${list.length} clientes`}</CardTitle>
           </CardHeader>
-          <CardContent>
-            {!customers || customers.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Nenhum cliente cadastrado</p>
+          <CardContent className="px-2 sm:px-3">
+            {list.length === 0 ? (
+              <div className="py-12 text-center">
+                <Users className="mx-auto mb-4 size-10 text-sc-smoke" aria-hidden="true" />
+                <p className="text-sc-stone">Nenhum cliente cadastrado ainda</p>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border hover:bg-transparent">
-                    <TableHead className="text-muted-foreground">Nome</TableHead>
-                    <TableHead className="text-muted-foreground">Telefone</TableHead>
-                    <TableHead className="text-muted-foreground">Email</TableHead>
-                    <TableHead className="text-muted-foreground">Cadastro</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(customers as Customer[]).map((customer) => (
-                    <TableRow key={customer.id} className="border-border">
-                      <TableCell className="font-medium text-foreground">{customer.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{customer.phone}</TableCell>
-                      <TableCell className="text-muted-foreground">{customer.email || "-"}</TableCell>
-                      <TableCell className="text-muted-foreground">{formatDate(customer.created_at)}</TableCell>
-                    </TableRow>
+              <>
+                <div className="sc-label hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.2fr)_110px] gap-4 border-b border-sc-line px-3 pb-3 text-sc-stone md:grid">
+                  <span>Nome</span>
+                  <span>Telefone</span>
+                  <span>E-mail</span>
+                  <span className="text-right">Cadastro</span>
+                </div>
+                <ul className="divide-y divide-sc-line">
+                  {list.map((customer) => (
+                    <li
+                      key={customer.id}
+                      className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-3 py-3.5 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.2fr)_110px] md:gap-4"
+                    >
+                      <span className="row-span-2 grid size-10 place-items-center rounded-full bg-sc-raised font-display text-lg font-black text-sc-bone md:hidden">
+                        {customer.name.charAt(0).toUpperCase()}
+                      </span>
+                      <span className="flex min-w-0 items-center gap-3">
+                        <span className="hidden size-9 shrink-0 place-items-center rounded-full bg-sc-raised font-display text-base font-black text-sc-bone md:grid">
+                          {customer.name.charAt(0).toUpperCase()}
+                        </span>
+                        <span className="truncate font-medium text-sc-bone">{customer.name}</span>
+                      </span>
+                      <span className="sc-label row-span-2 self-center text-right text-sc-smoke md:hidden">{formatDate(customer.created_at)}</span>
+                      <span className="truncate text-sm tabular-nums text-sc-stone">
+                        {customer.phone}
+                        <span className="md:hidden">{customer.email ? ` · ${customer.email}` : ""}</span>
+                      </span>
+                      <span className="hidden truncate text-sm text-sc-stone md:block">{customer.email || "—"}</span>
+                      <span className="sc-label hidden text-right text-sc-smoke md:block">{formatDate(customer.created_at)}</span>
+                    </li>
                   ))}
-                </TableBody>
-              </Table>
+                </ul>
+              </>
             )}
           </CardContent>
         </Card>

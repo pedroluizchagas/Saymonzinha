@@ -30,9 +30,9 @@ export default async function PDVPage() {
 
   return (
     <div>
-      <AdminHeader user={profile as Profile | null} title="Ponto de Venda" subtitle="Realize vendas rapidamente" />
+      <AdminHeader user={profile as Profile | null} title="PDV" subtitle="Frente de caixa · venda no balcão" />
 
-      <div className="p-6">
+      <div className="px-4 pb-6 md:px-8">
         <PDVInterface
           paymentMethods={(paymentMethods as PaymentMethod[]) || []}
           products={(products as Product[]) || []}

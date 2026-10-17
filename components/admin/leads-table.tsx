@@ -5,15 +5,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,23 +25,13 @@ interface LeadsTableProps {
   leads: Lead[]
 }
 
-const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string }> = {
-  pending: {
-    label: 'Pendente',
-    color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-  },
-  contacted: {
-    label: 'Contatado',
-    color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  },
-  converted: {
-    label: 'Convertido',
-    color: 'bg-green-500/10 text-green-500 border-green-500/20',
-  },
-  rejected: {
-    label: 'Rejeitado',
-    color: 'bg-red-500/10 text-red-500 border-red-500/20',
-  },
+// A situação de cada pedido pela claridade, não pela cor: o que espera contato em vermelho, o que
+// virou OS em osso, o que foi contatado em pedra e o rejeitado apagado.
+const STATUS_CONFIG: Record<LeadStatus, { label: string; dot: string; text: string }> = {
+  pending: { label: 'Aguardando contato', dot: 'bg-sc-red', text: 'text-sc-red' },
+  contacted: { label: 'Contatado', dot: 'bg-sc-stone', text: 'text-sc-stone' },
+  converted: { label: 'Virou OS', dot: 'bg-sc-bone', text: 'text-sc-bone' },
+  rejected: { label: 'Rejeitado', dot: 'bg-sc-smoke', text: 'text-sc-smoke line-through' },
 }
 
 export function LeadsTable({ leads: initialLeads }: LeadsTableProps) {
@@ -73,10 +54,10 @@ export function LeadsTable({ leads: initialLeads }: LeadsTableProps) {
   }
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
+    return new Date(date).toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     })
@@ -103,162 +84,98 @@ export function LeadsTable({ leads: initialLeads }: LeadsTableProps) {
   const pendingCount = leads.filter((l) => l.status === 'pending').length
 
   return (
-    <Card className="bg-card border-border">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle className="text-lg text-foreground">
-            Leads Recebidos
-          </CardTitle>
-          {pendingCount > 0 && (
-            <p className="text-sm text-muted-foreground mt-1">
-              {pendingCount} {pendingCount === 1 ? 'novo lead' : 'novos leads'}{' '}
-              aguardando contato
-            </p>
-          )}
-        </div>
+    <Card>
+      <CardHeader>
+        <p className="sc-label text-sc-stone">Pelo site</p>
+        <CardTitle>{leads.length === 1 ? '1 pedido recebido' : `${leads.length} pedidos recebidos`}</CardTitle>
+        {pendingCount > 0 && (
+          <p className="flex items-center gap-1.5 text-sm text-sc-red">
+            <span className="size-1.5 rounded-full bg-sc-red" aria-hidden="true" />
+            {pendingCount === 1 ? '1 esperando contato' : `${pendingCount} esperando contato`}
+          </p>
+        )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-2 sm:px-3">
         {leads.length === 0 ? (
-          <div className="text-center py-12">
-            <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">Nenhum pedido de orçamento recebido ainda</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Os pedidos de orçamento do site aparecerão aqui
-            </p>
+          <div className="px-3 py-12 text-center">
+            <Clock className="mx-auto mb-4 size-10 text-sc-smoke" aria-hidden="true" />
+            <p className="text-sc-bone">Nenhum pedido de orçamento recebido ainda</p>
+            <p className="mt-1 text-sm text-sc-stone">Os pedidos que chegam pelo site aparecem aqui.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-border hover:bg-transparent">
-                  <TableHead className="text-muted-foreground">
-                    Cliente
-                  </TableHead>
-                  <TableHead className="text-muted-foreground">
-                    Aparelho
-                  </TableHead>
-                  <TableHead className="text-muted-foreground">
-                    Problema
-                  </TableHead>
-                  <TableHead className="text-muted-foreground">
-                    Entrega
-                  </TableHead>
-                  <TableHead className="text-muted-foreground">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-muted-foreground">Data</TableHead>
-                  <TableHead className="text-muted-foreground w-[100px]">
-                    Ações
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leads.map((lead) => (
-                  <TableRow key={lead.id} className="border-border">
-                    <TableCell>
-                      <div>
-                        <p className="font-medium text-foreground">
-                          {lead.customer_name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatPhone(lead.customer_phone)}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-foreground">{lead.device_brand}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {lead.device_model}
-                      </p>
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-foreground">{lead.problem_type}</p>
-                      {lead.problem_description && (
-                        <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                          {lead.problem_description}
-                        </p>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="bg-secondary/50">
-                        {lead.delivery_type === 'store'
-                          ? 'Na loja'
-                          : 'Busca e entrega'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={STATUS_CONFIG[lead.status].color}>
-                        {STATUS_CONFIG[lead.status].label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {formatDate(lead.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() =>
-                            openWhatsApp(
-                              lead.customer_phone,
-                              lead.customer_name,
-                            )
-                          }
-                        >
-                          <MessageCircle className="h-4 w-4 text-green-500" />
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="bg-card border-border"
-                          >
-                            <DropdownMenuItem
-                              onClick={() =>
-                                updateLeadStatus(lead.id, 'contacted')
-                              }
-                              className="cursor-pointer"
-                            >
-                              <Phone className="h-4 w-4 mr-2" />
-                              Marcar como Contatado
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                router.push(`/admin/orders/new?lead=${lead.id}`)
-                              }
-                              className="cursor-pointer"
-                            >
-                              <ArrowUpRight className="h-4 w-4 mr-2" />
-                              Converter em OS
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                updateLeadStatus(lead.id, 'rejected')
-                              }
-                              className="cursor-pointer text-destructive"
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Rejeitar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <>
+            {/* cabeçalho das colunas, só no computador */}
+            <div className="sc-label hidden grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.4fr)_120px_96px] gap-4 border-b border-sc-line px-3 pb-3 text-sc-stone lg:grid">
+              <span>Situação</span>
+              <span>Cliente</span>
+              <span>Aparelho</span>
+              <span>Problema</span>
+              <span>Data</span>
+              <span className="text-right">Ações</span>
+            </div>
+            <ul className="divide-y divide-sc-line">
+              {leads.map((lead) => {
+                const status = STATUS_CONFIG[lead.status]
+                return (
+                  <li
+                    key={lead.id}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 rounded-[14px] px-3 py-4 transition-colors hover:bg-white/[0.03] lg:grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.4fr)_120px_96px] lg:items-center lg:gap-y-0"
+                  >
+                    <span className={`sc-label flex items-center gap-1.5 ${status.text}`}>
+                      <span className={`size-1.5 shrink-0 rounded-full ${status.dot}`} aria-hidden="true" />
+                      {status.label}
+                    </span>
+                    <span className="sc-label text-right text-sc-smoke lg:hidden">{formatDate(lead.created_at)}</span>
+                    <div className="col-span-2 min-w-0 lg:col-span-1">
+                      <p className="truncate font-semibold text-sc-bone">{lead.customer_name}</p>
+                      <p className="text-sm tabular-nums text-sc-stone">{formatPhone(lead.customer_phone)}</p>
+                    </div>
+                    <p className="sc-label col-span-2 truncate text-sc-stone lg:col-span-1 lg:text-sc-bone">
+                      {lead.device_brand} {lead.device_model}
+                    </p>
+                    <div className="col-span-2 min-w-0 lg:col-span-1">
+                      <p className="text-sm text-sc-bone">{lead.problem_type}</p>
+                      {lead.problem_description && <p className="truncate text-[13px] text-sc-stone">{lead.problem_description}</p>}
+                      <p className="sc-label mt-1 text-sc-smoke">{lead.delivery_type === 'store' ? 'Na loja' : 'Busca e entrega'}</p>
+                    </div>
+                    <span className="sc-label hidden text-sc-stone lg:block">{formatDate(lead.created_at)}</span>
+                    <div className="col-span-2 flex items-center gap-1.5 pt-1 lg:col-span-1 lg:justify-end lg:pt-0">
+                      <Button
+                        size="sm"
+                        className="bg-sc-green text-sc-ink lg:size-8 lg:p-0"
+                        onClick={() => openWhatsApp(lead.customer_phone, lead.customer_name)}
+                        aria-label={`Chamar ${lead.customer_name} no WhatsApp`}
+                      >
+                        <MessageCircle className="size-4" />
+                        <span className="lg:hidden">WhatsApp</span>
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon-sm" aria-label={`Mais ações para ${lead.customer_name}`}>
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => updateLeadStatus(lead.id, 'contacted')} className="cursor-pointer">
+                            <Phone className="size-4" />
+                            Marcar como contatado
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => router.push(`/admin/orders/new?lead=${lead.id}`)} className="cursor-pointer">
+                            <ArrowUpRight className="size-4" />
+                            Abrir uma OS
+                          </DropdownMenuItem>
+                          <DropdownMenuItem variant="destructive" onClick={() => updateLeadStatus(lead.id, 'rejected')} className="cursor-pointer">
+                            <XCircle className="size-4" />
+                            Rejeitar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          </>
         )}
       </CardContent>
     </Card>

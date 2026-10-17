@@ -1,5 +1,10 @@
 "use client"
 
+// Convite para instalar o painel como app (PWA), no celular: o botão nativo onde o navegador
+// oferece (Chrome, Edge, Samsung Internet) e os passos onde não oferece (Safari, Firefox). Some por
+// 7 dias quando a pessoa dispensa.
+
+import type React from "react"
 import { useEffect, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { X, Download, Share, Plus, MoreVertical, ChevronUp } from "lucide-react"
@@ -135,210 +140,82 @@ export function InstallPrompt() {
   }, [])
 
   if (!visible) return null
+  // Desktop ou desconhecido: nada a mostrar
+  if (platform !== "ios" && platform !== "android" && !deferredPrompt) return null
 
-  // ================================================================ //
-  // iOS: instrucoes passo-a-passo
-  // ================================================================ //
-  if (platform === "ios") {
-    return (
-      <div className="fixed inset-x-0 bottom-0 z-[9999] pwa-safe-bottom animate-in slide-in-from-bottom duration-300">
-        <div className="mx-auto max-w-lg px-4 pb-4">
-          <div className="relative rounded-2xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur-xl">
-            {/* Botao fechar */}
-            <button
-              onClick={handleDismiss}
-              aria-label="Fechar"
-              className="absolute right-3 top-3 rounded-full p-1 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
-            >
-              <X className="size-4" />
-            </button>
+  const steps =
+    platform === "ios"
+      ? [
+          { icon: <Share className="size-4" />, text: "Toque em Compartilhar, na barra do Safari." },
+          { icon: <Plus className="size-4" />, text: "Escolha Adicionar à Tela de Início." },
+          { icon: <ChevronUp className="size-4" />, text: "Confirme em Adicionar." },
+        ]
+      : [
+          { icon: <MoreVertical className="size-4" />, text: "Toque no menu do navegador, nos três pontos." },
+          { icon: <Plus className="size-4" />, text: "Escolha Adicionar à tela inicial ou Instalar app." },
+          { icon: <ChevronUp className="size-4" />, text: "Confirme em Adicionar." },
+        ]
 
-            <div className="flex items-start gap-3 pr-6">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff4d4f] to-[#b00000]">
-                <Download className="size-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white">
-                  Instale o Saymon Cell
-                </p>
-                <p className="mt-0.5 text-xs text-neutral-400">
-                  Acesse o painel direto da tela inicial do seu iPhone
-                </p>
-              </div>
-            </div>
-
-            {!showInstructions ? (
-              <Button
-                onClick={() => setShowInstructions(true)}
-                className="mt-3 w-full rounded-xl"
-                size="sm"
-              >
-                Como instalar
-              </Button>
-            ) : (
-              <div className="mt-3 space-y-3">
-                <div className="rounded-xl bg-neutral-900 p-3 space-y-3">
-                  <Step
-                    number={1}
-                    icon={<Share className="size-4 text-[#ff0200]" />}
-                    text='Toque no botao "Compartilhar" na barra do Safari'
-                  />
-                  <Step
-                    number={2}
-                    icon={<Plus className="size-4 text-[#ff0200]" />}
-                    text='Role e toque em "Adicionar a Tela de Inicio"'
-                  />
-                  <Step
-                    number={3}
-                    icon={<ChevronUp className="size-4 text-[#ff0200]" />}
-                    text='Confirme tocando em "Adicionar"'
-                  />
-                </div>
-                <Button
-                  onClick={handleDismiss}
-                  variant="ghost"
-                  className="w-full rounded-xl text-neutral-400 hover:text-white"
-                  size="sm"
-                >
-                  Entendi, fechar
-                </Button>
-              </div>
-            )}
-          </div>
+  // A notificação da tela de bloqueio da home: desce logo abaixo da barra do topo, sem cobrir a
+  // barra de abas, com o ícone do app (o glifo sobre o vermelho). No computador, no canto de baixo.
+  return (
+    <div
+      role="dialog"
+      aria-labelledby="pwa-install-title"
+      className="fixed inset-x-3 top-[calc(4rem+var(--sat)+8px)] z-[70] mx-auto max-w-[460px] animate-in fade-in-0 slide-in-from-top-4 duration-300 lg:inset-x-auto lg:top-auto lg:right-6 lg:bottom-6 lg:w-[380px] lg:slide-in-from-bottom-4"
+    >
+      <div className="rounded-[18px] bg-[rgba(244,243,240,0.96)] p-2.5 text-sc-ink shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06),0_10px_30px_-12px_rgba(0,0,0,0.25)] backdrop-blur-[20px]">
+        <div className="grid grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3">
+          <span className="grid size-[42px] place-items-center rounded-[10px] bg-sc-red">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/home/glyph.png" alt="" className="h-[64%] w-auto" />
+          </span>
+          <span className="min-w-0">
+            <span id="pwa-install-title" className="block text-[13px] font-semibold leading-[1.3]">
+              Instale o painel no celular
+            </span>
+            <span className="block font-mono text-[11px] font-medium uppercase leading-[1.25] tracking-[0.06em] text-[#4d4a46]">
+              Saymon Cell · abre da tela de início
+            </span>
+          </span>
+          <button
+            onClick={handleDismiss}
+            aria-label="Agora não"
+            className="grid size-9 place-items-center rounded-full text-[#4d4a46] transition-colors hover:bg-black/[0.06] hover:text-sc-ink"
+          >
+            <X className="size-4" />
+          </button>
         </div>
-      </div>
-    )
-  }
 
-  // ================================================================ //
-  // Android com prompt nativo
-  // ================================================================ //
-  if (deferredPrompt) {
-    return (
-      <div className="fixed inset-x-0 bottom-0 z-[9999] pwa-safe-bottom animate-in slide-in-from-bottom duration-300">
-        <div className="mx-auto max-w-lg px-4 pb-4">
-          <div className="relative rounded-2xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur-xl">
-            <button
-              onClick={handleDismiss}
-              aria-label="Fechar"
-              className="absolute right-3 top-3 rounded-full p-1 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
-            >
-              <X className="size-4" />
-            </button>
-
-            <div className="flex items-start gap-3 pr-6">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff4d4f] to-[#b00000]">
-                <Download className="size-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white">
-                  Instale o Saymon Cell
-                </p>
-                <p className="mt-0.5 text-xs text-neutral-400">
-                  Acesse rapido direto da tela inicial do seu celular
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-3 flex gap-2">
-              <Button
-                onClick={handleNativeInstall}
-                className="flex-1 rounded-xl"
-                size="sm"
-              >
-                <Download className="mr-1.5 size-4" />
-                Instalar app
-              </Button>
-              <Button
-                onClick={handleDismiss}
-                variant="ghost"
-                className="rounded-xl text-neutral-400 hover:text-white"
-                size="sm"
-              >
-                Agora nao
-              </Button>
-            </div>
+        {deferredPrompt ? (
+          <div className="mt-2.5 flex gap-2">
+            <Button onClick={handleNativeInstall} className="flex-1" size="sm">
+              <Download className="size-4" />
+              Instalar o app
+            </Button>
+            <Button onClick={handleDismiss} variant="ghost" size="sm" className="text-[#4d4a46] hover:bg-black/[0.06] hover:text-sc-ink">
+              Agora não
+            </Button>
           </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ================================================================ //
-  // Android sem prompt nativo (Samsung Internet, Firefox, etc.)
-  // ================================================================ //
-  if (platform === "android") {
-    return (
-      <div className="fixed inset-x-0 bottom-0 z-[9999] pwa-safe-bottom animate-in slide-in-from-bottom duration-300">
-        <div className="mx-auto max-w-lg px-4 pb-4">
-          <div className="relative rounded-2xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur-xl">
-            <button
-              onClick={handleDismiss}
-              aria-label="Fechar"
-              className="absolute right-3 top-3 rounded-full p-1 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
-            >
-              <X className="size-4" />
-            </button>
-
-            <div className="flex items-start gap-3 pr-6">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff4d4f] to-[#b00000]">
-                <Download className="size-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white">
-                  Instale o Saymon Cell
-                </p>
-                <p className="mt-0.5 text-xs text-neutral-400">
-                  Acesse rapido direto da tela inicial
-                </p>
-              </div>
-            </div>
-
-            {!showInstructions ? (
-              <Button
-                onClick={() => setShowInstructions(true)}
-                className="mt-3 w-full rounded-xl"
-                size="sm"
-              >
-                Como instalar
-              </Button>
-            ) : (
-              <div className="mt-3 space-y-3">
-                <div className="rounded-xl bg-neutral-900 p-3 space-y-3">
-                  <Step
-                    number={1}
-                    icon={<MoreVertical className="size-4 text-[#ff0200]" />}
-                    text="Toque no menu do navegador (tres pontos)"
-                  />
-                  <Step
-                    number={2}
-                    icon={<Plus className="size-4 text-[#ff0200]" />}
-                    text='Selecione "Adicionar a tela inicial" ou "Instalar app"'
-                  />
-                  <Step
-                    number={3}
-                    icon={<ChevronUp className="size-4 text-[#ff0200]" />}
-                    text='Confirme tocando em "Adicionar"'
-                  />
-                </div>
-                <Button
-                  onClick={handleDismiss}
-                  variant="ghost"
-                  className="w-full rounded-xl text-neutral-400 hover:text-white"
-                  size="sm"
-                >
-                  Entendi, fechar
-                </Button>
-              </div>
-            )}
+        ) : !showInstructions ? (
+          <Button onClick={() => setShowInstructions(true)} className="mt-2.5 w-full" size="sm">
+            Como instalar
+          </Button>
+        ) : (
+          <div className="mt-2.5 grid gap-2">
+            <ol className="grid gap-1 rounded-[14px] bg-black/[0.05] p-2">
+              {steps.map((step, i) => (
+                <Step key={i} number={i + 1} icon={step.icon} text={step.text} />
+              ))}
+            </ol>
+            <Button onClick={handleDismiss} variant="ghost" size="sm" className="text-[#4d4a46] hover:bg-black/[0.06] hover:text-sc-ink">
+              Entendi
+            </Button>
           </div>
-        </div>
+        )}
       </div>
-    )
-  }
-
-  // Desktop ou desconhecido - nao mostra nada
-  return null
+    </div>
+  )
 }
 
 // ------------------------------------------------------------------ //
@@ -355,14 +232,12 @@ function Step({
   text: string
 }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-neutral-800 text-xs font-bold text-neutral-300">
-        {number}
-      </div>
-      <div className="flex items-center gap-2">
-        {icon}
-        <span className="text-xs text-neutral-300">{text}</span>
-      </div>
-    </div>
+    <li className="flex items-center gap-3 rounded-[10px] px-2 py-1.5">
+      <span className="font-mono text-[11px] font-medium tracking-[0.06em] text-sc-red-strong">
+        {String(number).padStart(2, "0")}
+      </span>
+      <span className="text-sc-red-strong">{icon}</span>
+      <span className="text-[13px] leading-[1.35]">{text}</span>
+    </li>
   )
 }

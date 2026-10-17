@@ -7,12 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
-import { Plus, Package, Loader2, AlertTriangle, Store, Eye, EyeOff, Pencil } from "lucide-react"
+import { Plus, Package, Loader2, Pencil } from "lucide-react"
+import { formatPrice } from "@/lib/catalog"
 import type { Product, ProductCategory } from "@/types/database"
 import { uploadProductPhoto } from "@/lib/product-photo"
 import Image from "next/image"
@@ -167,52 +166,31 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
 
   return (
     <div className="space-y-6">
-      {/* Alertas e Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Info da Loja */}
-        <Card className="bg-card border-primary/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-foreground flex items-center gap-2">
-              <Store className="w-4 h-4 text-primary" />
-              Produtos na Loja Virtual
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-primary">{storeProducts.length}</p>
-            <p className="text-xs text-muted-foreground">produtos visíveis na loja pública</p>
-          </CardContent>
-        </Card>
+      {/* os números do estoque, como as estatísticas da home */}
+      <section aria-label="Estoque" className="grid gap-px overflow-hidden rounded-[20px] border border-sc-line bg-sc-line sm:grid-cols-3">
+        <StockStat value={storeProducts.length} label="Na loja virtual" items={[]} note="Produtos que aparecem para os clientes" />
+        <StockStat
+          value={lowStockProducts.length}
+          label="Estoque baixo"
+          items={lowStockProducts.slice(0, 3).map((p) => `${p.name} · ${p.stock_quantity}`)}
+          note="No mínimo ou abaixo"
+          alert={lowStockProducts.length > 0}
+        />
+        <StockStat
+          value={outOfStockProducts.length}
+          label="Sem estoque"
+          items={outOfStockProducts.slice(0, 3).map((p) => p.name)}
+          note="Esgotados"
+          alert={outOfStockProducts.length > 0}
+        />
+      </section>
 
-        {/* Alertas de Estoque */}
-        {(lowStockProducts.length > 0 || outOfStockProducts.length > 0) && (
-          <Card className="bg-card border-yellow-500/30">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-foreground flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-yellow-500" />
-                Alertas de Estoque
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {outOfStockProducts.slice(0, 3).map((p) => (
-                  <Badge key={p.id} className="bg-red-500/10 text-red-500 border-red-500/20">
-                    {p.name} - Sem estoque
-                  </Badge>
-                ))}
-                {lowStockProducts.slice(0, 3).map((p) => (
-                  <Badge key={p.id} className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
-                    {p.name} - Baixo ({p.stock_quantity})
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg text-foreground">Lista de Produtos</CardTitle>
+      <Card>
+        <CardHeader className="grid-cols-[1fr_auto] items-end">
+          <div className="grid gap-2">
+            <p className="sc-label text-sc-stone">Cadastrados</p>
+            <CardTitle>{products.length === 1 ? "1 produto" : `${products.length} produtos`}</CardTitle>
+          </div>
           <Dialog
             open={showNewDialog}
             onOpenChange={(open) => {
@@ -222,33 +200,31 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
           >
             <DialogTrigger asChild>
               <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Novo Produto
+                <Plus />
+                Novo produto
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle className="text-foreground">
-                  {editingProduct ? "Editar Produto" : "Novo Produto"}
-                </DialogTitle>
+                <DialogTitle>{editingProduct ? "Editar produto" : "Novo produto"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-foreground">Nome *</Label>
+                  <Label>Nome *</Label>
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="bg-background border-input"
+                   
                     placeholder="Ex: Capinha iPhone 14"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-foreground">Descrição</Label>
+                  <Label>Descrição</Label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="bg-background border-input"
+                   
                     placeholder="Descrição do produto para a loja..."
                     rows={2}
                   />
@@ -256,17 +232,17 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-foreground">Código de Barras</Label>
+                    <Label>Código de Barras</Label>
                     <Input
                       value={barcode}
                       onChange={(e) => setBarcode(e.target.value)}
-                      className="bg-background border-input"
+                     
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-foreground">Categoria *</Label>
+                    <Label>Categoria *</Label>
                     <Select value={category} onValueChange={(v) => setCategory(v as ProductCategory)}>
-                      <SelectTrigger className="bg-background border-input">
+                      <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -281,24 +257,24 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-foreground">Preço de Compra</Label>
+                    <Label>Preço de Compra</Label>
                     <Input
                       type="number"
                       step="0.01"
                       value={purchasePrice}
                       onChange={(e) => setPurchasePrice(e.target.value)}
-                      className="bg-background border-input"
+                     
                       placeholder="0.00"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-foreground">Preço de Venda *</Label>
+                    <Label>Preço de Venda *</Label>
                     <Input
                       type="number"
                       step="0.01"
                       value={salePrice}
                       onChange={(e) => setSalePrice(e.target.value)}
-                      className="bg-background border-input"
+                     
                       placeholder="0.00"
                     />
                   </div>
@@ -306,29 +282,29 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-foreground">Quantidade em Estoque</Label>
+                    <Label>Quantidade em Estoque</Label>
                     <Input
                       type="number"
                       value={stockQuantity}
                       onChange={(e) => setStockQuantity(e.target.value)}
-                      className="bg-background border-input"
+                     
                       placeholder="0"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-foreground">Estoque Mínimo</Label>
+                    <Label>Estoque Mínimo</Label>
                     <Input
                       type="number"
                       value={minStock}
                       onChange={(e) => setMinStock(e.target.value)}
-                      className="bg-background border-input"
+                     
                       placeholder="0"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-foreground">Foto</Label>
+                  <Label>Foto</Label>
                   <div className="flex items-center gap-4">
                     <div className="w-24 h-24 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center shrink-0">
                       {photoPreview || imageUrl ? (
@@ -407,102 +383,114 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
             </DialogContent>
           </Dialog>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-2 sm:px-3">
           {products.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Nenhum produto cadastrado</p>
+            <div className="py-12 text-center">
+              <Package className="mx-auto mb-4 size-10 text-sc-smoke" aria-hidden="true" />
+              <p className="text-sc-stone">Nenhum produto cadastrado</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border hover:bg-transparent">
-                    <TableHead className="text-muted-foreground w-12"></TableHead>
-                    <TableHead className="text-muted-foreground">Produto</TableHead>
-                    <TableHead className="text-muted-foreground">Categoria</TableHead>
-                    <TableHead className="text-muted-foreground text-right">Venda</TableHead>
-                    <TableHead className="text-muted-foreground text-center">Estoque</TableHead>
-                    <TableHead className="text-muted-foreground text-center">Loja</TableHead>
-                    <TableHead className="text-muted-foreground text-center">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {products.map((product) => (
-                    <TableRow key={product.id} className="border-border">
-                      <TableCell>
-                        <div className="w-10 h-10 rounded-md bg-muted overflow-hidden">
-                          {product.image_url ? (
-                            <Image
-                              src={product.image_url || "/placeholder.svg"}
-                              alt={product.name}
-                              width={40}
-                              height={40}
-                              className="object-cover w-full h-full"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Package className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-foreground">{product.name}</p>
-                          {product.barcode && <p className="text-xs text-muted-foreground">{product.barcode}</p>}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-secondary/50">
+            <>
+              <div className="sc-label hidden grid-cols-[48px_minmax(0,1fr)_110px_110px_90px_96px_44px] items-center gap-4 border-b border-sc-line px-3 pb-3 text-sc-stone md:grid">
+                <span />
+                <span>Produto</span>
+                <span>Categoria</span>
+                <span className="text-right">Venda</span>
+                <span className="text-right">Estoque</span>
+                <span className="text-center">Na loja</span>
+                <span />
+              </div>
+              <ul className="divide-y divide-sc-line">
+                {products.map((product) => {
+                  const out = product.stock_quantity === 0
+                  const low = !out && product.stock_quantity <= product.min_stock
+                  return (
+                    <li
+                      key={product.id}
+                      className="grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-3 py-3 md:grid-cols-[48px_minmax(0,1fr)_110px_110px_90px_96px_44px] md:gap-4"
+                    >
+                      <span
+                        className={
+                          product.image_url
+                            ? "relative isolate size-12 overflow-hidden rounded-[10px] bg-sc-bone"
+                            : "grid size-12 place-items-center rounded-[10px] bg-sc-raised"
+                        }
+                      >
+                        {product.image_url ? (
+                          <Image src={product.image_url} alt="" fill sizes="48px" className="object-contain mix-blend-multiply" />
+                        ) : (
+                          <Package className="size-5 text-sc-smoke" aria-hidden="true" />
+                        )}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium text-sc-bone">{product.name}</span>
+                        <span className="sc-label mt-1 block truncate text-sc-smoke">
                           {CATEGORY_LABELS[product.category]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-medium text-primary">
-                        R$ {product.sale_price.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          className={
-                            product.stock_quantity === 0
-                              ? "bg-red-500/10 text-red-500 border-red-500/20"
-                              : product.stock_quantity <= product.min_stock
-                                ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-                                : "bg-green-500/10 text-green-500 border-green-500/20"
-                          }
-                        >
-                          {product.stock_quantity}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className={product.show_in_store ? "text-primary" : "text-muted-foreground"}
-                          onClick={() => toggleStoreVisibility(product)}
-                          title={product.show_in_store ? "Remover da loja" : "Adicionar à loja"}
-                        >
-                          {product.show_in_store ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                        </Button>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditDialog(product)}
-                          title="Editar produto"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                          {product.barcode ? ` · ${product.barcode}` : ""}
+                        </span>
+                      </span>
+                      <span className="text-right md:hidden">
+                        <span className="block text-sm font-semibold tabular-nums text-sc-bone">{formatPrice(product.sale_price)}</span>
+                        <span className={out || low ? "sc-label mt-1 block text-sc-red" : "sc-label mt-1 block text-sc-stone"}>
+                          {out ? "Sem estoque" : `${product.stock_quantity} em estoque`}
+                        </span>
+                      </span>
+                      <span className="sc-label hidden text-sc-stone md:block">{CATEGORY_LABELS[product.category]}</span>
+                      <span className="hidden text-right text-sm font-semibold tabular-nums text-sc-bone md:block">
+                        {formatPrice(product.sale_price)}
+                      </span>
+                      <span className={out || low ? "hidden items-center justify-end gap-1.5 text-sm font-semibold tabular-nums text-sc-red md:flex" : "hidden items-center justify-end gap-1.5 text-sm tabular-nums text-sc-bone md:flex"}>
+                        {(out || low) && <span className="size-1.5 rounded-full bg-sc-red" aria-hidden="true" />}
+                        {product.stock_quantity}
+                      </span>
+                      <span className="col-span-2 flex items-center gap-2.5 md:col-span-1 md:justify-center">
+                        <Switch
+                          checked={product.show_in_store}
+                          onCheckedChange={() => toggleStoreVisibility(product)}
+                          aria-label={product.show_in_store ? `Tirar ${product.name} da loja virtual` : `Pôr ${product.name} na loja virtual`}
+                        />
+                        <span className="sc-label text-sc-stone md:hidden">{product.show_in_store ? "Na loja virtual" : "Fora da loja virtual"}</span>
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="justify-self-end"
+                        onClick={() => openEditDialog(product)}
+                        aria-label={`Editar ${product.name}`}
+                        title="Editar produto"
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </>
           )}
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+function StockStat({ value, label, note, items, alert = false }: { value: number; label: string; note: string; items: string[]; alert?: boolean }) {
+  return (
+    <div className="flex min-h-[150px] flex-col justify-end gap-2.5 bg-sc-carbon p-5 lg:p-6">
+      <span className={alert ? "font-display text-[clamp(48px,5vw,72px)] leading-[0.84] font-black tabular-nums text-sc-red" : "font-display text-[clamp(48px,5vw,72px)] leading-[0.84] font-black tabular-nums text-sc-bone"}>
+        {value}
+      </span>
+      <span className="sc-label text-sc-stone">{label}</span>
+      {items.length > 0 ? (
+        <ul className="grid gap-0.5 text-[13px] text-sc-stone">
+          {items.map((item) => (
+            <li key={item} className="truncate">
+              {item}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <span className="text-[13px] text-sc-stone">{note}</span>
+      )}
     </div>
   )
 }

@@ -180,23 +180,20 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
       {/* Cliente */}
-      <Card className="bg-card border-border">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg text-foreground flex items-center gap-2">
-            <Search className="w-5 h-5" />
-            Cliente
-          </CardTitle>
+          <CardTitle>Cliente</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {!showNewCustomerForm ? (
             <>
               <div className="space-y-2">
-                <Label className="text-foreground">Buscar Cliente</Label>
+                <Label>Buscar Cliente</Label>
                 <Input
                   placeholder="Digite o nome ou telefone..."
                   value={customerSearch}
                   onChange={(e) => setCustomerSearch(e.target.value)}
-                  className="bg-background border-input"
+                 
                 />
               </div>
 
@@ -243,38 +240,38 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
                 className="w-full bg-transparent"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
-                Cadastrar Novo Cliente
+                Cadastrar cliente novo
               </Button>
             </>
           ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-foreground">Nome *</Label>
+                  <Label>Nome *</Label>
                   <Input
                     value={newCustomer.name}
                     onChange={(e) => setNewCustomer((prev) => ({ ...prev, name: e.target.value }))}
-                    className="bg-background border-input"
+                   
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-foreground">Telefone *</Label>
+                  <Label>Telefone *</Label>
                   <Input
                     value={newCustomer.phone}
                     onChange={(e) => setNewCustomer((prev) => ({ ...prev, phone: e.target.value }))}
-                    className="bg-background border-input"
+                   
                     required
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-foreground">Email</Label>
+                <Label>Email</Label>
                 <Input
                   type="email"
                   value={newCustomer.email}
                   onChange={(e) => setNewCustomer((prev) => ({ ...prev, email: e.target.value }))}
-                  className="bg-background border-input"
+                 
                 />
               </div>
               {!leadData && (
@@ -293,19 +290,16 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
       </Card>
 
       {/* Aparelho */}
-      <Card className="bg-card border-border">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg text-foreground flex items-center gap-2">
-            <Smartphone className="w-5 h-5" />
-            Dados do Aparelho
-          </CardTitle>
+          <CardTitle>Aparelho</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-foreground">Marca *</Label>
+              <Label>Marca *</Label>
               <Select value={deviceBrand} onValueChange={setDeviceBrand} required>
-                <SelectTrigger className="bg-background border-input">
+                <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
@@ -318,12 +312,12 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-foreground">Modelo *</Label>
+              <Label>Modelo *</Label>
               <Input
                 value={deviceModel}
                 onChange={(e) => setDeviceModel(e.target.value)}
                 placeholder="Ex: iPhone 14 Pro"
-                className="bg-background border-input"
+               
                 required
               />
             </div>
@@ -331,38 +325,38 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label className="text-foreground">Cor</Label>
+              <Label>Cor</Label>
               <Input
                 value={deviceColor}
                 onChange={(e) => setDeviceColor(e.target.value)}
                 placeholder="Ex: Preto"
-                className="bg-background border-input"
+               
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-foreground">IMEI</Label>
+              <Label>IMEI</Label>
               <Input
                 value={deviceImei}
                 onChange={(e) => setDeviceImei(e.target.value)}
                 placeholder="Opcional"
-                className="bg-background border-input"
+               
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-foreground">Senha</Label>
+              <Label>Senha</Label>
               <Input
                 value={devicePassword}
                 onChange={(e) => setDevicePassword(e.target.value)}
                 placeholder="PIN/Padrão"
-                className="bg-background border-input"
+               
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-foreground">Tipo de Problema</Label>
+            <Label>Tipo de Problema</Label>
             <Select value={problemTypeId} onValueChange={setProblemTypeId}>
-              <SelectTrigger className="bg-background border-input">
+              <SelectTrigger>
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
               <SelectContent>
@@ -376,13 +370,13 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-foreground">Descrição do Problema *</Label>
+            <Label>Descrição do Problema *</Label>
             <Textarea
               value={problemDescription}
               onChange={(e) => setProblemDescription(e.target.value)}
               placeholder="Descreva o defeito relatado pelo cliente..."
               rows={3}
-              className="bg-background border-input resize-none"
+              className="border-input resize-none"
               required
             />
           </div>
@@ -390,12 +384,9 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
       </Card>
 
       {/* Checklist de Entrada */}
-      <Card className="bg-card border-border">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg text-foreground flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-yellow-500" />
-            Checklist de Entrada
-          </CardTitle>
+          <CardTitle>Checklist de entrada</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
@@ -428,36 +419,36 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-foreground">Danos físicos visíveis</Label>
+            <Label>Danos físicos visíveis</Label>
             <Textarea
               value={(checklist.physical_damage as string) || ""}
               onChange={(e) => updateChecklist("physical_damage", e.target.value)}
               placeholder="Ex: Arranhões na traseira, vidro trincado..."
               rows={2}
-              className="bg-background border-input resize-none"
+              className="border-input resize-none"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-foreground">Acessórios recebidos</Label>
+            <Label>Acessórios recebidos</Label>
             <Input
               value={(checklist.accessories_received as string) || ""}
               onChange={(e) => updateChecklist("accessories_received", e.target.value)}
               placeholder="Ex: Carregador, capinha..."
-              className="bg-background border-input"
+             
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Entrega e Valor */}
-      <Card className="bg-card border-border">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg text-foreground">Entrega e Valor Estimado</CardTitle>
+          <CardTitle>Entrega e valor estimado</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-3">
-            <Label className="text-foreground">Tipo de Entrega</Label>
+            <Label>Como o aparelho volta</Label>
             <RadioGroup
               value={deliveryType}
               onValueChange={(value) => setDeliveryType(value as DeliveryType)}
@@ -472,7 +463,7 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="delivery" id="delivery" />
                 <Label htmlFor="delivery" className="cursor-pointer text-foreground">
-                  Delivery
+                  Busca e entrega
                 </Label>
               </div>
             </RadioGroup>
@@ -480,26 +471,26 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
 
           {deliveryType === "delivery" && (
             <div className="space-y-2">
-              <Label className="text-foreground">Endereço para entrega</Label>
+              <Label>Endereço para entrega</Label>
               <Textarea
                 value={deliveryAddress}
                 onChange={(e) => setDeliveryAddress(e.target.value)}
                 placeholder="Endereço completo..."
                 rows={2}
-                className="bg-background border-input resize-none"
+                className="border-input resize-none"
               />
             </div>
           )}
 
           <div className="space-y-2 max-w-xs">
-            <Label className="text-foreground">Valor Estimado (R$)</Label>
+            <Label>Valor estimado (R$)</Label>
             <Input
               type="number"
               step="0.01"
               value={estimatedPrice}
               onChange={(e) => setEstimatedPrice(e.target.value)}
               placeholder="0,00"
-              className="bg-background border-input"
+             
             />
           </div>
         </CardContent>
@@ -522,7 +513,7 @@ export function NewOrderForm({ problemTypes, leadData }: NewOrderFormProps) {
               Criando...
             </>
           ) : (
-            "Criar Ordem de Serviço"
+            "Abrir a OS"
           )}
         </Button>
       </div>

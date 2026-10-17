@@ -37,9 +37,9 @@ export default async function FinancialPage() {
 
   return (
     <div>
-      <AdminHeader user={profile as Profile | null} title="Financeiro" subtitle="Controle seu fluxo de caixa" />
+      <AdminHeader user={profile as Profile | null} title="Financeiro" subtitle="O dinheiro que entra e sai do caixa" />
 
-      <div className="p-6">
+      <div className="px-4 pb-6 md:px-8">
         <FinancialDashboard
           transactions={(transactions as CashTransaction[]) || []}
           pendingTransactions={(pendingTransactions as CashTransaction[]) || []}

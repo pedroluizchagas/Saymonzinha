@@ -19,11 +19,11 @@
      <div>
        <AdminHeader
          user={profile as Profile | null}
-         title="Formas de Pagamento"
-         subtitle="Adicione e gerencie os métodos de pagamento"
+         title="Formas de pagamento"
+         subtitle="Configurações · como a loja recebe e as taxas"
        />
  
-       <div className="p-6">
+       <div className="px-4 pb-6 md:px-8">
          <SettingsPaymentMethods />
        </div>
      </div>

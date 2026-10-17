@@ -1,356 +1,241 @@
 "use client"
 
+// Moldura do painel no sistema visual da home. No computador, o menu lateral com a marca, as seções e
+// quem está usando. No celular, a barra do topo com a marca, as notificações e o perfil, e a barra de
+// abas de vidro da Desdobra flutuando embaixo; "Mais" abre as outras seções numa folha.
+
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import {
-  LayoutDashboard,
+  ChevronRight,
   ClipboardList,
-  Users,
-  ShoppingCart,
-  DollarSign,
-  Package,
-  Settings,
-  LogOut,
-  Smartphone,
-  Menu,
   FileText,
   Home,
-  ChevronRight,
+  LayoutGrid,
+  LogOut,
+  Menu,
+  Package,
+  Settings,
+  ShoppingCart,
+  Users,
+  Wallet,
+  X,
 } from "lucide-react"
-import { useState, useEffect } from "react"
-import type { Profile } from "@/types/database"
+import { useEffect, useState } from "react"
 import { NotificationDropdown } from "@/components/admin/notification-dropdown"
+import { ROLE_LABELS, UserAvatar } from "@/components/admin/avatar"
+import { createClient } from "@/lib/supabase/client"
+import { cn } from "@/lib/utils"
+import type { Profile } from "@/types/database"
 
-interface SidebarProps {
-  user: Profile | null
-}
-
-const NAV_ITEMS = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/leads", label: "Pedidos de orçamento", icon: FileText },
-  { href: "/admin/orders", label: "Ordens de Serviço", icon: ClipboardList },
-  { href: "/admin/customers", label: "Clientes", icon: Users },
-  { href: "/admin/pdv", label: "PDV", icon: ShoppingCart },
-  { href: "/admin/products", label: "Produtos", icon: Package },
-  { href: "/admin/financial", label: "Financeiro", icon: DollarSign },
-  { href: "/admin/settings", label: "Configurações", icon: Settings },
+const SECTIONS = [
+  {
+    label: "Atendimento",
+    items: [
+      { href: "/admin", label: "Início", icon: LayoutGrid },
+      { href: "/admin/leads", label: "Pedidos de orçamento", icon: FileText },
+      { href: "/admin/orders", label: "Ordens de serviço", icon: ClipboardList },
+      { href: "/admin/customers", label: "Clientes", icon: Users },
+    ],
+  },
+  {
+    label: "Vendas",
+    items: [
+      { href: "/admin/pdv", label: "PDV", icon: ShoppingCart },
+      { href: "/admin/products", label: "Produtos", icon: Package },
+    ],
+  },
+  {
+    label: "Gestão",
+    items: [
+      { href: "/admin/financial", label: "Financeiro", icon: Wallet },
+      { href: "/admin/settings", label: "Configurações", icon: Settings },
+    ],
+  },
 ]
 
-export function AdminSidebar({ user }: SidebarProps) {
+/** As abas do celular; o resto fica em "Mais". */
+const TABS = [
+  { href: "/admin", label: "Início", icon: Home },
+  { href: "/admin/orders", label: "OS", icon: ClipboardList },
+  { href: "/admin/products", label: "Produtos", icon: Package },
+  { href: "/admin/financial", label: "Financeiro", icon: Wallet },
+]
+
+const MORE = [
+  { href: "/admin/leads", label: "Pedidos de orçamento", note: "Os pedidos que chegam pelo site", icon: FileText },
+  { href: "/admin/customers", label: "Clientes", note: "A base de contatos", icon: Users },
+  { href: "/admin/pdv", label: "PDV", note: "Frente de caixa", icon: ShoppingCart },
+  { href: "/admin/settings", label: "Configurações", note: "Perfil, equipe e cadastros", icon: Settings },
+]
+
+export function AdminSidebar({ user }: { user: Profile | null }) {
   const pathname = usePathname()
   const router = useRouter()
-  const [mobileOpen, setMobileOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
-  // Buscar URL do avatar do usuario
+  const isActive = (href: string) => (href === "/admin" ? pathname === "/admin" : pathname.startsWith(href))
+  const moreActive = MORE.some((item) => isActive(item.href))
+
+  // A folha fecha ao trocar de página e com Esc.
+  useEffect(() => setMoreOpen(false), [pathname])
   useEffect(() => {
-    const loadAvatar = async () => {
-      if (!user?.avatar_url) {
-        setAvatarUrl(null)
-        return
-      }
-      if (user.avatar_url.startsWith("http")) {
-        setAvatarUrl(user.avatar_url)
-        return
-      }
-      const supabase = createClient()
-      const { data } = await supabase.storage
-        .from("avatar_profire")
-        .createSignedUrl(user.avatar_url, 3600)
-      setAvatarUrl(data?.signedUrl || null)
-    }
-    loadAvatar()
-  }, [user?.avatar_url])
+    if (!moreOpen) return
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && setMoreOpen(false)
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [moreOpen])
 
   const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    await createClient().auth.signOut()
     router.push("/auth/login")
-  }
-
-  const isActive = (href: string) => {
-    if (href === "/admin") return pathname === "/admin"
-    return pathname.startsWith(href)
   }
 
   return (
     <>
-      {/* Mobile Header - identico ao design */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-card border-b border-border z-[60] pwa-safe-header">
-        <div className="h-16 flex items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <Smartphone className="w-6 h-6 text-primary" />
-            <span className="font-bold text-foreground">
-              SAYMON <span className="text-primary">CELL</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <NotificationDropdown />
-            <Link
-              href="/admin/settings"
-              className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
-            >
-              {avatarUrl ? (
-                <Image
-                  src={avatarUrl}
-                  alt={user?.full_name || "Usuario"}
-                  width={32}
-                  height={32}
-                  className="rounded-full object-cover w-8 h-8"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center">
-                  <span className="text-white font-semibold text-xs">
-                    {user?.full_name?.charAt(0) || "U"}
-                  </span>
-                </div>
-              )}
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Overlay */}
-      {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 bg-background/80 z-40" onClick={() => setMobileOpen(false)} />
-      )}
-
-      {/* Sidebar - flexbox para layout correto com safe areas */}
-      <aside
-        className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-card border-r border-border z-50 transition-transform duration-300",
-          "flex flex-col pwa-safe-header",
-          "lg:translate-x-0",
-          mobileOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        {/* Logo */}
-        <div className="h-16 shrink-0 flex items-center gap-2 px-6 border-b border-border">
-          <Smartphone className="w-7 h-7 text-primary" />
-          <span className="font-bold text-lg text-foreground">
-            SAYMON <span className="text-primary">CELL</span>
-          </span>
+      {/* Computador: menu lateral */}
+      <aside className="pwa-safe-header fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r border-sc-line bg-sc-stage lg:flex">
+        <div className="flex h-20 shrink-0 items-center gap-3 px-6">
+          <Link href="/admin" className="sc-logo" aria-label="Saymon Cell, início do painel">
+            Saymon <b>Cell</b>
+            <sup>®</sup>
+          </Link>
+          <span className="sc-label ml-auto text-sc-smoke">Painel</span>
         </div>
 
-        {/* Navigation - preenche espaco disponivel e rola se necessario */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                isActive(item.href)
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground",
-              )}
-            >
-              <item.icon className="w-5 h-5" />
-              {item.label}
-            </Link>
+        <nav className="flex-1 overflow-y-auto px-3 pb-4" aria-label="Painel">
+          {SECTIONS.map((section) => (
+            <div key={section.label} className="mt-6 first:mt-2">
+              <p className="sc-label px-3 pb-2 text-sc-smoke">{section.label}</p>
+              <ul className="space-y-0.5">
+                {section.items.map((item) => {
+                  const active = isActive(item.href)
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={cn(
+                          "group flex items-center gap-3 rounded-full px-3 py-2.5 text-[14px] font-medium transition-colors",
+                          active ? "bg-white/[0.07] text-sc-bone" : "text-sc-stone hover:bg-white/[0.04] hover:text-sc-bone",
+                        )}
+                      >
+                        <item.icon
+                          className={cn("size-[18px] shrink-0", active ? "text-sc-red" : "text-sc-smoke group-hover:text-sc-stone")}
+                          aria-hidden="true"
+                        />
+                        {item.label}
+                        {active && <span className="ml-auto size-1.5 rounded-full bg-sc-red" aria-hidden="true" />}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           ))}
         </nav>
 
-        {/* User Section - fixo no rodape com safe area bottom */}
-        <div className="shrink-0 p-4 border-t border-border bg-card safe-area-bottom">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary font-semibold">{user?.full_name?.charAt(0) || "U"}</span>
+        <div className="safe-area-bottom shrink-0 border-t border-sc-line p-4">
+          <div className="flex items-center gap-3">
+            <UserAvatar user={user} size={38} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-sc-bone">{user?.full_name || "Usuário"}</p>
+              <p className="sc-label truncate text-sc-stone">{ROLE_LABELS[user?.role ?? ""] ?? "Equipe"}</p>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{user?.full_name || "Usuario"}</p>
-              <p className="text-xs text-muted-foreground capitalize">{user?.role || "tecnico"}</p>
-            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="grid size-9 shrink-0 place-items-center rounded-full text-sc-stone transition-colors hover:bg-sc-raised hover:text-sc-red"
+              aria-label="Sair do painel"
+              title="Sair"
+            >
+              <LogOut className="size-4" aria-hidden="true" />
+            </button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
         </div>
       </aside>
 
-      {/* Overlay escuro do popup Mais - Mobile */}
-      {moreOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/60 z-[45]"
-          onClick={() => setMoreOpen(false)}
-        />
-      )}
-
-      {/* Bottom Sheet popup do Mais - Mobile */}
-      <div
-        className={cn(
-          "lg:hidden fixed left-0 right-0 z-50 duration-300 ease-out bottom-sheet-offset",
-          moreOpen
-            ? "translate-y-0 opacity-100 pointer-events-auto"
-            : "translate-y-full opacity-0 pointer-events-none",
-        )}
-      >
-        <div className="bg-card rounded-t-2xl border-t border-x border-border overflow-hidden">
-          {/* Pedidos de orçamento */}
-          <Link
-            href="/admin/leads"
-            onClick={() => setMoreOpen(false)}
-            className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/30 transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-blue-500/15 flex items-center justify-center flex-shrink-0">
-              <FileText className="w-5 h-5 text-blue-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">Pedidos de orçamento</p>
-              <p className="text-xs text-muted-foreground">Gerenciar oportunidades</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground/50 flex-shrink-0" />
+      {/* Celular: barra do topo */}
+      <header className="pwa-safe-header pn-topbar fixed inset-x-0 top-0 z-40 lg:hidden">
+        <div className="flex h-16 items-center gap-3 px-4">
+          <Link href="/admin" className="sc-logo" aria-label="Saymon Cell, início do painel">
+            Saymon <b>Cell</b>
+            <sup>®</sup>
           </Link>
-
-          <div className="h-px bg-border mx-5" />
-
-          {/* Clientes */}
-          <Link
-            href="/admin/customers"
-            onClick={() => setMoreOpen(false)}
-            className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/30 transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-purple-500/15 flex items-center justify-center flex-shrink-0">
-              <Users className="w-5 h-5 text-purple-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">Clientes</p>
-              <p className="text-xs text-muted-foreground">Base de contatos</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground/50 flex-shrink-0" />
-          </Link>
-
-          <div className="h-px bg-border mx-5" />
-
-          {/* PDV */}
-          <Link
-            href="/admin/pdv"
-            onClick={() => setMoreOpen(false)}
-            className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/30 transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center flex-shrink-0">
-              <ShoppingCart className="w-5 h-5 text-red-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">PDV</p>
-              <p className="text-xs text-muted-foreground">Frente de caixa</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground/50 flex-shrink-0" />
-          </Link>
+          <span className="sc-label text-sc-smoke max-[359px]:hidden">Painel</span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <NotificationDropdown />
+            <Link href="/admin/settings" className="rounded-full" aria-label="Meu perfil e configurações">
+              <UserAvatar user={user} size={34} />
+            </Link>
+          </div>
         </div>
+      </header>
+
+      {/* Celular: "Mais" numa folha acima da barra de abas */}
+      {moreOpen && (
+        <div className="fixed inset-0 z-[38] bg-[rgba(10,9,8,0.72)] backdrop-blur-[6px] lg:hidden" onClick={() => setMoreOpen(false)} />
+      )}
+      <div id="pn-more" className="pn-more lg:hidden" data-open={moreOpen ? "1" : "0"} aria-hidden={!moreOpen}>
+        <p className="sc-label px-3 pb-1 pt-2 text-sc-smoke">Mais seções</p>
+        <ul>
+          {MORE.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                tabIndex={moreOpen ? 0 : -1}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className="flex items-center gap-3 rounded-[14px] px-3 py-3 transition-colors hover:bg-white/[0.05] aria-[current=page]:bg-white/[0.07]"
+              >
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sc-raised">
+                  <item.icon className="size-[18px] text-sc-bone" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-medium text-sc-bone">{item.label}</span>
+                  <span className="block truncate text-[13px] text-sc-stone">{item.note}</span>
+                </span>
+                <ChevronRight className="size-4 text-sc-smoke" aria-hidden="true" />
+              </Link>
+            </li>
+          ))}
+          <li>
+            <button
+              type="button"
+              tabIndex={moreOpen ? 0 : -1}
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-[14px] px-3 py-3 text-left transition-colors hover:bg-white/[0.05]"
+            >
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sc-raised">
+                <LogOut className="size-[18px] text-sc-red" aria-hidden="true" />
+              </span>
+              <span className="text-[15px] font-medium text-sc-bone">Sair do painel</span>
+            </button>
+          </li>
+        </ul>
       </div>
 
-      {/* Bottom Navigation - Mobile */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-[60] pwa-safe-bottom">
-        <nav className="h-16 grid grid-cols-5">
-          {/* Inicio */}
-          <Link
-            href="/admin"
-            onClick={() => setMoreOpen(false)}
-            className={cn(
-              "flex flex-col items-center justify-center gap-1 text-xs",
-              isActive("/admin") ? "text-primary" : "text-muted-foreground",
-            )}
-          >
-            <Home className="w-5 h-5" />
-            <span>Inicio</span>
-            <span
-              className={cn(
-                "mt-1 h-0.5 w-6 rounded-full",
-                isActive("/admin") ? "bg-primary" : "bg-transparent",
-              )}
-            />
-          </Link>
-
-          {/* OS */}
-          <Link
-            href="/admin/orders"
-            onClick={() => setMoreOpen(false)}
-            className={cn(
-              "flex flex-col items-center justify-center gap-1 text-xs",
-              isActive("/admin/orders") ? "text-primary" : "text-muted-foreground",
-            )}
-          >
-            <ClipboardList className="w-5 h-5" />
-            <span>OS</span>
-            <span
-              className={cn(
-                "mt-1 h-0.5 w-6 rounded-full",
-                isActive("/admin/orders") ? "bg-primary" : "bg-transparent",
-              )}
-            />
-          </Link>
-
-          {/* Produtos */}
-          <Link
-            href="/admin/products"
-            onClick={() => setMoreOpen(false)}
-            className={cn(
-              "flex flex-col items-center justify-center gap-1 text-xs",
-              isActive("/admin/products") ? "text-primary" : "text-muted-foreground",
-            )}
-          >
-            <Package className="w-5 h-5" />
-            <span>Produtos</span>
-            <span
-              className={cn(
-                "mt-1 h-0.5 w-6 rounded-full",
-                isActive("/admin/products") ? "bg-primary" : "bg-transparent",
-              )}
-            />
-          </Link>
-
-          {/* Financeiro */}
-          <Link
-            href="/admin/financial"
-            onClick={() => setMoreOpen(false)}
-            className={cn(
-              "flex flex-col items-center justify-center gap-1 text-xs",
-              isActive("/admin/financial") ? "text-primary" : "text-muted-foreground",
-            )}
-          >
-            <DollarSign className="w-5 h-5" />
-            <span>Financeiro</span>
-            <span
-              className={cn(
-                "mt-1 h-0.5 w-6 rounded-full",
-                isActive("/admin/financial") ? "bg-primary" : "bg-transparent",
-              )}
-            />
-          </Link>
-
-          {/* Mais */}
+      {/* Celular: a barra de abas de vidro da Desdobra */}
+      <nav className="pn-tabbar-wrap lg:hidden" aria-label="Painel">
+        <div className="sc-tabbar pn-tabbar">
+          {TABS.map((tab) => (
+            <Link key={tab.href} href={tab.href} className="pn-tab" aria-current={isActive(tab.href) && !moreOpen ? "page" : undefined}>
+              <tab.icon aria-hidden="true" />
+              <span>{tab.label}</span>
+            </Link>
+          ))}
           <button
             type="button"
-            onClick={() => setMoreOpen(!moreOpen)}
-            className={cn(
-              "flex flex-col items-center justify-center gap-1 text-xs",
-              moreOpen ? "text-primary" : "text-muted-foreground",
-            )}
+            className="pn-tab"
+            aria-expanded={moreOpen}
+            aria-controls="pn-more"
+            aria-current={moreOpen || moreActive ? "true" : undefined}
+            onClick={() => setMoreOpen((open) => !open)}
           >
-            <Menu className="w-5 h-5" />
+            {moreOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
             <span>Mais</span>
-            <span
-              className={cn(
-                "mt-1 h-0.5 w-6 rounded-full",
-                moreOpen ? "bg-primary" : "bg-transparent",
-              )}
-            />
           </button>
-        </nav>
-      </div>
+        </div>
+      </nav>
     </>
   )
 }

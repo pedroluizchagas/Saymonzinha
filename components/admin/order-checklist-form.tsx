@@ -2,8 +2,7 @@
  
  import { useState } from "react"
  import { Button } from "@/components/ui/button"
- import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
- import { Label } from "@/components/ui/label"
+  import { Label } from "@/components/ui/label"
  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
  import { Textarea } from "@/components/ui/textarea"
  import type { EntryChecklist } from "@/types/database"
@@ -71,22 +70,19 @@
      }
    }
  
+   // Fica dentro do "Editar o checklist" da página da OS, sem cartão próprio.
    return (
-     <Card className="bg-card border-border">
-       <CardHeader>
-         <CardTitle className="text-lg text-foreground">Checklist de Entrada (Editar)</CardTitle>
-       </CardHeader>
-       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          <div className="space-y-2">
            <Label>Condição da Tela</Label>
            <Select
              value={screenCondition ?? "null"}
              onValueChange={(v) => setScreenCondition(v === "null" ? null : (v as "ok" | "cracked" | "broken"))}
            >
-             <SelectTrigger className="bg-background">
+             <SelectTrigger>
                <SelectValue placeholder="Selecione" />
              </SelectTrigger>
-             <SelectContent className="bg-popover border-border">
+             <SelectContent>
                <SelectItem value="null">Indefinido</SelectItem>
                <SelectItem value="ok">Sem dano</SelectItem>
                <SelectItem value="cracked">Trincada</SelectItem>
@@ -98,10 +94,10 @@
          <div className="space-y-2">
            <Label>Liga</Label>
            <Select value={turnsOn} onValueChange={(v: TriState) => setTurnsOn(v)}>
-             <SelectTrigger className="bg-background">
+             <SelectTrigger>
                <SelectValue placeholder="Selecione" />
              </SelectTrigger>
-             <SelectContent className="bg-popover border-border">
+             <SelectContent>
                <SelectItem value="null">Indefinido</SelectItem>
                <SelectItem value="true">Sim</SelectItem>
                <SelectItem value="false">Não</SelectItem>
@@ -112,10 +108,10 @@
          <div className="space-y-2">
            <Label>Touch</Label>
            <Select value={touchWorks} onValueChange={(v: TriState) => setTouchWorks(v)}>
-             <SelectTrigger className="bg-background">
+             <SelectTrigger>
                <SelectValue placeholder="Selecione" />
              </SelectTrigger>
-             <SelectContent className="bg-popover border-border">
+             <SelectContent>
                <SelectItem value="null">Indefinido</SelectItem>
                <SelectItem value="true">Funciona</SelectItem>
                <SelectItem value="false">Não funciona</SelectItem>
@@ -126,10 +122,10 @@
          <div className="space-y-2">
            <Label>Câmeras</Label>
            <Select value={camerasWork} onValueChange={(v: TriState) => setCamerasWork(v)}>
-             <SelectTrigger className="bg-background">
+             <SelectTrigger>
                <SelectValue placeholder="Selecione" />
              </SelectTrigger>
-             <SelectContent className="bg-popover border-border">
+             <SelectContent>
                <SelectItem value="null">Indefinido</SelectItem>
                <SelectItem value="true">Funcionam</SelectItem>
                <SelectItem value="false">Não funcionam</SelectItem>
@@ -140,10 +136,10 @@
          <div className="space-y-2">
            <Label>Botões</Label>
            <Select value={buttonsWork} onValueChange={(v: TriState) => setButtonsWork(v)}>
-             <SelectTrigger className="bg-background">
+             <SelectTrigger>
                <SelectValue placeholder="Selecione" />
              </SelectTrigger>
-             <SelectContent className="bg-popover border-border">
+             <SelectContent>
                <SelectItem value="null">Indefinido</SelectItem>
                <SelectItem value="true">Funcionam</SelectItem>
                <SelectItem value="false">Não funcionam</SelectItem>
@@ -154,10 +150,10 @@
          <div className="space-y-2">
            <Label>Conector de Carga</Label>
            <Select value={chargingPortOk} onValueChange={(v: TriState) => setChargingPortOk(v)}>
-             <SelectTrigger className="bg-background">
+             <SelectTrigger>
                <SelectValue placeholder="Selecione" />
              </SelectTrigger>
-             <SelectContent className="bg-popover border-border">
+             <SelectContent>
                <SelectItem value="null">Indefinido</SelectItem>
                <SelectItem value="true">OK</SelectItem>
                <SelectItem value="false">Com problema</SelectItem>
@@ -168,10 +164,10 @@
          <div className="space-y-2">
            <Label>Alto-falantes</Label>
            <Select value={speakersOk} onValueChange={(v: TriState) => setSpeakersOk(v)}>
-             <SelectTrigger className="bg-background">
+             <SelectTrigger>
                <SelectValue placeholder="Selecione" />
              </SelectTrigger>
-             <SelectContent className="bg-popover border-border">
+             <SelectContent>
                <SelectItem value="null">Indefinido</SelectItem>
                <SelectItem value="true">OK</SelectItem>
                <SelectItem value="false">Com problema</SelectItem>
@@ -182,10 +178,10 @@
          <div className="space-y-2">
            <Label>Microfone</Label>
            <Select value={microphoneOk} onValueChange={(v: TriState) => setMicrophoneOk(v)}>
-             <SelectTrigger className="bg-background">
+             <SelectTrigger>
                <SelectValue placeholder="Selecione" />
              </SelectTrigger>
-             <SelectContent className="bg-popover border-border">
+             <SelectContent>
                <SelectItem value="null">Indefinido</SelectItem>
                <SelectItem value="true">OK</SelectItem>
                <SelectItem value="false">Com problema</SelectItem>
@@ -199,7 +195,7 @@
              value={physicalDamage}
              onChange={(e) => setPhysicalDamage(e.target.value)}
              placeholder="Descreva arranhões, amassados, trincos, etc."
-             className="min-h-20 bg-background"
+             className="min-h-20"
            />
          </div>
  
@@ -209,7 +205,7 @@
              value={accessoriesReceived}
              onChange={(e) => setAccessoriesReceived(e.target.value)}
              placeholder="Capas, carregadores, cartões, etc."
-             className="min-h-20 bg-background"
+             className="min-h-20"
            />
          </div>
  
@@ -219,18 +215,17 @@
              value={notes}
              onChange={(e) => setNotes(e.target.value)}
              placeholder="Observações adicionais"
-             className="min-h-20 bg-background"
+             className="min-h-20"
            />
          </div>
  
          <div className="md:col-span-2 flex justify-end">
-           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground">
+           <Button onClick={handleSave} disabled={saving}>
              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
              Salvar checklist
            </Button>
          </div>
-       </CardContent>
-     </Card>
+       </div>
    )
  }
  

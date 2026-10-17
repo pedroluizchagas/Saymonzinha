@@ -1,10 +1,7 @@
-import type React from "react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { AdminHeader } from "@/components/admin/header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Settings, Users, Smartphone, CreditCard, Tag } from "lucide-react"
+import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import type { Profile } from "@/types/database"
 import { ProfileSettings } from "@/components/admin/profile-settings"
@@ -25,72 +22,44 @@ export default async function SettingsPage() {
       <AdminHeader
         user={profile as Profile | null}
         title="Configurações"
-        subtitle="Gerencie as configurações do sistema"
+        subtitle="O seu perfil, a equipe e os cadastros do painel"
       />
 
-      <div className="p-4 md:p-6">
+      <div className="space-y-6 px-4 pb-6 md:px-8">
         {profile ? <ProfileSettings profile={profile as Profile} /> : null}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
-          <SettingsCard
-            icon={Users}
-            title="Equipe"
-            description="Gerencie os usuários e permissões do sistema"
-            href="/admin/settings/team"
-          />
-          <SettingsCard
-            icon={Smartphone}
-            title="Marcas e Modelos"
-            description="Configure as marcas e modelos de dispositivos"
-            href="/admin/settings/devices"
-          />
-          <SettingsCard
-            icon={Tag}
-            title="Tipos de Serviço"
-            description="Gerencie os tipos de problemas e preços"
-            href="/admin/settings/services"
-          />
-          <SettingsCard
-            icon={CreditCard}
-            title="Formas de Pagamento"
-            description="Configure métodos de pagamento e taxas"
-            href="/admin/settings/payments"
-          />
-          <SettingsCard
-            icon={Settings}
-            title="Geral"
-            description="Configurações gerais do sistema"
-            href="/admin/settings/general"
-          />
-        </div>
+
+        {/* os cadastros do painel, numerados como as listas da home */}
+        <section aria-label="Cadastros" className="max-w-5xl">
+          <p className="sc-label mb-3 text-sc-stone">Cadastros</p>
+          <ul className="overflow-hidden rounded-[20px] border border-sc-line">
+            {SECTIONS.map((section, i) => (
+              <li key={section.href} className="border-b border-sc-line last:border-0">
+                <Link
+                  href={section.href}
+                  className="group grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-4 bg-sc-carbon px-5 py-4 transition-colors hover:bg-sc-raised"
+                >
+                  <span className="sc-label text-sc-smoke group-hover:text-sc-red">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="min-w-0">
+                    <span className="block font-display text-[26px] leading-[0.9] font-black uppercase tracking-[-0.01em] text-sc-bone">
+                      {section.title}
+                    </span>
+                    <span className="mt-1.5 block text-[13px] text-sc-stone">{section.description}</span>
+                  </span>
+                  <ArrowUpRight className="size-5 text-sc-smoke transition-colors group-hover:text-sc-red" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </div>
   )
 }
 
-interface SettingsCardProps {
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  description: string
-  href: string
-}
-
-function SettingsCard({ icon: Icon, title, description, href }: SettingsCardProps) {
-  return (
-    <Card className="bg-card border-border hover:border-primary/30 transition-colors">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Icon className="w-5 h-5 text-primary" />
-          </div>
-          <CardTitle className="text-lg text-foreground">{title}</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <CardDescription className="text-muted-foreground mb-4">{description}</CardDescription>
-        <Button asChild variant="outline" size="sm" className="w-full bg-transparent">
-          <Link href={href}>Configurar</Link>
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
+const SECTIONS = [
+  { title: "Equipe", description: "Quem usa o painel, com qual função, e quem está ativo", href: "/admin/settings/team" },
+  { title: "Marcas e modelos", description: "Os aparelhos que a loja atende, para as OS", href: "/admin/settings/devices" },
+  { title: "Tipos de serviço", description: "Os consertos e os preços estimados", href: "/admin/settings/services" },
+  { title: "Formas de pagamento", description: "Pix, dinheiro, cartões e as taxas de cada um", href: "/admin/settings/payments" },
+  { title: "Geral", description: "As preferências da loja", href: "/admin/settings/general" },
+]

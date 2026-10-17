@@ -1,17 +1,21 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { useEffect, useRef, useState } from "react"
+import type React from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import type { ServiceOrder, ServiceOrderItem } from "@/types/database"
 import { toPng } from "html-to-image"
 import { Loader2, Download, MessageCircle, ExternalLink } from "lucide-react"
-import Image from "next/image"
 import { uploadServiceNoteImage } from "@/lib/actions/service-order-actions"
+import { useClock } from "@/components/home/shared/device-ui"
 
 // Dimensoes da imagem exportada (simula tela de smartphone)
 const IMG_W = 390
 const IMG_H = 844
+
+// O aparelho da prévia: a nota mais a moldura (aro de 4px e borda de 9px de cada lado)
+const DEVICE_W = IMG_W + 26
 
 // Safe areas simuladas (compativel com iPhone 14/15 Pro)
 const SAFE_TOP = 54 // barra de status (notch / dynamic island)
@@ -22,27 +26,40 @@ interface ServiceNoteProps {
   items?: ServiceOrderItem[]
 }
 
-/** Retorna hora atual formatada para a barra de status simulada */
-function currentTime(): string {
-  const now = new Date()
-  return now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
-}
 
 export function ServiceNote({ order, items = [] }: ServiceNoteProps) {
   const ref = useRef<HTMLDivElement | null>(null)
+  // A hora de Divinópolis, a mesma da home: fixa no servidor e atualizada no navegador (sem divergir na hidratação).
+  const time = useClock()
   const [exporting, setExporting] = useState(false)
   const [sending, setSending] = useState(false)
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null)
+  // No celular o aparelho não cabe no cartão: a prévia encolhe por inteiro (a imagem exportada não muda,
+  // porque só a tela, sem o transform de fora, vira imagem).
+  const frameRef = useRef<HTMLDivElement | null>(null)
+  const deviceRef = useRef<HTMLDivElement | null>(null)
+  const [fit, setFit] = useState({ scale: 1, height: 0 })
+
+  useEffect(() => {
+    const frame = frameRef.current
+    const device = deviceRef.current
+    if (!frame || !device) return
+    const observer = new ResizeObserver(() => {
+      setFit({ scale: Math.min(1, frame.clientWidth / DEVICE_W), height: device.offsetHeight })
+    })
+    observer.observe(frame)
+    return () => observer.disconnect()
+  }, [])
 
   const formatCurrency = (v: number | null | undefined) => {
-    if (v == null) return "-"
-    return `R$ ${v.toFixed(2)}`
+    if (v == null) return "—"
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v)
   }
 
   const formatDate = (iso?: string | null) => {
     if (!iso) return "-"
     try {
-      return new Date(iso).toLocaleDateString("pt-BR")
+      return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })
     } catch {
       return "-"
     }
@@ -57,7 +74,7 @@ export function ServiceNote({ order, items = [] }: ServiceNoteProps) {
         height: IMG_H,
         pixelRatio: 2,
         cacheBust: true,
-        backgroundColor: "#0a0a0b",
+        backgroundColor: "#0a0908",
       })
 
       const link = document.createElement("a")
@@ -77,7 +94,7 @@ export function ServiceNote({ order, items = [] }: ServiceNoteProps) {
       height: IMG_H,
       pixelRatio: 2,
       cacheBust: true,
-      backgroundColor: "#0a0a0b",
+      backgroundColor: "#0a0908",
     })
     const upload = await uploadServiceNoteImage(order.order_number, dataUrl)
     const url = upload.url || ""
@@ -139,305 +156,231 @@ export function ServiceNote({ order, items = [] }: ServiceNoteProps) {
     }
   }
 
+  const itemsTotal = items.reduce((acc, it) => acc + Number(it.total_price || 0), 0)
+  const finalValue = order.final_price ?? order.estimated_price
+  const checklist = [
+    { label: "Tela", value: screenLabel(order.entry_checklist?.screen_condition), bad: !!order.entry_checklist?.screen_condition && order.entry_checklist.screen_condition !== "ok" },
+    { label: "Liga", value: triLabel(order.entry_checklist?.turns_on), bad: order.entry_checklist?.turns_on === false },
+    { label: "Touch", value: triLabel(order.entry_checklist?.touch_works, "Funciona", "Não funciona"), bad: order.entry_checklist?.touch_works === false },
+    { label: "Câmeras", value: triLabel(order.entry_checklist?.cameras_work, "Funcionam", "Não funcionam"), bad: order.entry_checklist?.cameras_work === false },
+    { label: "Botões", value: triLabel(order.entry_checklist?.buttons_work, "Funcionam", "Não funcionam"), bad: order.entry_checklist?.buttons_work === false },
+    { label: "Carga", value: triLabel(order.entry_checklist?.charging_port_ok, "OK", "Com problema"), bad: order.entry_checklist?.charging_port_ok === false },
+    { label: "Som", value: triLabel(order.entry_checklist?.speakers_ok, "OK", "Com problema"), bad: order.entry_checklist?.speakers_ok === false },
+    { label: "Microfone", value: triLabel(order.entry_checklist?.microphone_ok, "OK", "Com problema"), bad: order.entry_checklist?.microphone_ok === false },
+  ]
+
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <p className="text-sm text-muted-foreground">Nota de Servico (Preview Mobile)</p>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <Button
-            onClick={handleExport}
-            disabled={exporting}
-            className="bg-primary text-primary-foreground"
-          >
-            {exporting ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 mr-2" />
-            )}
-            Exportar imagem
+    <Card>
+      <CardHeader className="grid-cols-1 gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+        <div className="grid gap-2">
+          <p className="sc-label text-sc-stone">Para o cliente</p>
+          <CardTitle>Nota de serviço</CardTitle>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={handleExport} disabled={exporting} variant="secondary">
+            {exporting ? <Loader2 className="animate-spin" /> : <Download />}
+            Baixar imagem
           </Button>
-          <Button
-            onClick={handleSendWhatsApp}
-            disabled={sending}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
-          >
-            {sending ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <MessageCircle className="w-4 h-4 mr-2" />
-            )}
-            Enviar WhatsApp
+          <Button onClick={handleSendWhatsApp} disabled={sending} className="bg-sc-green text-sc-ink">
+            {sending ? <Loader2 className="animate-spin" /> : <MessageCircle />}
+            Enviar pelo WhatsApp
           </Button>
         </div>
-      </div>
+      </CardHeader>
 
-      {whatsappUrl && (
-        <div className="flex items-center gap-3 rounded-lg border border-emerald-600/30 bg-emerald-600/10 px-4 py-3">
-          <MessageCircle className="w-5 h-5 text-emerald-500 shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-foreground font-medium">
-              Nota gerada com sucesso!
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Clique no botao abaixo para abrir o WhatsApp.
-            </p>
+      <CardContent className="space-y-4">
+        {whatsappUrl && (
+          <div className="flex flex-wrap items-center gap-3 rounded-[18px] border border-sc-line bg-sc-raised px-4 py-3">
+            <MessageCircle className="size-5 shrink-0 text-sc-green" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-sc-bone">A nota está pronta.</p>
+              <p className="text-[13px] text-sc-stone">O WhatsApp não abriu sozinho: toque para abrir.</p>
+            </div>
+            <Button asChild size="sm" className="bg-sc-green text-sc-ink">
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink />
+                Abrir o WhatsApp
+              </a>
+            </Button>
           </div>
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors shrink-0"
+        )}
+
+        {/* a prévia num celular, como o cliente vai ver; só a tela vira imagem */}
+        <div ref={frameRef} className="pb-2">
+          {/* a tela do aparelho mede o próprio conteúdo como contêiner, então o aparelho tem largura fixa;
+              a margem negativa devolve a altura que o transform não tira do fluxo */}
+          <div
+            ref={deviceRef}
+            className="sc-device mx-auto origin-top-left"
+            style={{
+              width: DEVICE_W,
+              transform: fit.scale < 1 ? `scale(${fit.scale})` : undefined,
+              marginBottom: fit.scale < 1 ? -fit.height * (1 - fit.scale) : undefined,
+            }}
           >
-            <ExternalLink className="w-3.5 h-3.5" />
-            Abrir WhatsApp
-          </a>
-        </div>
-      )}
- 
-      <div className="w-full overflow-x-auto">
-        <div className="inline-block">
-          <Card className="bg-card border-border mx-auto w-[390px]">
-            <CardContent className="p-0">
-              {/* --- Container capturado como imagem --- */}
-              <div
-                ref={ref}
-                className="text-neutral-100 font-sans overflow-hidden"
-                style={{
-                  width: IMG_W,
-                  height: IMG_H,
-                  backgroundColor: "#0a0a0b",
-                  WebkitPrintColorAdjust: "exact",
-                }}
-              >
-                <div className="h-full flex flex-col">
-
-                  {/* ======= SAFE AREA TOPO - Barra de status simulada ======= */}
+            <div className="sc-device__bezel">
+              <div className="sc-device__screen">
+                <div
+                  ref={ref}
+                  className="relative isolate overflow-hidden font-sans text-sc-bone"
+                  style={{ width: IMG_W, height: IMG_H, backgroundColor: "#0a0908", WebkitPrintColorAdjust: "exact" }}
+                >
+                  {/* o halo vermelho da marca, atrás de tudo, no canto de cima */}
                   <div
-                    className="shrink-0 flex items-end justify-between px-6 pb-1"
-                    style={{ height: SAFE_TOP, backgroundColor: "#0a0a0b" }}
-                  >
-                    <span className="text-[13px] font-semibold text-white/90">
-                      {currentTime()}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      {/* Sinal celular - 4 barras */}
-                      <div className="flex items-end gap-[2px]">
-                        <div className="w-[3px] h-[5px] rounded-sm bg-white/80" />
-                        <div className="w-[3px] h-[7px] rounded-sm bg-white/80" />
-                        <div className="w-[3px] h-[9px] rounded-sm bg-white/80" />
-                        <div className="w-[3px] h-[11px] rounded-sm bg-white/80" />
-                      </div>
-                      {/* Wi-Fi - arcos simplificados */}
-                      <svg width="15" height="12" viewBox="0 0 15 12" fill="none">
-                        <path d="M7.5 10.5a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" fill="rgba(255,255,255,0.85)" />
-                        <path d="M4.5 9a4.2 4.2 0 016 0" stroke="rgba(255,255,255,0.85)" strokeWidth="1.3" strokeLinecap="round" />
-                        <path d="M2.2 6.5a7.5 7.5 0 0110.6 0" stroke="rgba(255,255,255,0.85)" strokeWidth="1.3" strokeLinecap="round" />
-                        <path d="M0 4a11 11 0 0115 0" stroke="rgba(255,255,255,0.85)" strokeWidth="1.3" strokeLinecap="round" />
-                      </svg>
-                      {/* Bateria */}
-                      <div className="flex items-center">
-                        <div
-                          className="relative rounded-[3px] border border-white/70"
-                          style={{ width: 22, height: 11 }}
-                        >
-                          <div
-                            className="absolute left-[1.5px] top-[1.5px] bottom-[1.5px] rounded-[1.5px]"
-                            style={{ width: 14, backgroundColor: "#4ade80" }}
-                          />
-                        </div>
-                        <div
-                          className="rounded-r-sm bg-white/70"
-                          style={{ width: 2, height: 5, marginLeft: 1 }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ======= CABECALHO - Logo e info da OS ======= */}
-                  <div className="px-4 py-3 border-b border-neutral-700/60">
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src="/images/chatgpt-20image-2023-20de-20jun.png"
-                        alt="Saymon Cell"
-                        width={120}
-                        height={42}
-                        className="w-auto h-10"
-                      />
-                      <div>
-                        <p className="text-sm font-semibold">Saymon Cell - Assistencia Tecnica</p>
-                        <p className="text-[11px] text-gray-300">OS #{order.order_number} -- {formatDate(order.created_at)}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ======= CONTEUDO PRINCIPAL ======= */}
-                  <div className="flex-1 overflow-hidden px-4 py-2.5 grid grid-cols-1 gap-1.5">
-                    <div className="text-[12px]">
-                      <p className="font-semibold text-white">Cliente</p>
-                      <p>{order.customer?.name}</p>
-                      <p className="text-gray-300">{order.customer?.phone}</p>
-                      {order.customer?.email && <p className="text-gray-300">{order.customer.email}</p>}
+                    className="pointer-events-none absolute -top-28 -right-24 size-[340px] rounded-full"
+                    style={{ background: "radial-gradient(closest-side, rgba(255,2,0,0.42), transparent)" }}
+                  />
+                  <div className="relative z-[1] flex h-full flex-col">
+                    {/* barra de status */}
+                    <div className="flex shrink-0 items-end justify-between px-7 pb-1.5" style={{ height: SAFE_TOP }}>
+                      <span className="text-[14px] font-semibold tabular-nums text-sc-bone">{time}</span>
+                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-sc-bone">
+                        5G
+                        <span className="relative rounded-[3px] border border-sc-bone/70" style={{ width: 22, height: 11 }}>
+                          <span className="absolute inset-y-[1.5px] left-[1.5px] rounded-[1.5px] bg-sc-bone" style={{ width: 14 }} />
+                        </span>
+                      </span>
                     </div>
 
-                    <div className="text-[12px]">
-                      <p className="font-semibold text-white">Aparelho</p>
-                      <p>
-                        {order.device_brand} {order.device_model}
+                    {/* cabeçalho: a marca e a OS */}
+                    <div className="shrink-0 px-5 pt-3 pb-4">
+                      <div className="flex items-center gap-2.5">
+                        <span className="grid size-9 place-items-center rounded-[10px] bg-sc-red">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/home/glyph.png" alt="" className="h-[64%] w-auto" />
+                        </span>
+                        <span className="font-display text-[22px] leading-none font-black uppercase">
+                          Saymon <span className="text-sc-red">Cell</span>
+                        </span>
+                        <span className="ml-auto font-mono text-[10px] font-medium uppercase tracking-[0.06em] text-sc-stone">
+                          {formatDate(order.created_at)}
+                        </span>
+                      </div>
+                      <p className="mt-4 font-mono text-[10px] font-medium uppercase tracking-[0.06em] text-sc-stone">
+                        Nota de serviço
                       </p>
-                      <p className="text-gray-300">
-                        Cor: {order.device_color || "-"} -- IMEI: {order.device_imei || "-"}
+                      <p className="mt-1.5 font-display text-[56px] leading-[0.84] font-black uppercase">
+                        OS #{order.order_number}
                       </p>
                     </div>
 
-                    <div className="text-[12px]">
-                      <p className="font-semibold text-white">Problema</p>
-                      <p>{order.problem_description}</p>
-                      {order.problem_type?.name && <p className="text-gray-300">Tipo: {order.problem_type.name}</p>}
-                    </div>
-
-                    {order.diagnosis && (
-                      <div className="text-[12px]">
-                        <p className="font-semibold text-white">Diagnostico</p>
-                        <p>{order.diagnosis}</p>
+                    {/* corpo */}
+                    <div className="grid flex-1 content-start gap-3 overflow-hidden px-5 text-[12px] leading-[1.4]">
+                      <div className="grid grid-cols-2 gap-3 border-t border-sc-line pt-3">
+                        <NoteBlock label="Cliente">
+                          <p className="font-semibold">{order.customer?.name}</p>
+                          <p className="text-sc-stone">{order.customer?.phone}</p>
+                        </NoteBlock>
+                        <NoteBlock label="Aparelho">
+                          <p className="font-semibold">
+                            {order.device_brand} {order.device_model}
+                          </p>
+                          <p className="text-sc-stone">{[order.device_color, order.device_imei && `IMEI ${order.device_imei}`].filter(Boolean).join(" · ") || "—"}</p>
+                        </NoteBlock>
                       </div>
-                    )}
 
-                    {items.length > 0 && (
-                      <div className="text-[12px]">
-                        <p className="font-semibold text-white">Itens</p>
-                        <div className="mt-1 border border-neutral-700 rounded-md overflow-hidden">
-                          <div className="grid grid-cols-3 px-2 py-1 text-gray-300">
-                            <span>Descricao</span>
-                            <span className="text-center">Qtde</span>
-                            <span className="text-right">Total</span>
-                          </div>
-                          {items.map((it) => (
-                            <div key={it.id} className="grid grid-cols-3 px-2 py-1 border-t border-neutral-700">
-                              <span className="truncate">{it.description}</span>
-                              <span className="text-center">{it.quantity}</span>
-                              <span className="text-right">R$ {Number(it.total_price).toFixed(2)}</span>
-                            </div>
+                      <NoteBlock label="Defeito" className="border-t border-sc-line pt-3">
+                        <p>{order.problem_description}</p>
+                        {order.diagnosis && <p className="mt-1 text-sc-stone">Diagnóstico: {order.diagnosis}</p>}
+                      </NoteBlock>
+
+                      <NoteBlock label="Checklist de entrada" className="border-t border-sc-line pt-3">
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                          {checklist.map((row) => (
+                            <NoteItem key={row.label} label={row.label} value={row.value} bad={row.bad} />
                           ))}
-                          <div className="grid grid-cols-3 px-2 py-1 border-t border-neutral-700 font-semibold">
-                            <span>Total</span>
-                            <span />
-                            <span className="text-right">
-                              R$ {items.reduce((acc, it) => acc + Number(it.total_price || 0), 0).toFixed(2)}
-                            </span>
+                        </div>
+                        {order.entry_checklist?.physical_damage && (
+                          <p className="mt-1.5 text-sc-stone">Danos: {order.entry_checklist.physical_damage}</p>
+                        )}
+                        {order.entry_checklist?.accessories_received && (
+                          <p className="text-sc-stone">Acessórios: {order.entry_checklist.accessories_received}</p>
+                        )}
+                      </NoteBlock>
+
+                      {items.length > 0 && (
+                        <NoteBlock label="Peças e serviços" className="border-t border-sc-line pt-3">
+                          <div className="grid gap-1">
+                            {items.map((it) => (
+                              <div key={it.id} className="flex justify-between gap-3">
+                                <span className="truncate">
+                                  {it.quantity}× {it.description}
+                                </span>
+                                <span className="tabular-nums">{formatCurrency(Number(it.total_price))}</span>
+                              </div>
+                            ))}
+                            <div className="flex justify-between gap-3 text-sc-stone">
+                              <span>Total dos itens</span>
+                              <span className="tabular-nums">{formatCurrency(itemsTotal)}</span>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="text-[12px] grid grid-cols-2 gap-2">
-                      <div>
-                        <p className="font-semibold text-white">Estimado</p>
-                        <p>{formatCurrency(order.estimated_price)}</p>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-white">Final</p>
-                        <p>{formatCurrency(order.final_price)}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <p className="font-semibold text-white">Custo de Pecas</p>
-                        <p>{formatCurrency(order.parts_cost)}</p>
-                      </div>
-                    </div>
-
-                    <div className="text-[12px]">
-                      <p className="font-semibold text-white">Checklist</p>
-                      <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1">
-                        <NoteItem label="Liga" value={triLabel(order.entry_checklist?.turns_on)} />
-                        <NoteItem label="Touch" value={triLabel(order.entry_checklist?.touch_works, "Funciona", "Nao funciona")} />
-                        <NoteItem label="Cameras" value={triLabel(order.entry_checklist?.cameras_work, "Funcionam", "Nao funcionam")} />
-                        <NoteItem label="Botoes" value={triLabel(order.entry_checklist?.buttons_work, "Funcionam", "Nao funcionam")} />
-                        <NoteItem label="Carga" value={triLabel(order.entry_checklist?.charging_port_ok, "OK", "Com problema")} />
-                        <NoteItem label="Som" value={triLabel(order.entry_checklist?.speakers_ok, "OK", "Com problema")} />
-                        <NoteItem label="Microfone" value={triLabel(order.entry_checklist?.microphone_ok, "OK", "Com problema")} />
-                        <NoteItem
-                          label="Tela"
-                          value={
-                            order.entry_checklist?.screen_condition === "ok"
-                              ? "Sem dano"
-                              : order.entry_checklist?.screen_condition === "cracked"
-                              ? "Trincada"
-                              : order.entry_checklist?.screen_condition === "broken"
-                              ? "Quebrada"
-                              : "-"
-                          }
-                        />
-                      </div>
-                      {order.entry_checklist?.physical_damage && (
-                        <div className="mt-1.5">
-                          <p className="font-semibold text-white">Danos fisicos</p>
-                          <p className="text-gray-300">{order.entry_checklist?.physical_damage}</p>
-                        </div>
-                      )}
-                      {order.entry_checklist?.accessories_received && (
-                        <div className="mt-1.5">
-                          <p className="font-semibold text-white">Acessorios recebidos</p>
-                          <p className="text-gray-300">{order.entry_checklist?.accessories_received}</p>
-                        </div>
-                      )}
-                      {order.entry_checklist?.notes && (
-                        <div className="mt-1.5">
-                          <p className="font-semibold text-white">Observacoes</p>
-                          <p className="text-gray-300">{order.entry_checklist?.notes}</p>
-                        </div>
+                        </NoteBlock>
                       )}
                     </div>
-                  </div>
 
-                  {/* ======= RODAPE ======= */}
-                  <div className="shrink-0 px-4 py-2.5 bg-neutral-800/80 border-t border-neutral-700/60">
-                    <p className="text-[10px] text-gray-300">
-                      Entrega: {order.delivery_type === "store" ? "Na Loja" : "Entrega"} -- {order.delivery_address || "-"}
-                    </p>
-                    <p className="text-[10px] text-gray-300">
-                      Datas -- Recebido: {formatDate(order.received_at)} -- Concluido: {formatDate(order.completed_at)} --
-                      Entregue: {formatDate(order.delivered_at)}
-                    </p>
-                    <p className="text-[10px] text-gray-300 mt-0.5">
-                      Saymon Cell -- Atendimento: (37) 98802-3341 -- Endereco: Av. Anhanguera, 1286, Loja 02 -- Jardim dos
-                      Candides, Divinopolis - MG
-                    </p>
-                  </div>
+                    {/* o valor e o rodapé */}
+                    <div className="shrink-0 px-5 pb-3">
+                      <div className="flex items-end justify-between gap-3 rounded-[16px] bg-sc-red px-4 py-3 text-sc-ink">
+                        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.06em]">
+                          {order.final_price != null ? "Valor final" : "Valor estimado"}
+                        </span>
+                        <span className="font-display text-[34px] leading-[0.84] font-black tabular-nums">
+                          {finalValue != null ? formatCurrency(finalValue) : "A definir"}
+                        </span>
+                      </div>
+                      <p className="mt-2.5 text-[10px] leading-[1.4] text-sc-stone">
+                        {order.delivery_type === "store" ? "Retirada na loja" : `Busca e entrega${order.delivery_address ? ` · ${order.delivery_address}` : ""}`}
+                        {" · "}Recebido {formatDate(order.received_at)}
+                        {order.completed_at ? ` · Concluído ${formatDate(order.completed_at)}` : ""}
+                        {order.delivered_at ? ` · Entregue ${formatDate(order.delivered_at)}` : ""}
+                      </p>
+                      <p className="mt-1 text-[10px] leading-[1.4] text-sc-stone">
+                        WhatsApp (37) 98802-3341 · Av. Anhanguera, 1286, Loja 02 · Jardim dos Candidés, Divinópolis - MG
+                      </p>
+                    </div>
 
-                  {/* ======= SAFE AREA RODAPE - Home indicator simulado ======= */}
-                  <div
-                    className="shrink-0 flex items-center justify-center"
-                    style={{ height: SAFE_BOTTOM, backgroundColor: "#0a0a0b" }}
-                  >
-                    <div
-                      className="rounded-full bg-white/20"
-                      style={{ width: 134, height: 5 }}
-                    />
+                    {/* indicador da tela de início */}
+                    <div className="flex shrink-0 items-center justify-center" style={{ height: SAFE_BOTTOM }}>
+                      <div className="rounded-full bg-white/25" style={{ width: 134, height: 5 }} />
+                    </div>
                   </div>
-
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
-      </div>
-     </div>
-   )
- }
- 
- function NoteItem({ label, value }: { label: string; value: string }) {
-   return (
-     <div className="flex items-center justify-between">
-      <span className="text-gray-300">{label}</span>
-       <span className="font-medium">{value}</span>
-     </div>
-   )
- }
- 
- function triLabel(v?: boolean | null, yes = "Sim", no = "Não") {
-   if (v === true) return yes
-   if (v === false) return no
-   return "-"
- }
+      </CardContent>
+    </Card>
+  )
+}
+
+function NoteBlock({ label, className, children }: { label: string; className?: string; children: React.ReactNode }) {
+  return (
+    <div className={className}>
+      <p className="mb-1 font-mono text-[10px] font-medium uppercase tracking-[0.06em] text-sc-stone">{label}</p>
+      {children}
+    </div>
+  )
+}
+
+function screenLabel(value?: "ok" | "cracked" | "broken" | null) {
+  return value === "ok" ? "Sem dano" : value === "cracked" ? "Trincada" : value === "broken" ? "Quebrada" : "—"
+}
+
+function NoteItem({ label, value, bad = false }: { label: string; value: string; bad?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-sc-stone">{label}</span>
+      <span className={bad ? "font-semibold text-sc-red" : "font-medium"}>{value}</span>
+    </div>
+  )
+}
+
+function triLabel(v?: boolean | null, yes = "Sim", no = "Não") {
+  if (v === true) return yes
+  if (v === false) return no
+  return "—"
+}
 
 function formatWhatsAppPhone(phone?: string | null) {
   if (!phone) return null

@@ -8,7 +8,7 @@
  import { Button } from "@/components/ui/button"
  import { Input } from "@/components/ui/input"
  import { Label } from "@/components/ui/label"
- import { Loader2, User } from "lucide-react"
+ import { Loader2 } from "lucide-react"
  
  interface ProfileSettingsProps {
    profile: Profile
@@ -89,38 +89,38 @@
    }
  
    return (
-     <Card className="bg-card border-border mb-6 max-w-3xl">
+     <Card className="max-w-3xl">
        <CardHeader>
-         <div className="flex items-center gap-3">
-           <div className="p-2 bg-primary/10 rounded-lg">
-             <User className="w-5 h-5 text-primary" />
-           </div>
-           <CardTitle className="text-lg text-foreground">Meu Perfil</CardTitle>
-         </div>
+         <p className="sc-label text-sc-stone">Você</p>
+         <CardTitle>Meu perfil</CardTitle>
        </CardHeader>
        <CardContent className="space-y-6">
          <div className="flex items-center gap-4">
            {avatarPreview ? (
              <Image src={avatarPreview} alt="Avatar" width={72} height={72} className="rounded-full object-cover" />
            ) : (
-             <div className="w-18 h-18 rounded-full bg-primary/10 flex items-center justify-center">
-               <span className="text-primary font-semibold text-xl">{fullName?.charAt(0) || "U"}</span>
+             <div className="grid size-[72px] shrink-0 place-items-center rounded-full bg-sc-red-strong">
+               <span className="font-display text-4xl font-black text-white">{fullName?.charAt(0)?.toUpperCase() || "U"}</span>
              </div>
            )}
            <div>
-             <Label className="block text-foreground mb-2">Foto do perfil</Label>
-             <Input type="file" accept="image/*" onChange={onSelectAvatar} />
-             <p className="text-xs text-muted-foreground mt-2">Formatos aceitos: PNG, JPG. Tamanho recomendado: 256x256.</p>
+             <p className="sc-label mb-2 text-sc-stone">Foto do perfil</p>
+             {/* o campo de arquivo do navegador fica escondido; a pílula abre a escolha da foto */}
+             <label className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full bg-white/[0.08] px-3.5 text-[13px] font-medium text-foreground transition-colors hover:bg-white/[0.12] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-sc-red">
+               <input type="file" accept="image/*" onChange={onSelectAvatar} className="sr-only" />
+               {avatarPreview ? "Trocar foto" : "Escolher foto"}
+             </label>
+             <p className="text-xs text-muted-foreground mt-2">PNG ou JPG, de preferência quadrada (256 × 256).</p>
            </div>
          </div>
  
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
            <div className="space-y-2">
-             <Label className="text-foreground">Nome completo</Label>
+             <Label>Nome completo</Label>
              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome" />
            </div>
            <div className="space-y-2">
-             <Label className="text-foreground">Telefone</Label>
+             <Label>Telefone</Label>
              <Input value={phone ?? ""} onChange={(e) => setPhone(e.target.value)} placeholder="(00) 90000-0000" />
            </div>
          </div>
@@ -132,9 +132,8 @@
            </Button>
            {message ? (
              <span
-               className={`text-sm ${
-                 message.type === "success" ? "text-green-600" : "text-red-600"
-               }`}
+               role="status"
+               className={`text-sm ${message.type === "success" ? "text-sc-stone" : "text-sc-red"}`}
              >
                {message.text}
              </span>

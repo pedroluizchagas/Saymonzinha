@@ -1,20 +1,13 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter, Poppins } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { scFontVariables } from "@/components/home/fonts"
 import { CartProvider } from "@/contexts/cart-context"
+import { APPLE_WEB_APP } from "@/lib/pwa"
 import "./globals.css"
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-})
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
-})
+// Os tokens e as fontes do sistema visual valem no site inteiro: no painel, no login e nas janelas e
+// menus que abrem fora da página (portais). A home e a loja virtual continuam com o próprio .sc.
+import "@/components/home/sc-system.css"
 
 export const metadata: Metadata = {
   title: "Saymon Cell | Assistencia Tecnica de Smartphones em Divinopolis",
@@ -48,41 +41,7 @@ export const metadata: Metadata = {
       { url: "/icons/apple-touch-icon.png", type: "image/png", sizes: "180x180" },
     ],
   },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Saymon Cell",
-    startupImage: [
-      {
-        url: "/images/logo.png",
-        media: "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)",
-      },
-      {
-        url: "/images/logo.png",
-        media: "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)",
-      },
-      {
-        url: "/images/logo.png",
-        media: "(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)",
-      },
-      {
-        url: "/images/logo.png",
-        media: "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)",
-      },
-      {
-        url: "/images/logo.png",
-        media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)",
-      },
-      {
-        url: "/images/logo.png",
-        media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)",
-      },
-      {
-        url: "/images/logo.png",
-        media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
-      },
-    ],
-  },
+  appleWebApp: APPLE_WEB_APP,
   manifest: "/manifest.webmanifest",
   other: {
     "mobile-web-app-capable": "yes",
@@ -114,7 +73,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="dark scroll-smooth">
-      <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
+      <body className={`sc ${scFontVariables} font-sans antialiased`}>
         <CartProvider>
           {children}
         </CartProvider>

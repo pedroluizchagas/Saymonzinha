@@ -1,5 +1,9 @@
 "use client"
 
+// Financeiro do painel: os totais do mês em display (entrada em osso, saída em vermelho, o saldo pelo
+// sinal), as contas pendentes com o vencimento e o fluxo de caixa com o sinal de cada movimento.
+
+import type React from "react"
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -7,10 +11,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
-import { TrendingUp, TrendingDown, DollarSign, Plus, AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
+import { Wallet, Plus, CheckCircle2, Loader2 } from "lucide-react"
+import { formatPrice } from "@/lib/catalog"
+import { Money } from "./money"
 import { createTransaction, markTransactionPaid } from "@/lib/actions/financial-actions"
 import type { CashTransaction, ExpenseCategory, TransactionType } from "@/types/database"
 
@@ -89,6 +93,7 @@ export function FinancialDashboard({
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("pt-BR", {
+      timeZone: "America/Sao_Paulo",
       day: "2-digit",
       month: "2-digit",
     })
@@ -96,114 +101,82 @@ export function FinancialDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-card border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Entradas</p>
-                <p className="text-2xl font-bold text-green-500">R$ {totalIncome.toFixed(2)}</p>
-              </div>
-              <div className="p-3 bg-green-500/10 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-green-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Saídas</p>
-                <p className="text-2xl font-bold text-red-500">R$ {totalExpense.toFixed(2)}</p>
-              </div>
-              <div className="p-3 bg-red-500/10 rounded-lg">
-                <TrendingDown className="w-6 h-6 text-red-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Saldo</p>
-                <p className={`text-2xl font-bold ${balance >= 0 ? "text-green-500" : "text-red-500"}`}>
-                  R$ {balance.toFixed(2)}
-                </p>
-              </div>
-              <div className={`p-3 rounded-lg ${balance >= 0 ? "bg-green-500/10" : "bg-red-500/10"}`}>
-                <DollarSign className={`w-6 h-6 ${balance >= 0 ? "text-green-500" : "text-red-500"}`} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* os totais do mês, como as estatísticas da home */}
+      <section aria-label="Totais do mês" className="grid gap-px overflow-hidden rounded-[20px] border border-sc-line bg-sc-line sm:grid-cols-3">
+        <Total label="Entradas" note="Vendas e depósitos">
+          <Money value={totalIncome} signed className="text-sc-bone" />
+        </Total>
+        <Total label="Saídas" note="Despesas e sangrias">
+          <Money value={-totalExpense} className="text-sc-red" />
+        </Total>
+        <Total label="Saldo" note={balance < 0 ? "Saiu mais do que entrou" : "Entrou mais do que saiu"} accent={balance < 0}>
+          <Money value={balance} className={balance < 0 ? "text-sc-red" : "text-sc-bone"} />
+        </Total>
+      </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Contas a Pagar */}
+        {/* Contas a pagar */}
         {pendingTransactions.length > 0 && (
-          <Card className="bg-card border-border border-yellow-500/30">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-lg text-foreground flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-yellow-500" />
-                Contas Pendentes
-              </CardTitle>
+          <Card>
+            <CardHeader>
+              <p className="sc-label text-sc-stone">A pagar</p>
+              <CardTitle>Contas pendentes</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {pendingTransactions.map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">{transaction.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Vence: {transaction.due_date ? formatDate(transaction.due_date) : "Sem data"}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <p className="font-semibold text-red-500">R$ {transaction.amount.toFixed(2)}</p>
+            <CardContent className="px-2 sm:px-3">
+              <ul className="divide-y divide-sc-line">
+                {pendingTransactions.map((transaction) => {
+                  const overdue = !!transaction.due_date && new Date(transaction.due_date) < new Date(new Date().toDateString())
+                  return (
+                    <li key={transaction.id} className="flex items-center gap-3 px-3 py-3.5">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-sc-bone">{transaction.description}</p>
+                        <p className={overdue ? "sc-label mt-1 text-sc-red" : "sc-label mt-1 text-sc-stone"}>
+                          {transaction.due_date
+                            ? `${overdue ? "Venceu" : "Vence"} ${formatDate(transaction.due_date)}`
+                            : "Sem vencimento"}
+                        </p>
+                      </div>
+                      <p className="font-semibold tabular-nums text-sc-red">− {formatPrice(transaction.amount)}</p>
                       <Button
-                        size="sm"
+                        size="icon-sm"
                         variant="outline"
                         onClick={() => handleMarkPaid(transaction.id)}
-                        className="bg-transparent"
+                        aria-label={`Marcar ${transaction.description} como paga`}
+                        title="Marcar como paga"
                       >
-                        <CheckCircle2 className="w-4 h-4" />
+                        <CheckCircle2 className="size-4" />
                       </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    </li>
+                  )
+                })}
+              </ul>
             </CardContent>
           </Card>
         )}
 
         {/* Botão Nova Transação */}
-        <Card className="bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg text-foreground">Fluxo de Caixa</CardTitle>
+        <Card>
+          <CardHeader className="grid-cols-[1fr_auto] items-end">
+            <div className="grid gap-2">
+              <p className="sc-label text-sc-stone">No mês</p>
+              <CardTitle>Fluxo de caixa</CardTitle>
+            </div>
             <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
               <DialogTrigger asChild>
-                <Button size="sm" className="bg-primary hover:bg-primary/90">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nova Transação
+                <Button size="sm">
+                  <Plus />
+                  Nova transação
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-card border-border">
+              <DialogContent>
                 <DialogHeader>
-                  <DialogTitle className="text-foreground">Nova Transação</DialogTitle>
+                  <DialogTitle>Nova transação</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-foreground">Tipo *</Label>
+                    <Label>Tipo *</Label>
                     <Select value={newType} onValueChange={(v) => setNewType(v as TransactionType)}>
-                      <SelectTrigger className="bg-background border-input">
+                      <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -217,9 +190,9 @@ export function FinancialDashboard({
 
                   {(newType === "expense" || newType === "income") && (
                     <div className="space-y-2">
-                      <Label className="text-foreground">Categoria</Label>
+                      <Label>Categoria</Label>
                       <Select value={newCategory} onValueChange={setNewCategory}>
-                        <SelectTrigger className="bg-background border-input">
+                        <SelectTrigger>
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                         <SelectContent>
@@ -234,42 +207,42 @@ export function FinancialDashboard({
                   )}
 
                   <div className="space-y-2">
-                    <Label className="text-foreground">Descrição *</Label>
+                    <Label>Descrição *</Label>
                     <Input
                       value={newDescription}
                       onChange={(e) => setNewDescription(e.target.value)}
-                      className="bg-background border-input"
+                     
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-foreground">Valor (R$) *</Label>
+                      <Label>Valor (R$) *</Label>
                       <Input
                         type="number"
                         step="0.01"
                         value={newAmount}
                         onChange={(e) => setNewAmount(e.target.value)}
-                        className="bg-background border-input"
+                       
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-foreground">Vencimento</Label>
+                      <Label>Vencimento</Label>
                       <Input
                         type="date"
                         value={newDueDate}
                         onChange={(e) => setNewDueDate(e.target.value)}
-                        className="bg-background border-input"
+                       
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-foreground">Observações</Label>
+                    <Label>Observações</Label>
                     <Textarea
                       value={newNotes}
                       onChange={(e) => setNewNotes(e.target.value)}
-                      className="bg-background border-input resize-none"
+                      className="border-input resize-none"
                       rows={2}
                     />
                   </div>
@@ -278,7 +251,6 @@ export function FinancialDashboard({
                   <Button
                     onClick={handleCreateTransaction}
                     disabled={!newDescription || !newAmount || isSubmitting}
-                    className="bg-primary hover:bg-primary/90"
                   >
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salvar"}
                   </Button>
@@ -286,62 +258,49 @@ export function FinancialDashboard({
               </DialogContent>
             </Dialog>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 sm:px-3">
             {transactions.length === 0 ? (
-              <div className="text-center py-8">
-                <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Nenhuma transação este mês</p>
+              <div className="py-8 text-center">
+                <Wallet className="mx-auto mb-4 size-10 text-sc-smoke" aria-hidden="true" />
+                <p className="text-sc-stone">Nenhuma transação neste mês</p>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border hover:bg-transparent">
-                    <TableHead className="text-muted-foreground">Data</TableHead>
-                    <TableHead className="text-muted-foreground">Descrição</TableHead>
-                    <TableHead className="text-muted-foreground">Categoria</TableHead>
-                    <TableHead className="text-muted-foreground text-right">Valor</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.slice(0, 10).map((transaction) => (
-                    <TableRow key={transaction.id} className="border-border">
-                      <TableCell className="text-muted-foreground text-sm">
-                        {formatDate(transaction.created_at)}
-                      </TableCell>
-                      <TableCell className="text-foreground">{transaction.description}</TableCell>
-                      <TableCell>
-                        {transaction.category ? (
-                          <Badge
-                            variant="outline"
-                            style={{
-                              borderColor: transaction.category.color,
-                              color: transaction.category.color,
-                            }}
-                          >
+              <ul className="divide-y divide-sc-line">
+                {transactions.slice(0, 10).map((transaction) => {
+                  const incoming = transaction.type === "income" || transaction.type === "deposit"
+                  return (
+                    <li key={transaction.id} className="grid grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-3 px-3 py-3">
+                      <span className="sc-label text-sc-smoke">{formatDate(transaction.created_at)}</span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm text-sc-bone">{transaction.description}</span>
+                        {transaction.category && (
+                          <span className="sc-label mt-1 flex items-center gap-1.5 text-sc-stone">
+                            <span className="size-1.5 rounded-full" style={{ background: transaction.category.color }} aria-hidden="true" />
                             {transaction.category.name}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
+                          </span>
                         )}
-                      </TableCell>
-                      <TableCell
-                        className={`text-right font-medium ${
-                          transaction.type === "income" || transaction.type === "deposit"
-                            ? "text-green-500"
-                            : "text-red-500"
-                        }`}
-                      >
-                        {transaction.type === "income" || transaction.type === "deposit" ? "+" : "-"} R${" "}
-                        {transaction.amount.toFixed(2)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </span>
+                      <span className={incoming ? "text-sm font-semibold tabular-nums text-sc-bone" : "text-sm font-semibold tabular-nums text-sc-red"}>
+                        {incoming ? "+" : "−"} {formatPrice(transaction.amount)}
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
             )}
           </CardContent>
         </Card>
       </div>
+    </div>
+  )
+}
+
+function Total({ label, note, accent = false, children }: { label: string; note: string; accent?: boolean; children: React.ReactNode }) {
+  return (
+    <div className={accent ? "flex min-h-[150px] flex-col justify-end gap-2.5 bg-sc-ember p-5 lg:min-h-[180px] lg:p-6" : "flex min-h-[150px] flex-col justify-end gap-2.5 bg-sc-carbon p-5 lg:min-h-[180px] lg:p-6"}>
+      <span className="sc-label text-sc-stone">{label}</span>
+      <span className="text-[clamp(40px,4.4vw,64px)]">{children}</span>
+      <span className="text-[13px] text-sc-stone">{note}</span>
     </div>
   )
 }

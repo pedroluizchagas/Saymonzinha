@@ -1,8 +1,21 @@
+import Link from "next/link"
 import { redirect } from "next/navigation"
+import { Plus, ShoppingCart } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { AdminHeader } from "@/components/admin/header"
 import { DashboardKPIs } from "@/components/admin/dashboard-kpis"
+import type { ComponentProps } from "react"
+import { Button } from "@/components/ui/button"
 import type { Profile } from "@/types/database"
+
+type DashboardData = ComponentProps<typeof DashboardKPIs>["data"]
+
+/** "Bom dia", "Boa tarde" ou "Boa noite" pela hora de Divinópolis, e o mês por extenso. */
+function greeting(now: Date) {
+  const hour = Number(new Intl.DateTimeFormat("pt-BR", { hour: "numeric", hourCycle: "h23", timeZone: "America/Sao_Paulo" }).format(now))
+  const month = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric", timeZone: "America/Sao_Paulo" }).format(now)
+  return { hello: hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite", month }
+}
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -163,42 +176,35 @@ export default async function AdminDashboardPage() {
       ticketMedio,
     },
     topProblems,
-    recentOrders: recentOrders || [],
+    // O Supabase tipa o cliente embutido como lista, mas a relação é de um para um e vem como objeto.
+    recentOrders: (recentOrders ?? []) as unknown as DashboardData["recentOrders"],
   }
+
+  const { hello, month } = greeting(now)
+  const firstName = profile?.full_name?.split(" ")[0]
 
   return (
     <div>
-      <AdminHeader user={profile as Profile | null} title="Dashboard" subtitle="Visão geral do seu negócio" />
+      <AdminHeader
+        user={profile as Profile | null}
+        title="Visão geral"
+        subtitle={`${hello}${firstName ? `, ${firstName}` : ""} · ${month}`}
+      >
+        <Button asChild>
+          <Link href="/admin/orders/new">
+            <Plus aria-hidden="true" />
+            Nova OS
+          </Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link href="/admin/pdv">
+            <ShoppingCart aria-hidden="true" />
+            Abrir PDV
+          </Link>
+        </Button>
+      </AdminHeader>
 
-      {/* Cabeçalho Mobile conforme design */}
-      <div className="lg:hidden px-4 md:px-6 pt-2">
-        <p className="text-sm text-muted-foreground">Bom dia, {profile?.full_name?.split(' ')[0] || 'Admin'}</p>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">Visão Geral</h1>
-          <span className="text-xs text-muted-foreground">
-            {(() => {
-              const now = new Date()
-              const monthNames = [
-                "Janeiro",
-                "Fevereiro",
-                "Março",
-                "Abril",
-                "Maio",
-                "Junho",
-                "Julho",
-                "Agosto",
-                "Setembro",
-                "Outubro",
-                "Novembro",
-                "Dezembro",
-              ]
-              return `${monthNames[now.getMonth()]} ${now.getFullYear()}`
-            })()}
-          </span>
-        </div>
-      </div>
-
-      <div className="p-4 md:p-6 pb-24 lg:pb-6">
+      <div className="px-4 pb-6 md:px-8 lg:pb-10">
         <DashboardKPIs data={kpiData} />
       </div>
     </div>

@@ -1,88 +1,38 @@
-'use client'
+"use client"
 
-import Image from 'next/image'
-import { useEffect, useState } from 'react'
-import { Search } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import type { Profile } from '@/types/database'
-import { createClient } from '@/lib/supabase/client'
-import { NotificationDropdown } from '@/components/admin/notification-dropdown'
+// Cabeçalho de cada página do painel: o rótulo em mono e o título no display da home, como as seções
+// da Raio-X, e as ações da página (Nova OS, Novo cliente...). No computador, as notificações e quem
+// está usando ficam à direita; no celular elas já estão na barra do topo.
+
+import type { ReactNode } from "react"
+import { NotificationDropdown } from "@/components/admin/notification-dropdown"
+import { ROLE_LABELS, UserAvatar } from "@/components/admin/avatar"
+import type { Profile } from "@/types/database"
 
 interface AdminHeaderProps {
   user: Profile | null
   title: string
   subtitle?: string
+  /** Ações da página, à direita do título no computador e abaixo dele no celular. */
+  children?: ReactNode
 }
 
-export function AdminHeader({ user, title, subtitle }: AdminHeaderProps) {
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-
-  useEffect(() => {
-    const run = async () => {
-      if (!user?.avatar_url) {
-        setAvatarUrl(null)
-        return
-      }
-      if (user.avatar_url.startsWith('http')) {
-        setAvatarUrl(user.avatar_url)
-        return
-      }
-      const supabase = createClient()
-      const { data } = await supabase.storage
-        .from('avatar_profire')
-        .createSignedUrl(user.avatar_url, 3600)
-      setAvatarUrl(data?.signedUrl || null)
-    }
-    run()
-  }, [user?.avatar_url])
-
+export function AdminHeader({ user, title, subtitle, children }: AdminHeaderProps) {
   return (
-    <header className="hidden lg:flex h-16 items-center justify-between px-6 border-b border-border bg-card/50 backdrop-blur-sm">
-      <div>
-        <h1 className="text-xl font-semibold text-foreground">{title}</h1>
-        {subtitle && (
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
-        )}
+    <header className="flex flex-wrap items-end gap-x-6 gap-y-4 px-4 pt-5 pb-5 md:px-8 lg:pt-8 lg:pb-7">
+      <div className="min-w-0 flex-1">
+        {subtitle && <p className="sc-label text-sc-stone">{subtitle}</p>}
+        <h1 className="mt-2.5 font-display text-[clamp(40px,5vw,64px)] leading-[0.84] font-black uppercase tracking-[-0.01em] text-balance text-sc-bone lg:mt-3">
+          {title}
+        </h1>
       </div>
-
-      <div className="flex items-center gap-4">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar..."
-            className="pl-9 w-64 bg-background border-input"
-          />
-        </div>
-
-        {/* Notifications */}
+      {children && <div className="flex flex-wrap items-center gap-2 max-lg:w-full">{children}</div>}
+      <div className="hidden items-center gap-3 border-l border-sc-line pl-4 lg:flex">
         <NotificationDropdown />
-
-        {/* User */}
-        <div className="flex items-center gap-3 pl-4 border-l border-border">
-          {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt={user?.full_name || 'Usuário'}
-              width={36}
-              height={36}
-              className="rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary font-semibold text-sm">
-                {user?.full_name?.charAt(0) || 'U'}
-              </span>
-            </div>
-          )}
-          <div className="hidden xl:block">
-            <p className="text-sm font-medium text-foreground">
-              {user?.full_name}
-            </p>
-            <p className="text-xs text-muted-foreground capitalize">
-              {user?.role}
-            </p>
-          </div>
+        <UserAvatar user={user} size={38} />
+        <div className="hidden xl:block">
+          <p className="text-sm font-medium text-sc-bone">{user?.full_name}</p>
+          <p className="sc-label text-sc-stone">{ROLE_LABELS[user?.role ?? ""] ?? "Equipe"}</p>
         </div>
       </div>
     </header>

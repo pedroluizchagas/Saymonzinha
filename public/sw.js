@@ -1,14 +1,14 @@
-const SW_VERSION = "4.0.0"
+const SW_VERSION = "5.0.0"
 const CACHE_NAME = "saymoncell-v" + SW_VERSION
 const APP_PREFIXES = ["/admin", "/auth"]
 const PRECACHE_URLS = [
   "/offline-admin.html",
   "/manifest.webmanifest",
+  "/home/glyph.png",
   "/icons/favicon-32x32.png",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
   "/icons/apple-touch-icon.png",
-  "/images/logo.png",
 ]
 
 // ----------------------------------------------------------
@@ -31,7 +31,7 @@ self.addEventListener("push", function (event) {
   var options = {
     body: data.body || "",
     icon: "/icons/icon-192x192.png",
-    badge: "/icons/favicon-32x32.png",
+    badge: "/icons/badge-96x96.png",
     tag: data.tag || "default",
     renotify: true,
     data: {

@@ -1,5 +1,7 @@
 "use client"
 
+import { formatPrice } from "@/lib/catalog"
+import { Money } from "./money"
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
@@ -8,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -153,7 +154,7 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
       {/* Área de Produtos */}
       <div className="lg:col-span-2 space-y-4">
         {/* Busca e Código de Barras */}
-        <Card className="bg-card border-border">
+        <Card>
           <CardContent className="p-4">
             <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
               {/* Busca - ocupa toda a linha no mobile */}
@@ -163,24 +164,24 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
                   placeholder="Buscar produto por nome..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-background border-input"
+                  className="pl-10 border-input"
                 />
 
                 {searchResults.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 z-10 mt-1.5 max-h-64 overflow-y-auto rounded-[14px] border border-sc-line bg-sc-raised p-1.5 shadow-[0_14px_26px_-14px_rgba(0,0,0,0.5)]">
                     {searchResults.map((product) => (
                       <button
                         key={product.id}
                         type="button"
                         onClick={() => addToCart(product)}
-                        className="w-full p-3 text-left hover:bg-secondary/50 transition-colors border-b border-border last:border-0"
+                        className="w-full rounded-[10px] p-3 text-left transition-colors hover:bg-white/[0.06]"
                       >
                         <div className="flex justify-between items-center">
                           <div>
                             <p className="font-medium text-foreground">{product.name}</p>
-                            <p className="text-xs text-muted-foreground">Estoque: {product.stock_quantity}</p>
+                            <p className="sc-label mt-1 text-sc-stone">{product.stock_quantity} em estoque</p>
                           </div>
-                          <p className="font-semibold text-primary">R$ {product.sale_price.toFixed(2)}</p>
+                          <p className="font-semibold tabular-nums text-sc-bone">{formatPrice(product.sale_price)}</p>
                         </div>
                       </button>
                     ))}
@@ -198,14 +199,14 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
                       placeholder="Cod. barras"
                       value={barcodeInput}
                       onChange={(e) => setBarcodeInput(e.target.value)}
-                      className="pl-10 lg:w-40 bg-background border-input"
+                      className="pl-10 lg:w-40 border-input"
                     />
                   </div>
                 </form>
 
-                <Button type="button" variant="outline" onClick={addCustomItem} className="bg-transparent shrink-0">
-                  <Plus className="w-4 h-4 mr-1 lg:mr-2" />
-                  <span className="hidden sm:inline">Item</span> Avulso
+                <Button type="button" variant="outline" onClick={addCustomItem} className="shrink-0">
+                  <Plus />
+                  Item avulso
                 </Button>
               </div>
             </div>
@@ -213,12 +214,9 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
         </Card>
 
         {/* Carrinho */}
-        <Card className="bg-card border-border">
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-foreground flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5" />
-              Carrinho
-            </CardTitle>
+            <CardTitle>Carrinho</CardTitle>
           </CardHeader>
           <CardContent>
             {cart.length === 0 ? (
@@ -228,62 +226,61 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
                 <p className="text-sm text-muted-foreground">Adicione produtos para iniciar uma venda</p>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border hover:bg-transparent">
-                    <TableHead className="text-muted-foreground">Produto</TableHead>
-                    <TableHead className="text-muted-foreground w-24">Qtd</TableHead>
-                    <TableHead className="text-muted-foreground w-32">Preço</TableHead>
-                    <TableHead className="text-muted-foreground w-28">Total</TableHead>
-                    <TableHead className="w-12"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {cart.map((item) => (
-                    <TableRow key={item.id} className="border-border">
-                      <TableCell>
-                        <Input
-                          value={item.name}
-                          onChange={(e) => updateItem(item.id, "name", e.target.value)}
-                          className="bg-background border-input"
-                        />
-                      </TableCell>
-                      <TableCell>
+              <ul className="divide-y divide-sc-line">
+                {cart.map((item) => (
+                  // no celular: a descrição e o botão de tirar numa linha, quantidade, preço e total na outra;
+                  // do sm em diante, tudo numa linha só
+                  <li
+                    key={item.id}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-2 gap-y-2 py-3 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_6.5rem_8rem_6.5rem_auto] sm:items-center"
+                  >
+                    <Input
+                      value={item.name}
+                      onChange={(e) => updateItem(item.id, "name", e.target.value)}
+                      aria-label="Descrição do item"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeItem(item.id)}
+                      className="hover:bg-sc-ember hover:text-sc-red sm:col-start-5 sm:row-start-1"
+                      aria-label={`Tirar ${item.name} da venda`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                    <div className="col-span-2 grid grid-cols-[6.5rem_minmax(0,1fr)_auto] items-center gap-2 sm:contents">
+                      <label className="relative sm:col-start-2 sm:row-start-1">
+                        <span className="sc-label pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sc-smoke">Qtd</span>
                         <Input
                           type="number"
                           min="1"
+                          inputMode="numeric"
                           value={item.quantity}
                           onChange={(e) => updateItem(item.id, "quantity", Number.parseInt(e.target.value) || 1)}
-                          className="bg-background border-input"
+                          className="pl-11 text-right tabular-nums"
+                          aria-label="Quantidade"
                         />
-                      </TableCell>
-                      <TableCell>
+                      </label>
+                      <label className="relative sm:col-start-3 sm:row-start-1">
+                        <span className="sc-label pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sc-smoke">R$</span>
                         <Input
                           type="number"
                           step="0.01"
                           min="0"
+                          inputMode="decimal"
                           value={item.unit_price}
                           onChange={(e) => updateItem(item.id, "unit_price", Number.parseFloat(e.target.value) || 0)}
-                          className="bg-background border-input"
+                          className="pl-10 text-right tabular-nums"
+                          aria-label="Preço de cada um, em reais"
                         />
-                      </TableCell>
-                      <TableCell className="font-semibold text-foreground">
-                        R$ {(item.quantity * item.unit_price).toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeItem(item.id)}
-                          className="text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </label>
+                      <p className="text-right font-semibold tabular-nums text-foreground sm:col-start-4 sm:row-start-1">
+                        {formatPrice(item.quantity * item.unit_price)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             )}
           </CardContent>
         </Card>
@@ -291,41 +288,44 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
 
       {/* Resumo e Pagamento */}
       <div className="space-y-4">
-        <Card className="bg-card border-border">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-lg text-foreground">Resumo da Venda</CardTitle>
+            <p className="sc-label text-sc-stone">Resumo</p>
+            <CardTitle>Venda</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="text-foreground">R$ {subtotal.toFixed(2)}</span>
+            <dl className="grid gap-2 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-sc-stone">Subtotal</dt>
+                <dd className="tabular-nums text-sc-bone">{formatPrice(subtotal)}</dd>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Desconto</span>
-                <span className="text-foreground">- R$ {discountValue.toFixed(2)}</span>
+              <div className="flex justify-between gap-3">
+                <dt className="text-sc-stone">Desconto</dt>
+                <dd className="tabular-nums text-sc-bone">− {formatPrice(discountValue)}</dd>
               </div>
-              <div className="h-px bg-border" />
-              <div className="flex justify-between text-lg font-bold">
-                <span className="text-foreground">Total</span>
-                <span className="text-primary">R$ {total.toFixed(2)}</span>
-              </div>
-              {fee > 0 && (
-                <>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Taxa ({selectedMethod?.fee_percentage}%)</span>
-                    <span className="text-destructive">- R$ {fee.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Valor Líquido</span>
-                    <span className="text-green-500">R$ {netTotal.toFixed(2)}</span>
-                  </div>
-                </>
-              )}
+            </dl>
+
+            {/* o total no bloco vermelho, como o valor da nota de serviço */}
+            <div className="flex items-end justify-between gap-3 rounded-[18px] bg-sc-red px-4 py-4 text-sc-ink">
+              <span className="sc-label">Total</span>
+              <Money value={total} className="text-[44px]" />
             </div>
 
+            {fee > 0 && (
+              <dl className="grid gap-2 text-sm">
+                <div className="flex justify-between gap-3">
+                  <dt className="text-sc-stone">Taxa ({selectedMethod?.fee_percentage}%)</dt>
+                  <dd className="tabular-nums text-sc-red">− {formatPrice(fee)}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-sc-stone">Valor líquido</dt>
+                  <dd className="font-semibold tabular-nums text-sc-bone">{formatPrice(netTotal)}</dd>
+                </div>
+              </dl>
+            )}
+
             <div className="space-y-2">
-              <Label className="text-foreground">Desconto (R$)</Label>
+              <Label>Desconto (R$)</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -333,14 +333,13 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
                 placeholder="0,00"
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
-                className="bg-background border-input"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-foreground">Forma de Pagamento *</Label>
+              <Label>Forma de pagamento *</Label>
               <Select value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
-                <SelectTrigger className="bg-background border-input">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
@@ -356,18 +355,18 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
             <Button
               onClick={handleFinalizeSale}
               disabled={cart.length === 0 || !selectedPaymentMethod || isSubmitting}
-              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+              className="w-full"
               size="lg"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Finalizando...
+                  <Loader2 className="animate-spin" />
+                  Finalizando
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Finalizar Venda
+                  <CheckCircle2 />
+                  Finalizar venda
                 </>
               )}
             </Button>
@@ -375,9 +374,9 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
         </Card>
 
         {/* Produtos Rápidos */}
-        <Card className="bg-card border-border">
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-foreground">Produtos Rápidos</CardTitle>
+            <CardTitle>Atalhos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
@@ -387,11 +386,11 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => addToCart(product)}
-                  className="justify-start text-left h-auto py-2 bg-transparent"
+                  className="h-auto justify-start rounded-[14px] py-2.5 text-left"
                 >
-                  <div className="truncate">
-                    <p className="text-xs font-medium truncate">{product.name}</p>
-                    <p className="text-xs text-muted-foreground">R$ {product.sale_price.toFixed(2)}</p>
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-medium">{product.name}</p>
+                    <p className="text-xs tabular-nums text-sc-stone">{formatPrice(product.sale_price)}</p>
                   </div>
                 </Button>
               ))}
@@ -402,19 +401,17 @@ export function PDVInterface({ paymentMethods, products }: PDVInterfaceProps) {
 
       {/* Dialog de Sucesso */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-        <DialogContent className="bg-card border-border">
+        <DialogContent>
           <DialogHeader className="text-center">
-            <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-8 h-8 text-accent" />
+            <div className="mx-auto mb-4 grid size-16 place-items-center rounded-full bg-sc-red-strong">
+              <CheckCircle2 className="size-8 text-white" />
             </div>
-            <DialogTitle className="text-foreground">Venda Realizada!</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              A venda foi registrada com sucesso no sistema.
-            </DialogDescription>
+            <DialogTitle className="pr-0 text-center">Venda registrada</DialogTitle>
+            <DialogDescription className="text-center">A venda entrou no fluxo de caixa do financeiro, e o estoque dos produtos já baixou.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button onClick={() => setShowSuccess(false)} className="w-full">
-              Nova Venda
+              Nova venda
             </Button>
           </DialogFooter>
         </DialogContent>

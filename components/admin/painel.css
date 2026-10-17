@@ -1,0 +1,109 @@
+/* =====================================================================
+   Painel (ver sidebar.tsx): as peças da moldura que vêm do sistema da home.
+   A barra de abas é a sc-tabbar da Desdobra (vidro escuro, a aba atual em branco);
+   o resto do painel usa os componentes do shadcn com os tokens da marca (app/globals.css).
+   ===================================================================== */
+
+/* barra do topo no celular: vidro escuro com o fio de baixo, como o cabeçalho da Raio-X ao rolar */
+.pn-topbar {
+  background: rgba(10, 9, 8, 0.82);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 1px 0 var(--stage-line);
+}
+
+/* barra de abas flutuante */
+.pn-tabbar-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(12px, var(--sab));
+  /* abaixo das janelas, menus e listas de opção (z-50), que precisam cobrir as barras do celular */
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px;
+  pointer-events: none;
+}
+.pn-tabbar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: 100%;
+  max-width: 460px;
+  pointer-events: auto;
+}
+.pn-tab {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 4px 7px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  font: 500 11px/1.1 var(--font-text);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.3s var(--ease-out),
+    color 0.3s;
+}
+.pn-tab svg {
+  width: 20px;
+  height: 20px;
+}
+.pn-tab span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pn-tab[aria-current] {
+  background: var(--white);
+  color: var(--ink);
+}
+
+/* "Mais": a folha que sobe acima da barra de abas */
+.pn-more {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(max(12px, var(--sab)) + 74px);
+  z-index: 39;
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 6px;
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-card);
+  background: var(--carbon);
+  box-shadow: var(--shadow-device);
+  transition:
+    transform 0.35s var(--ease-out),
+    opacity 0.25s,
+    visibility 0s;
+}
+.pn-more ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pn-more[data-open="0"] {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(16px) scale(0.98);
+  pointer-events: none;
+  transition:
+    transform 0.35s var(--ease-out),
+    opacity 0.25s,
+    visibility 0s 0.35s;
+}
+
+/* a barra de abas e a folha são do celular; no computador, o menu lateral (este arquivo vem fora das
+   camadas do Tailwind, então o lg:hidden do componente não basta) */
+@media (min-width: 1024px) {
+  .pn-tabbar-wrap,
+  .pn-more {
+    display: none;
+  }
+}

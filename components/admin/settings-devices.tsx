@@ -7,15 +7,18 @@
  import { Button } from "@/components/ui/button"
  import { Input } from "@/components/ui/input"
  import { Label } from "@/components/ui/label"
- import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
  import { Switch } from "@/components/ui/switch"
- import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
- import { Loader2, Smartphone, Plus } from "lucide-react"
+ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+ import { ChevronRight, Loader2 } from "lucide-react"
+ import { SettingsField, SettingsList, SettingsRow, countLabel } from "@/components/admin/settings-list"
+
+ const BRAND_COLUMNS = "md:grid-cols-[minmax(0,1fr)_4rem_8rem_1rem]"
+ const MODEL_COLUMNS = "md:grid-cols-[minmax(0,1fr)_4rem_1rem]"
  
  export function SettingsDevices() {
    const supabase = createClient()
    const [brands, setBrands] = useState<DeviceBrand[]>([])
-   const [loading, setLoading] = useState(false)
+   const [loading, setLoading] = useState(true)
    const [name, setName] = useState("")
    const [savingId, setSavingId] = useState<string | null>(null)
  
@@ -79,22 +82,18 @@
    }
  
    return (
-     <Card className="bg-card border-border">
+     <Card>
        <CardHeader>
-         <div className="flex items-center gap-3">
-           <div className="p-2 bg-primary/10 rounded-lg">
-             <Smartphone className="w-5 h-5 text-primary" />
-           </div>
-           <CardTitle className="text-lg text-foreground">Marcas e Modelos</CardTitle>
-         </div>
+         <p className="sc-label text-sc-stone">Cadastradas</p>
+         <CardTitle>{loading && brands.length === 0 ? "Carregando" : countLabel(brands.length, "marca", "marcas")}</CardTitle>
        </CardHeader>
        <CardContent className="space-y-6">
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-           <div className="space-y-2 md:col-span-2">
-             <Label className="text-foreground">Nova marca</Label>
-             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Apple" />
+         <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+           <div className="space-y-2">
+             <Label htmlFor="marca-nome">Nova marca</Label>
+             <Input id="marca-nome" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Apple" />
            </div>
-           <div className="flex items-end">
+           <div>
              <Button onClick={addBrand} disabled={savingId === "new"}>
                {savingId === "new" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                Adicionar
@@ -102,124 +101,80 @@
            </div>
          </div>
  
-         <div className="border border-border rounded-lg overflow-hidden">
-           <Table>
-             <TableHeader>
-               <TableRow>
-                 <TableHead>Marca</TableHead>
-                 <TableHead>Ativa</TableHead>
-                 <TableHead>Modelos</TableHead>
-                 <TableHead></TableHead>
-               </TableRow>
-             </TableHeader>
-             <TableBody>
-               {loading ? (
-                 <TableRow>
-                   <TableCell colSpan={4}>
-                     <div className="flex items-center gap-2">
-                       <Loader2 className="w-4 h-4 animate-spin" />
-                       Carregando...
-                     </div>
-                   </TableCell>
-                 </TableRow>
-               ) : brands.length === 0 ? (
-                 <TableRow>
-                   <TableCell colSpan={4} className="text-muted-foreground">
-                     Nenhuma marca cadastrada
-                   </TableCell>
-                 </TableRow>
-               ) : (
-                 brands.map((b) => (
-                   <TableRow key={b.id}>
-                     <TableCell>
-                       <Input defaultValue={b.name} onBlur={(e) => updateBrand(b, { name: e.target.value })} />
-                     </TableCell>
-                     <TableCell className="w-32">
-                       <Switch checked={!!b.is_active} onCheckedChange={(v) => updateBrand(b, { is_active: v })} />
-                     </TableCell>
-                     <TableCell className="w-40">
-                       <Dialog>
-                         <DialogTrigger asChild>
-                           <Button variant="outline" size="sm" onClick={() => openModels(b)}>
-                             <Plus className="w-4 h-4 mr-2" />
-                             Gerenciar
+         <SettingsList
+           head={["Marca", "Ativa", "Modelos"]}
+           columns={BRAND_COLUMNS}
+           loading={loading && brands.length === 0}
+           empty={brands.length === 0 && "Nenhuma marca cadastrada."}
+         >
+           {brands.map((b) => (
+             <SettingsRow key={b.id} columns={BRAND_COLUMNS} saving={savingId === b.id}>
+               <SettingsField label="Marca" className="col-span-2 md:col-span-1">
+                 <Input defaultValue={b.name} onBlur={(e) => updateBrand(b, { name: e.target.value })} />
+               </SettingsField>
+               <SettingsField label="Ativa">
+                 <span className="flex h-11 items-center">
+                   <Switch checked={!!b.is_active} onCheckedChange={(v) => updateBrand(b, { is_active: v })} />
+                 </span>
+               </SettingsField>
+               <div className="flex h-11 items-center justify-end md:justify-start">
+                 <Dialog>
+                   <DialogTrigger asChild>
+                     <Button variant="outline" size="sm" onClick={() => openModels(b)} aria-label={`Modelos da marca ${b.name}`}>
+                       Modelos
+                       <ChevronRight />
+                     </Button>
+                   </DialogTrigger>
+                   <DialogContent className="sm:max-w-[600px]">
+                     <DialogHeader>
+                       <DialogTitle>Modelos · {selectedBrand?.name}</DialogTitle>
+                       <DialogDescription>Os modelos da marca e quais estão ativos.</DialogDescription>
+                     </DialogHeader>
+                     <div className="space-y-4">
+                       <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                         <div className="space-y-2">
+                           <Label htmlFor="modelo-nome">Novo modelo</Label>
+                           <Input
+                             id="modelo-nome"
+                             value={modelName}
+                             onChange={(e) => setModelName(e.target.value)}
+                             placeholder="Ex.: iPhone 12"
+                           />
+                         </div>
+                         <div>
+                           <Button onClick={addModel} disabled={modelSavingId === "new" || !selectedBrand}>
+                             {modelSavingId === "new" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                             Adicionar
                            </Button>
-                         </DialogTrigger>
-                         <DialogContent className="sm:max-w-[600px] bg-card border-border">
-                           <DialogHeader>
-                             <DialogTitle>Modelos - {selectedBrand?.name}</DialogTitle>
-                           </DialogHeader>
-                           <div className="space-y-4">
-                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                               <div className="space-y-2 md:col-span-2">
-                                 <Label className="text-foreground">Novo modelo</Label>
-                                 <Input value={modelName} onChange={(e) => setModelName(e.target.value)} placeholder="Ex.: iPhone 12" />
-                               </div>
-                               <div className="flex items-end">
-                                 <Button onClick={addModel} disabled={modelSavingId === "new" || !selectedBrand}>
-                                   {modelSavingId === "new" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                   Adicionar
-                                 </Button>
-                               </div>
-                             </div>
+                         </div>
+                       </div>
  
-                             <div className="border border-border rounded-lg overflow-hidden">
-                               <Table>
-                                 <TableHeader>
-                                   <TableRow>
-                                     <TableHead>Modelo</TableHead>
-                                     <TableHead>Ativo</TableHead>
-                                     <TableHead></TableHead>
-                                   </TableRow>
-                                 </TableHeader>
-                                 <TableBody>
-                                   {modelsLoading ? (
-                                     <TableRow>
-                                       <TableCell colSpan={3}>
-                                         <div className="flex items-center gap-2">
-                                           <Loader2 className="w-4 h-4 animate-spin" />
-                                           Carregando...
-                                         </div>
-                                       </TableCell>
-                                     </TableRow>
-                                   ) : models.length === 0 ? (
-                                     <TableRow>
-                                       <TableCell colSpan={3} className="text-muted-foreground">
-                                         Nenhum modelo cadastrado
-                                       </TableCell>
-                                     </TableRow>
-                                   ) : (
-                                     models.map((m) => (
-                                       <TableRow key={m.id}>
-                                         <TableCell>
-                                           <Input defaultValue={m.name} onBlur={(e) => updateModel(m, { name: e.target.value })} />
-                                         </TableCell>
-                                         <TableCell className="w-32">
-                                           <Switch checked={!!m.is_active} onCheckedChange={(v) => updateModel(m, { is_active: v })} />
-                                         </TableCell>
-                                         <TableCell className="w-28">
-                                           {modelSavingId === m.id ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                                         </TableCell>
-                                       </TableRow>
-                                     ))
-                                   )}
-                                 </TableBody>
-                               </Table>
-                             </div>
-                           </div>
-                           <DialogFooter></DialogFooter>
-                         </DialogContent>
-                       </Dialog>
-                     </TableCell>
-                     <TableCell className="w-28">
-                       {savingId === b.id ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                     </TableCell>
-                   </TableRow>
-                 ))
-               )}
-             </TableBody>
-           </Table>
-         </div>
+                       <SettingsList
+                         head={["Modelo", "Ativo"]}
+                         columns={MODEL_COLUMNS}
+                         loading={modelsLoading && models.length === 0}
+                         empty={models.length === 0 && "Nenhum modelo cadastrado."}
+                       >
+                         {models.map((m) => (
+                           <SettingsRow key={m.id} columns={MODEL_COLUMNS} saving={modelSavingId === m.id}>
+                             <SettingsField label="Modelo" className="col-span-2 md:col-span-1">
+                               <Input defaultValue={m.name} onBlur={(e) => updateModel(m, { name: e.target.value })} />
+                             </SettingsField>
+                             <SettingsField label="Ativo">
+                               <span className="flex h-11 items-center">
+                                 <Switch checked={!!m.is_active} onCheckedChange={(v) => updateModel(m, { is_active: v })} />
+                               </span>
+                             </SettingsField>
+                           </SettingsRow>
+                         ))}
+                       </SettingsList>
+                     </div>
+                   </DialogContent>
+                 </Dialog>
+               </div>
+             </SettingsRow>
+           ))}
+         </SettingsList>
        </CardContent>
      </Card>
    )
