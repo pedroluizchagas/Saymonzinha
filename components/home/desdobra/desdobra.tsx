@@ -32,6 +32,7 @@ import {
 } from "../shared/content"
 import { makeCracks } from "../shared/crack"
 import { CallSlider, StatusBar, useClock } from "../shared/device-ui"
+import { HeaderActions } from "../shared/header-actions"
 import { HomeFooter } from "../shared/home-footer"
 import { useQuoteRequest } from "../shared/quote-dialog"
 import { ServiceVisual, type VisualKind } from "../shared/service-visual"
@@ -396,20 +397,7 @@ export function Desdobra({ products, lite }: { products: Product[]; lite: boolea
             </a>
           ))}
         </nav>
-        <div className="sc-header-actions">
-          <a
-            className="sc-pill sc-pill--stage sc-pill--sm sc-pill--icon"
-            href={whatsappLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Chamar no WhatsApp"
-          >
-            <MessageCircle aria-hidden="true" />
-          </a>
-          <button type="button" className="sc-pill sc-pill--red sc-pill--sm" onClick={() => quote.open()}>
-            Pedir orçamento <ArrowUpRight />
-          </button>
-        </div>
+        <HeaderActions />
       </header>
 
       <div className="va-controls">

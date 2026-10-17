@@ -1,0 +1,67 @@
+/* Janela do site (ver modal.tsx): folha que sobe de baixo, centralizada ou ao lado. */
+
+.sc-modal {
+  width: min(calc(100% - 32px), 520px);
+  max-height: min(92svh, 760px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-device);
+  overflow: auto;
+  overscroll-behavior: contain;
+  color-scheme: dark;
+}
+.sc-modal::backdrop {
+  background: rgba(10, 9, 8, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.sc-modal[data-layout="sheet"] {
+  width: 100%;
+  max-width: 640px;
+  max-height: 92svh;
+  margin: auto auto 0;
+  border-bottom: 0;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+.sc-modal[data-layout="side"] {
+  width: min(100%, 440px);
+  max-width: none;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 0 0 auto;
+  border-right: 0;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+}
+.sc-modal[open] {
+  animation: sc-modal-in 0.35s var(--ease-out);
+}
+.sc-modal[data-layout="sheet"][open] {
+  animation-name: sc-modal-up;
+}
+.sc-modal[data-layout="side"][open] {
+  animation-name: sc-modal-side;
+}
+@keyframes sc-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+@keyframes sc-modal-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sc-modal-side {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-modal[open] {
+    animation: none;
+  }
+}

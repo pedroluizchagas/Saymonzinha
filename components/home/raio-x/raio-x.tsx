@@ -5,7 +5,7 @@
 // cada camada apresenta um serviço, e ele se remonta "novo de novo".
 // Depois a página segue editorial: etapas, números, marcas, loja e contato.
 
-import { ArrowDown, ArrowUpRight, Check, Instagram, MapPin, Menu, MessageCircle, Package, Phone, X } from "lucide-react"
+import { ArrowDown, ArrowUpRight, Check, Instagram, MapPin, Menu, Package, Phone, X } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import type { Product } from "@/types/database"
 import {
@@ -31,6 +31,7 @@ import {
 } from "../shared/content"
 import { makeCracks } from "../shared/crack"
 import { CallSlider, useClock } from "../shared/device-ui"
+import { HeaderActions } from "../shared/header-actions"
 import { HomeFooter } from "../shared/home-footer"
 import { useQuoteRequest } from "../shared/quote-dialog"
 // O CSS do sistema vem antes do da versão: as regras da versão sobrescrevem as do sistema.
@@ -152,19 +153,7 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
           <sup>®</sup>
         </a>
         <span className="sc-label vb-header__mid">{SECTIONS.region}</span>
-        <div className="sc-header-actions">
-          <a
-            className="sc-pill sc-pill--stage sc-pill--sm sc-pill--icon"
-            href={whatsappLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Chamar no WhatsApp"
-          >
-            <MessageCircle aria-hidden="true" />
-          </a>
-          <button type="button" className="sc-pill sc-pill--red sc-pill--sm" onClick={() => quote.open()}>
-            Pedir orçamento <ArrowUpRight />
-          </button>
+        <HeaderActions>
           <button
             ref={menuButtonRef}
             type="button"
@@ -176,7 +165,7 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
           >
             {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
           </button>
-        </div>
+        </HeaderActions>
       </header>
       <nav id="vb-menu" className="vb-menu" aria-label="Menu" hidden={!menuOpen}>
         <ul>

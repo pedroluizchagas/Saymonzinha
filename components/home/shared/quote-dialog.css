@@ -1,48 +1,5 @@
-/* Janela do pedido de orçamento (ver quote-dialog.tsx).
-   Centralizada na Desdobra; na Raio-X sobe de baixo, como uma folha. */
-
-.qd {
-  width: min(calc(100% - 32px), 520px);
-  max-height: min(92svh, 760px);
-  margin: auto;
-  padding: 0;
-  border: 1px solid var(--stage-line);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-device);
-  overflow: auto;
-  overscroll-behavior: contain;
-  color-scheme: dark;
-}
-.qd::backdrop {
-  background: rgba(10, 9, 8, 0.72);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.qd[data-layout="sheet"] {
-  width: 100%;
-  max-width: 640px;
-  max-height: 92svh;
-  margin: auto auto 0;
-  border-bottom: 0;
-  border-radius: var(--radius-card) var(--radius-card) 0 0;
-}
-.qd[open] {
-  animation: qd-in 0.35s var(--ease-out);
-}
-.qd[data-layout="sheet"][open] {
-  animation-name: qd-up;
-}
-@keyframes qd-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.98);
-  }
-}
-@keyframes qd-up {
-  from {
-    transform: translateY(100%);
-  }
-}
+/* Conteúdo da janela do pedido de orçamento (ver quote-dialog.tsx). A janela em si, centralizada
+   ou subindo de baixo, está em modal.css. */
 
 .qd__panel {
   display: grid;
@@ -215,11 +172,5 @@
   .qd__foot .sc-pill--red {
     flex: 1;
     min-width: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .qd[open] {
-    animation: none;
   }
 }

@@ -28,6 +28,7 @@ import {
   type QuoteRequestErrors,
   type QuoteRequestForm,
 } from "./quote-request"
+import { Modal } from "./modal"
 import "../sc-system.css"
 import "./quote-dialog.css"
 
@@ -60,9 +61,7 @@ function onlyFields(errors: QuoteRequestErrors, fields: (keyof QuoteRequestForm)
 }
 
 export function QuoteRequestProvider({ layout, children }: { layout: "sheet" | "center"; children: ReactNode }) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
-  const openerRef = useRef<HTMLElement | null>(null)
   const id = useId()
   const [isOpen, setIsOpen] = useState(false)
   const [form, setForm] = useState(EMPTY_QUOTE_REQUEST)
@@ -76,7 +75,6 @@ export function QuoteRequestProvider({ layout, children }: { layout: "sheet" | "
 
   const open = useCallback(
     (problem?: string) => {
-      openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
       // Depois de um pedido enviado, a próxima abertura começa um pedido novo.
       if (status === "sent") {
         setForm(EMPTY_QUOTE_REQUEST)
@@ -85,7 +83,6 @@ export function QuoteRequestProvider({ layout, children }: { layout: "sheet" | "
       }
       if (problem) setForm((f) => ({ ...f, problem }))
       setErrors({})
-      dialogRef.current?.showModal()
       setIsOpen(true)
     },
     [status],
@@ -103,11 +100,7 @@ export function QuoteRequestProvider({ layout, children }: { layout: "sheet" | "
     target?.focus()
   }, [isOpen, step, focusRequest, sent])
 
-  const close = () => dialogRef.current?.close()
-  const onClose = () => {
-    setIsOpen(false)
-    openerRef.current?.focus()
-  }
+  const close = () => setIsOpen(false)
 
   const update = <K extends keyof QuoteRequestForm>(field: K, value: QuoteRequestForm[K]) => {
     setForm((f) => ({ ...f, [field]: value }))
@@ -156,14 +149,7 @@ export function QuoteRequestProvider({ layout, children }: { layout: "sheet" | "
   return (
     <QuoteRequestContext.Provider value={api}>
       {children}
-      <dialog
-        ref={dialogRef}
-        className="sc qd"
-        data-layout={layout}
-        aria-labelledby={`${id}-titulo`}
-        onClose={onClose}
-        onClick={(e) => e.target === e.currentTarget && close()}
-      >
+      <Modal open={isOpen} onClose={close} layout={layout} labelledBy={`${id}-titulo`} className="qd">
         <div className="qd__panel" ref={bodyRef}>
           <div className="qd__head">
             <p className="sc-label">
@@ -395,7 +381,7 @@ export function QuoteRequestProvider({ layout, children }: { layout: "sheet" | "
             </form>
           )}
         </div>
-      </dialog>
+      </Modal>
     </QuoteRequestContext.Provider>
   )
 }
