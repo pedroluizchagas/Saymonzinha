@@ -9,6 +9,7 @@ import {
   DESKTOP_MIN_WIDTH,
   PRESENTATION_COOKIE,
   PRESENTATION_COOKIE_ATTRIBUTES,
+  SWAP_GLOBAL,
   SWAP_STYLE_ID,
   TOUCH_QUERY,
   choosePresentation,
@@ -18,6 +19,14 @@ import type { Product } from "@/types/database"
 
 const Desdobra = dynamic(() => import("./desdobra/desdobra").then((m) => m.Desdobra))
 const RaioX = dynamic(() => import("./raio-x/raio-x").then((m) => m.RaioX))
+
+// Se o script antes da pintura viu que o servidor errou, a versão certa começa a baixar já,
+// em paralelo com a hidratação da errada, em vez de só depois dela.
+if (typeof window !== "undefined") {
+  const swap = (window as unknown as Record<string, unknown>)[SWAP_GLOBAL]
+  if (swap === "raio-x") void import("./raio-x/raio-x")
+  if (swap === "desdobra") void import("./desdobra/desdobra")
+}
 
 export function HomePresentation({ initialVersion, products }: { initialVersion: HomeVersion; products: Product[] }) {
   const [version, setVersion] = useState(initialVersion)

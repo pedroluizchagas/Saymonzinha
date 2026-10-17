@@ -19,6 +19,9 @@ export const PRESENTATION_COOKIE_ATTRIBUTES = `Max-Age=${COOKIE_MAX_AGE}; Path=/
 /** Estilo que esconde a página enquanto o navegador troca uma versão que o servidor errou. */
 export const SWAP_STYLE_ID = "home-trocando"
 
+/** Variável global em que o script antes da pintura avisa a versão certa quando o servidor errou. */
+export const SWAP_GLOBAL = "__homeSwap"
+
 export type PresentationSignals = {
   userAgent?: string
   /** Cabeçalho Sec-CH-UA-Mobile: "?1" quando o navegador se declara móvel. */
