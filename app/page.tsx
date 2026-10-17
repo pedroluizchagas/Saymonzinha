@@ -1,27 +1,18 @@
-import { Header } from "@/components/layout/header"
-import { HeroSection } from "@/components/sections/hero-section"
-import { HowItWorksSection } from "@/components/sections/how-it-works-section"
-import { ServicesSection } from "@/components/sections/services-section"
-import { ProductsSection } from "@/components/sections/products-section"
-import { AuthoritySection } from "@/components/sections/authority-section"
-import { LocationSection } from "@/components/sections/location-section"
-import { GuaranteeSection } from "@/components/sections/guarantee-section"
-import { Footer } from "@/components/layout/footer"
-import { WhatsAppButton } from "@/components/ui/whatsapp-button"
+import { cookies, headers } from "next/headers"
+import { HomeNova } from "@/components/home/home-nova"
+import { getFeaturedProducts } from "@/lib/actions/store-actions"
+import { PRESENTATION_COOKIE, choosePresentation } from "@/lib/home-presentation"
 
-export default function HomePage() {
-  return (
-    <main className="min-h-screen bg-background text-foreground">
-      <Header />
-      <HeroSection />
-      <HowItWorksSection />
-      <ServicesSection />
-      <ProductsSection />
-      <AuthoritySection />
-      <LocationSection />
-      <GuaranteeSection />
-      <Footer />
-      <WhatsAppButton />
-    </main>
-  )
+// A home: a Desdobra no desktop e a Raio-X em celular e tablet (ver docs/adr/0001). O título e a
+// descrição vêm do layout.
+export default async function HomePage() {
+  const [requestHeaders, cookieStore] = await Promise.all([headers(), cookies()])
+  const presentation = choosePresentation({
+    userAgent: requestHeaders.get("user-agent") ?? undefined,
+    mobileHint: requestHeaders.get("sec-ch-ua-mobile"),
+    cookie: cookieStore.get(PRESENTATION_COOKIE)?.value,
+  })
+  const products = await getFeaturedProducts(4).catch(() => [])
+
+  return <HomeNova presentation={presentation} products={products} />
 }
