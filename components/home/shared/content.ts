@@ -1,5 +1,4 @@
-// Conteúdo da home nova: fonte única para a Desdobra e a Raio-X (ver docs/adr/0001).
-// Fonte: components/sections/*, components/layout/footer.tsx e components/forms/pre-quote-form.tsx.
+// Conteúdo da home: fonte única para a Desdobra e a Raio-X (ver docs/adr/0001).
 
 export const WHATSAPP_NUMBER = "5537988023341"
 export const WHATSAPP_DISPLAY = "(37) 98802-3341"
@@ -121,7 +120,7 @@ export const SECTIONS = {
   call: { label: "Chamada recebida · sobre o seu conserto", message: "Olá Saymon Cell! Vim pelo site e quero consertar meu celular." },
 }
 
-// Menu das duas versões. As âncoras são as mesmas da home antiga, que o cabeçalho da loja usa.
+// Menu das duas versões. As âncoras são as mesmas do cabeçalho e do rodapé da loja.
 export const MENU = [
   { label: "Serviços", href: "#servicos" },
   { label: "Como funciona", href: "#como-funciona" },

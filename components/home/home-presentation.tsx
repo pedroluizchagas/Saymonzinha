@@ -6,7 +6,7 @@
 // gzip): baixar a outra só na hora da troca deixava o iPad de 1,5 a 2,5 s com a página oculta na
 // primeira visita, em produção.
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import {
   DESKTOP_MIN_WIDTH,
   JANK_COOKIE,
@@ -23,6 +23,7 @@ import {
 import type { Product } from "@/types/database"
 import { Desdobra } from "./desdobra/desdobra"
 import { RaioX } from "./raio-x/raio-x"
+import { ARRIVAL_HOLD_MS, onFirstInteraction } from "./shared/arrival"
 import { QuoteRequestProvider } from "./shared/quote-dialog"
 
 // Engasgo: nos primeiros 2,5 s de rolagem, média abaixo de 42 quadros por segundo ou mais de 20%
@@ -72,11 +73,14 @@ function watchForJank(onJank: () => void) {
 export function HomePresentation({ initial, products }: { initial: Presentation; products: Product[] }) {
   const [presentation, setPresentation] = useState(initial)
   const [confirmed, setConfirmed] = useState(false)
-  // Para onde rolar depois de uma troca: o topo ou os serviços com a página em uso, e a âncora do
-  // endereço quando a troca é na chegada (a rolagem do navegador até ela valia para a outra versão).
+  // Para onde rolar depois de uma troca: o topo ou os serviços com a página em uso. Na chegada, a
+  // âncora do endereço: a rolagem até ela (do navegador, ou do Next vindo de outra página do site)
+  // pode ter valido para a outra versão ou para o conteúdo antes de assentar.
   const scrollAfter = useRef<"top" | "servicos" | "hash" | null>(null)
 
-  useEffect(() => {
+  // Antes da pintura: vindo de outra página do site (a loja, por exemplo), a navegação é interna, o
+  // script de antes da pintura não roda, e a versão errada não pode aparecer.
+  useLayoutEffect(() => {
     const touch = window.matchMedia(TOUCH_QUERY)
     const wide = window.matchMedia(`(min-width: ${DESKTOP_MIN_WIDTH}px)`)
     const reduce = window.matchMedia(REDUCED_MOTION_QUERY)
@@ -95,11 +99,11 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
       })
       document.cookie = `${PRESENTATION_COOKIE}=${presentationCookieValue(next)}; ${PRESENTATION_COOKIE_ATTRIBUTES}${secure}`
       setConfirmed(true)
+      if (firstCheck) scrollAfter.current = "hash"
       if (next.version !== current.version || next.lite !== current.lite) {
         // Com a página em uso, a versão nova recomeça do topo; a Raio-X que fica leve por
         // engasgo vai para a lista de serviços, que é onde a pessoa estava.
-        if (firstCheck) scrollAfter.current = "hash"
-        else scrollAfter.current = next.version === current.version && next.version === "raio-x" ? "servicos" : "top"
+        if (!firstCheck) scrollAfter.current = next.version === current.version && next.version === "raio-x" ? "servicos" : "top"
         current = next
         setPresentation(next)
       }
@@ -125,8 +129,11 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
   }, [initial])
 
   // Revela a página depois do render que já mostra a apresentação certa e faz a rolagem pendente.
+  // Antes da confirmação, nada: o React pode rodar este efeito do primeiro render, ainda com a versão
+  // do servidor, antes de montar a certa, e a âncora da versão certa ainda não existe.
   useEffect(() => {
-    if (confirmed) document.getElementById(SWAP_STYLE_ID)?.remove()
+    if (!confirmed) return
+    document.getElementById(SWAP_STYLE_ID)?.remove()
     const target = scrollAfter.current
     scrollAfter.current = null
     if (target === "top") window.scrollTo(0, 0)
@@ -134,18 +141,14 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
     // Na Desdobra as âncoras não são ids (ela mesma rola até a seção); aqui só a Raio-X responde.
     const anchor = target === "hash" && window.location.hash ? document.getElementById(window.location.hash.slice(1)) : null
     if (anchor) {
-      // A rolagem suave do navegador até a âncora pode ainda estar em curso, e as fontes podem chegar
-      // depois e mudar a altura do que vem antes: por 1,2 s a âncora é mantida no lugar, enquanto
-      // a pessoa não mexer na página.
+      // A rolagem até a âncora pode ainda estar em curso (suave, e com um destino que valia para o
+      // conteúdo de antes), e as fontes podem chegar depois e mudar a altura do que vem antes.
       const go = () => anchor.scrollIntoView({ behavior: "instant" as ScrollBehavior })
       let moved = false
-      const onMove = () => {
+      onFirstInteraction(() => {
         moved = true
-      }
-      window.addEventListener("wheel", onMove, { once: true, passive: true })
-      window.addEventListener("touchmove", onMove, { once: true, passive: true })
-      window.addEventListener("keydown", onMove, { once: true })
-      const until = performance.now() + 1200
+      })
+      const until = performance.now() + ARRIVAL_HOLD_MS
       const hold = () => {
         if (moved) return
         if (Math.abs(anchor.getBoundingClientRect().top) > 1) go()

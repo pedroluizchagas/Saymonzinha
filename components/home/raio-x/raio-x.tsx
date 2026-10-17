@@ -320,7 +320,7 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
         </div>
       </section>
 
-      <section className="vb-section vb-why">
+      <section className="vb-section vb-why" id="sobre">
         <div className="vb-section__head">
           <p className="sc-label vb-muted">{SECTIONS.why.label}</p>
           <h2 className="sc-display vb-h2">{SECTIONS.why.title}</h2>

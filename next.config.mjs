@@ -8,9 +8,10 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // Links antigos do protótipo levam à home nova em aprovação.
-      { source: "/prototipo", destination: "/nova-home", permanent: false },
-      { source: "/prototipo/:path*", destination: "/nova-home", permanent: false },
+      // Os endereços da aprovação e do protótipo levam à home.
+      { source: "/nova-home", destination: "/", permanent: true },
+      { source: "/prototipo", destination: "/", permanent: true },
+      { source: "/prototipo/:path*", destination: "/", permanent: true },
     ]
   },
 }
