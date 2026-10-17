@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { scFontVariables } from "@/components/home/fonts"
-import { LojaVirtual } from "@/components/loja/loja-virtual"
+import { Catalog } from "@/components/loja/catalog"
+import { StoreShell } from "@/components/loja/store-shell"
 import { getStoreProducts } from "@/lib/actions/store-actions"
 
 // Loja virtual nova em aprovação: fica fora do Google até substituir /loja.
@@ -15,7 +16,9 @@ export default async function NovaLojaPage() {
   const products = await getStoreProducts().catch(() => [])
   return (
     <div className={scFontVariables}>
-      <LojaVirtual products={products} />
+      <StoreShell>
+        <Catalog products={products} />
+      </StoreShell>
     </div>
   )
 }

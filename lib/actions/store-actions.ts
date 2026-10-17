@@ -27,6 +27,25 @@ export async function getStoreProducts(): Promise<Product[]> {
   return data || []
 }
 
+/** Produtos publicados na loja virtual, com ou sem estoque: a página do produto esgotado e a conferência do carrinho. */
+export async function getPublishedProducts(): Promise<Product[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("is_active", true)
+    .eq("show_in_store", true)
+    .order("name")
+
+  if (error) {
+    console.error("Erro ao buscar produtos publicados:", error)
+    return []
+  }
+
+  return data || []
+}
+
 export async function getStoreProductsByCategory(category: string): Promise<Product[]> {
   const supabase = await createClient()
 

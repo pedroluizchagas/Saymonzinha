@@ -43,6 +43,33 @@ export function stockBadge(product: Product): "Esgotado" | "Últimas unidades" |
   return product.stock_quantity <= FEW_LEFT ? "Últimas unidades" : null
 }
 
+/** Quantos caracteres do código do produto entram no endereço (ver docs/adr/0002). */
+const CODE_LENGTH = 8
+const NAME_MAX = 60
+
+/** Endereço da página do produto: o nome legível mais o começo do código (ADR 0002). */
+export function productPath(product: Product) {
+  const name =
+    plain(product.name)
+      .replace(/[^a-z0-9]+/g, "-")
+      .slice(0, NAME_MAX)
+      .replace(/^-+|-+$/g, "") || "produto"
+  return `${STORE_PATH}/${name}-${product.id.slice(0, CODE_LENGTH)}`
+}
+
+/**
+ * O produto de um endereço da loja virtual, achado pelo trecho do código no fim. Se o nome do
+ * endereço não é o atual (o produto mudou de nome), devolve o endereço certo para redirecionar.
+ */
+export function findProduct(address: string, products: Product[]): { product: Product } | { redirect: string } | null {
+  const code = address.slice(address.lastIndexOf("-") + 1)
+  if (code.length !== CODE_LENGTH) return null
+  const product = products.find((p) => p.id.startsWith(code))
+  if (!product) return null
+  const path = productPath(product)
+  return path === `${STORE_PATH}/${address}` ? { product } : { redirect: path }
+}
+
 /** Texto comparável: sem acentos, sem maiúsculas e sem espaços nas pontas. */
 function plain(text: string) {
   return text

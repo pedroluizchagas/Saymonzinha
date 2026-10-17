@@ -1,5 +1,8 @@
 // Conteúdo da home: fonte única para a Desdobra e a Raio-X (ver docs/adr/0001).
 
+/** Endereço do site, para links completos (prévias de link, mensagens de WhatsApp, dados para o Google). */
+export const SITE_URL = "https://www.saymoncell.com.br"
+
 export const WHATSAPP_NUMBER = "5537988023341"
 export const WHATSAPP_DISPLAY = "(37) 98802-3341"
 export const INSTAGRAM_URL = "https://instagram.com/saymoncell037"

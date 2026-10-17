@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import type { Product } from "@/types/database"
-import { catalogFilters, filterCatalog, shouldShowSearch, stockBadge } from "./catalog"
+import { catalogFilters, filterCatalog, findProduct, productPath, shouldShowSearch, stockBadge } from "./catalog"
 
 function product(name: string, overrides: Partial<Product> = {}): Product {
   return {
@@ -69,5 +69,33 @@ describe("catálogo da loja virtual", () => {
     expect(stockBadge(product("B", { stock_quantity: 1 }))).toBe("Últimas unidades")
     expect(stockBadge(product("C", { stock_quantity: 2 }))).toBe("Últimas unidades")
     expect(stockBadge(product("D", { stock_quantity: 3 }))).toBeNull()
+  })
+
+  test("o endereço do produto é o nome sem acentos, em minúsculas e com hífens, mais o começo do código", () => {
+    const id = "3f2a9c1d-0000-4000-8000-000000000001"
+    expect(productPath(product("Película de vidro 3D", { id }))).toBe("/nova-loja/pelicula-de-vidro-3d-3f2a9c1d")
+    expect(productPath(product("Carregador turbo USB-C 25W (original)!", { id }))).toBe(
+      "/nova-loja/carregador-turbo-usb-c-25w-original-3f2a9c1d",
+    )
+    expect(productPath(product("Power bank 10.000 mAh", { id }))).toBe("/nova-loja/power-bank-10-000-mah-3f2a9c1d")
+    expect(productPath(product("***", { id }))).toBe("/nova-loja/produto-3f2a9c1d")
+  })
+
+  test("acha o produto pelo trecho do código no endereço", () => {
+    const pelicula = product("Película de vidro 3D", { id: "3f2a9c1d-0000-4000-8000-000000000001" })
+    const capinha = product("Capinha", { id: "9b8c7d6e-0000-4000-8000-000000000002" })
+    expect(findProduct("pelicula-de-vidro-3d-3f2a9c1d", [capinha, pelicula])).toEqual({ product: pelicula })
+  })
+
+  test("quando o nome mudou, o endereço antigo manda para o endereço atual", () => {
+    const pelicula = product("Película de vidro 3D", { id: "3f2a9c1d-0000-4000-8000-000000000001" })
+    expect(findProduct("pelicula-antiga-3f2a9c1d", [pelicula])).toEqual({ redirect: "/nova-loja/pelicula-de-vidro-3d-3f2a9c1d" })
+  })
+
+  test("endereço sem produto não acha nada: código desconhecido, sem código ou incompleto", () => {
+    const pelicula = product("Película de vidro 3D", { id: "3f2a9c1d-0000-4000-8000-000000000001" })
+    expect(findProduct("qualquer-coisa-00000000", [pelicula])).toBeNull()
+    expect(findProduct("pelicula-de-vidro-3d-", [pelicula])).toBeNull()
+    expect(findProduct("pelicula-3f2a", [pelicula])).toBeNull()
   })
 })
