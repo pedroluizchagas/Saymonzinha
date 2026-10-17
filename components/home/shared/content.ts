@@ -128,6 +128,14 @@ export const MENU = [
   { label: "Localização", href: "#localizacao" },
 ]
 
+/** O menu fora da home (na loja virtual): as âncoras levam à home, e "Loja" à loja virtual. */
+export function siteMenu(storePath: string) {
+  return MENU.map((item) => ({
+    ...item,
+    href: item.href.startsWith("#") ? `/${item.href}` : item.href === "/loja" ? storePath : item.href,
+  }))
+}
+
 export const BRANDS = ["Apple", "Samsung", "Motorola", "Xiaomi", "LG", "Asus", "Huawei", "Realme", "OnePlus", "Nokia"]
 
 export const STORE_CATEGORIES = ["Capinhas", "Carregadores", "Caixinhas de som JBL", "Fones bluetooth"]

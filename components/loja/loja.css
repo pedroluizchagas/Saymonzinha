@@ -1,0 +1,357 @@
+/* Loja virtual (ver loja-virtual.tsx), no sistema visual da home: tema Noite, uma versão só.
+   Vem depois de sc-system.css. */
+
+.lv {
+  min-height: 100vh;
+  background: var(--stage);
+  color: var(--stage-ink);
+}
+
+/* Cabeçalho do site */
+.lv-header {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: max(12px, env(safe-area-inset-top, 0px)) 16px 12px;
+  border-bottom: 1px solid var(--stage-line);
+  background: rgba(10, 9, 8, 0.88);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+}
+.lv-header .sc-logo {
+  flex: none;
+}
+.lv-header .sc-header-actions {
+  margin-left: auto;
+}
+.lv-nav {
+  display: none;
+}
+.lv-nav a,
+.lv-menu a {
+  color: var(--stage-muted);
+  text-decoration: none;
+}
+.lv-nav a[aria-current="page"],
+.lv-menu a[aria-current="page"] {
+  color: var(--stage-ink);
+}
+.lv-cart {
+  position: relative;
+}
+.lv-cart__count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--red);
+  color: var(--white);
+  font: 700 11px/18px var(--font-text);
+  text-align: center;
+}
+.lv-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 16px;
+  min-width: 220px;
+  padding: 8px;
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-card);
+  background: rgba(10, 9, 8, 0.96);
+  box-shadow: var(--shadow-card);
+}
+.lv-menu[hidden] {
+  display: none;
+}
+.lv-menu ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lv-menu a {
+  display: block;
+  padding: 14px 16px;
+  border-radius: var(--radius-icon);
+  color: var(--stage-ink);
+  font: 500 15px/1.2 var(--font-text);
+}
+.lv-menu a:hover,
+.lv-menu a:focus-visible {
+  background: var(--stage-control);
+}
+@media (max-width: 479px) {
+  /* No celular, o WhatsApp do cabeçalho vai para o menu compacto, para caber a marca, o "Pedir
+     orçamento", o carrinho e o menu. */
+  .lv-header {
+    gap: 8px;
+  }
+  .lv-header .sc-header-actions > a.sc-pill--icon {
+    display: none;
+  }
+}
+@media (max-width: 380px) {
+  .lv-header {
+    padding-inline: 12px;
+  }
+  .lv-header .sc-logo {
+    font-size: 18px;
+  }
+  .lv-header .sc-pill--red {
+    padding-inline: 10px;
+  }
+}
+@media (min-width: 1024px) {
+  .lv-header {
+    padding-inline: 32px;
+  }
+  .lv-nav {
+    display: flex;
+    gap: 28px;
+    margin-left: auto;
+    font: 500 12px/1 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .lv-header .sc-header-actions {
+    margin-left: 28px;
+  }
+  .lv-menu-button,
+  .lv-menu {
+    display: none;
+  }
+}
+
+/* Topo */
+.lv-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 16px 72px;
+}
+.lv-title {
+  display: grid;
+  gap: var(--space-8);
+  margin: 0;
+}
+.lv-title__kicker {
+  color: var(--stage-muted);
+}
+.lv-title__name {
+  font-size: clamp(64px, 17vw, 132px);
+  line-height: 0.86;
+}
+.lv-intro {
+  max-width: 52ch;
+  margin: var(--space-12) 0 0;
+  color: var(--stage-muted);
+}
+
+/* Filtros e busca */
+.lv-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-12);
+  margin-top: var(--space-24);
+}
+.lv-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.lv-filter {
+  border: 1px solid var(--stage-line);
+  background: transparent;
+  color: var(--stage-ink);
+}
+.lv-filter[aria-pressed="true"] {
+  border-color: var(--red);
+  background: var(--red);
+  color: var(--white);
+}
+.lv-search {
+  position: relative;
+  display: flex;
+  flex: 1 1 220px;
+  max-width: 360px;
+}
+.lv-search svg {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: var(--stage-muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.lv-search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px 10px 40px;
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-pill);
+  background: var(--stage-control);
+  color: var(--stage-ink);
+  /* 16px evita o zoom automático do iOS ao focar o campo */
+  font: 400 16px/1.4 var(--font-text);
+}
+
+/* Grade de produtos */
+.lv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: var(--space-24) 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 640px) {
+  .lv-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .lv-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+.lv-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-card);
+  background: var(--stage-control);
+}
+.lv-card__photo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  background: var(--bone);
+}
+.lv-card__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.lv-card__photo[data-empty] {
+  background: var(--ink);
+}
+.lv-card__photo[data-empty] img {
+  width: 38%;
+  height: auto;
+  opacity: 0.9;
+}
+.lv-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--red);
+  color: var(--white);
+}
+.lv-card__body {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 12px;
+}
+.lv-card__name {
+  margin: 0;
+  font: 600 14px/1.3 var(--font-text);
+}
+.lv-card__price {
+  margin: 0;
+  font: 800 26px/1 var(--font-display);
+}
+.lv-card__add {
+  justify-content: center;
+  width: 100%;
+  margin-top: 6px;
+}
+.lv-none button {
+  border: 0;
+  background: none;
+  color: var(--red-text);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Loja virtual sem produtos */
+.lv-empty {
+  display: grid;
+  gap: var(--space-16);
+  max-width: 560px;
+  margin-top: var(--space-29);
+  padding: var(--space-24);
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-card);
+  background: var(--stage-control);
+}
+.lv-empty p {
+  margin: 0;
+}
+.lv-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+/* Rodapé */
+.lv-footer {
+  padding: 40px 16px max(40px, env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--stage-line);
+  color: var(--stage-muted);
+}
+.lv-footer .sc-footer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.lv-footer a {
+  color: var(--stage-ink);
+}
+
+/* "Adicionado ao carrinho" */
+.lv-notif {
+  position: fixed;
+  z-index: 40;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  left: 50%;
+  width: min(calc(100% - 24px), 380px);
+  transform: translate(-50%, calc(-100% - 24px));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.4s var(--ease-out),
+    opacity 0.3s;
+}
+.lv-notif[data-on="1"] {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+.lv-notif .sc-notif {
+  /* mais opaco que o vidro da tela de bloqueio, para o cabeçalho não aparecer por trás */
+  background: rgba(244, 243, 240, 0.96);
+}
+.lv-notif .sc-notif__title,
+.lv-notif .sc-notif__meta {
+  display: block;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lv-notif {
+    transform: translate(-50%, 0);
+    transition: opacity 0.2s;
+  }
+}

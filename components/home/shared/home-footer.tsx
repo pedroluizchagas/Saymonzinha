@@ -1,8 +1,9 @@
-// Rodapé das duas versões: endereço, contatos, menu e ©. As cores vêm de quem o usa.
+// Rodapé das duas versões da home e da loja virtual: endereço, contatos, menu e ©. As cores vêm de quem
+// o usa; fora da home, o menu vem com os endereços completos (siteMenu).
 
 import { ADDRESS, INSTAGRAM_URL, MENU, PHONE_URL, WHATSAPP_DISPLAY, whatsappLink } from "./content"
 
-export function HomeFooter() {
+export function HomeFooter({ menu = MENU }: { menu?: { label: string; href: string }[] }) {
   return (
     <div className="sc-footer">
       <div className="sc-footer__col">
@@ -25,7 +26,7 @@ export function HomeFooter() {
       </div>
       <nav className="sc-footer__col" aria-label="Rodapé">
         <p className="sc-label sc-footer__title">Navegue</p>
-        {MENU.map((item) => (
+        {menu.map((item) => (
           <a key={item.href} href={item.href}>
             {item.label}
           </a>

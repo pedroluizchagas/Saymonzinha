@@ -10,7 +10,8 @@ import type { Product, CartItem } from "@/types/database"
 
 interface CartContextType {
   items: CartItem[]
-  addItem: (product: Product, quantity?: number) => void
+  /** Por padrão abre o carrinho; a loja virtual nova avisa com uma notificação e passa `open: false`. */
+  addItem: (product: Product, quantity?: number, options?: { open?: boolean }) => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
@@ -49,7 +50,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isHydrated])
 
-  const addItem = useCallback((product: Product, quantity = 1) => {
+  const addItem = useCallback((product: Product, quantity = 1, { open = true }: { open?: boolean } = {}) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.product.id === product.id)
 
@@ -63,7 +64,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       return [...prev, { product, quantity: Math.min(quantity, product.stock_quantity) }]
     })
-    setIsOpen(true)
+    if (open) setIsOpen(true)
   }, [])
 
   const removeItem = useCallback((productId: string) => {
