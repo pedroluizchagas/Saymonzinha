@@ -12,10 +12,14 @@ import {
   ADDRESS,
   BRANDS,
   GUARANTEES,
+  HEADLINE_KICKER,
   HOURS,
   INSTAGRAM_URL,
   MAPS_URL,
   MENU,
+  PARKING_NOTE,
+  PHONE_URL,
+  PICKUP_NOTE,
   SERVICES,
   STATS,
   STEPS,
@@ -26,6 +30,7 @@ import {
 } from "../shared/content"
 import { makeCracks } from "../shared/crack"
 import { CallSlider, useClock } from "../shared/device-ui"
+import { HomeFooter } from "../shared/home-footer"
 import { useQuoteRequest } from "../shared/quote-dialog"
 // O CSS do sistema vem antes do da versão: as regras da versão sobrescrevem as do sistema.
 import "../sc-system.css"
@@ -39,7 +44,7 @@ const LAYERS: { key: LayerKey; part: string; service: string }[] = [
   { key: "bateria", part: "Bateria", service: "bateria" },
   { key: "placa", part: "Placa lógica", service: "placa" },
   { key: "chassi", part: "Chassi e conector", service: "conector" },
-  { key: "tampa", part: "Tampa traseira", service: "banho" },
+  { key: "tampa", part: "Tampa e vedação", service: "banho" },
 ]
 
 const clamp = (v: number, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v))
@@ -178,16 +183,17 @@ export function RaioX({ products }: { products: Product[] }) {
           <div className="vb-grid" aria-hidden="true" />
 
           <div className="vb-hero">
-            <p className="sc-label vb-hero__label">Busca · conserto · entrega</p>
-            <h1 className="sc-display vb-hero__title">
-              <span>Abrimos.</span>
-              <span>Consertamos.</span>
-              <span className="vb-red">Devolvemos.</span>
+            <h1 className="vb-hero__h1">
+              <span className="sc-label vb-hero__label">{HEADLINE_KICKER}</span>{" "}
+              <span className="sc-display vb-hero__title">
+                <span>Abrimos.</span> <span>Consertamos.</span> <span className="vb-red">Devolvemos.</span>
+              </span>
             </h1>
             <p className="sc-body vb-hero__lead">
               A Saymon Cell busca seu smartphone em casa, conserta no laboratório e devolve funcionando. Sem você sair de
               Divinópolis, nem do sofá.
             </p>
+            <p className="sc-label vb-muted">{PICKUP_NOTE}</p>
             <div className="vb-hero__actions">
               <button type="button" className="sc-pill sc-pill--red" onClick={() => quote.open()}>
                 Pedir orçamento <ArrowUpRight />
@@ -358,9 +364,13 @@ export function RaioX({ products }: { products: Product[] }) {
           <p className="sc-body">
             {ADDRESS.unit} · {ADDRESS.district} · {ADDRESS.city} · CEP {ADDRESS.zip}
           </p>
+          <p className="sc-body vb-muted">{PARKING_NOTE}</p>
           <div className="vb-visit__actions">
             <a className="sc-pill sc-pill--white" href={MAPS_URL} target="_blank" rel="noopener noreferrer">
               <MapPin /> Abrir no Maps
+            </a>
+            <a className="sc-pill sc-pill--ghost" href={PHONE_URL}>
+              <Phone /> Ligar
             </a>
             <a className="sc-pill sc-pill--ghost" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
               <Instagram /> @saymoncell037
@@ -400,7 +410,7 @@ export function RaioX({ products }: { products: Product[] }) {
             <CallSlider href={whatsappLink("Olá Saymon Cell! Vim pelo site e quero consertar meu celular.")} />
           </div>
         </div>
-        <p className="sc-label vb-muted vb-footer__legal">© {new Date().getFullYear()} Saymon Cell · Assistência técnica</p>
+        <HomeFooter />
       </footer>
     </div>
   )

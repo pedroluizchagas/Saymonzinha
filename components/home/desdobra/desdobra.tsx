@@ -13,10 +13,14 @@ import {
   ADDRESS,
   BRANDS,
   GUARANTEES,
+  HEADLINE_KICKER,
   HOURS,
   INSTAGRAM_URL,
   MAPS_URL,
   MENU,
+  PARKING_NOTE,
+  PHONE_URL,
+  PICKUP_NOTE,
   SERVICES,
   STATS,
   STEPS,
@@ -26,6 +30,7 @@ import {
 } from "../shared/content"
 import { makeCracks } from "../shared/crack"
 import { CallSlider, StatusBar, useClock } from "../shared/device-ui"
+import { HomeFooter } from "../shared/home-footer"
 import { useQuoteRequest } from "../shared/quote-dialog"
 import { ServiceVisual, type VisualKind } from "../shared/service-visual"
 // O CSS do sistema vem antes do da versão: as regras da versão sobrescrevem as do sistema.
@@ -33,8 +38,7 @@ import "../sc-system.css"
 import "./desdobra.css"
 import { buildTimeline, type Timeline } from "./timeline"
 
-type Axis = "x" | "y"
-type Geometry = { axis: Axis; vw: number; vh: number; W: number; H: number; f: number }
+type Geometry = { vw: number; vh: number; W: number; H: number; f: number }
 type SectionMark = { key: string; tab: string; top: number; glow: string; bar: string }
 
 const FINISHES = [
@@ -69,17 +73,11 @@ const PANEL_BAR = ["ink", "white", "split-ink", "white", "white", "split-ink"]
 const clamp = (v: number, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v))
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
+// Só paisagem: a Desdobra aparece a partir de 1024px de largura (ver docs/adr/0001).
 function computeGeometry(vw: number, vh: number): Geometry {
-  if (vw < 810) {
-    // retrato: metades empilhadas, dobradiça horizontal
-    const f = 10
-    const W = Math.min(vw - 32, 440) - 2 * f
-    const H = Math.min(vh - 132, W * 2.05)
-    return { axis: "y", vw, vh, W, H, f }
-  }
   const f = 13
   const H = Math.min(720, vh - 168, (vw - 96) / 1.478)
-  return { axis: "x", vw, vh, W: H * 1.478, H, f }
+  return { vw, vh, W: H * 1.478, H, f }
 }
 
 export function Desdobra({ products }: { products: Product[] }) {
@@ -159,7 +157,7 @@ export function Desdobra({ products }: { products: Product[] }) {
 
       // mantém a parte visível do aparelho centrada enquanto a metade gira
       const phi = (1 - open) * 180
-      const D = geo.axis === "x" ? geo.W + 2 * geo.f : geo.H + 2 * geo.f
+      const D = geo.W + 2 * geo.f
       const edge = (D / 2) * (1 - Math.cos((phi * Math.PI) / 180))
       const visStart = Math.min(edge, D / 2)
       const shift = D / 2 - (visStart + D) / 2
@@ -259,12 +257,12 @@ export function Desdobra({ products }: { products: Product[] }) {
   const finishColor = FINISHES.find((f) => f.key === finish)?.color
   const vars = useMemo(() => {
     if (!geo) return undefined
-    const closed = geo.axis === "x" ? (geo.W + 2 * geo.f) / 2 : geo.W + 2 * geo.f
-    const closedH = geo.axis === "x" ? geo.H + 2 * geo.f : (geo.H + 2 * geo.f) / 2
-    const side = geo.axis === "x" ? (geo.vw - closed) / 2 : 0
+    const closed = (geo.W + 2 * geo.f) / 2
+    const closedH = geo.H + 2 * geo.f
+    const side = (geo.vw - closed) / 2
     const overlap = closed * 0.1
-    const saymon = geo.axis === "x" ? Math.min((side - 24 + overlap) / 2.62, closedH * 0.36) : (geo.vw - 28) / 2.62
-    const cell = geo.axis === "x" ? Math.min((side - 24 + overlap) / 1.42, 300, closedH * 0.5) : Math.min((geo.vw - 28) / 1.42, saymon * 1.25)
+    const saymon = Math.min((side - 24 + overlap) / 2.62, closedH * 0.36)
+    const cell = Math.min((side - 24 + overlap) / 1.42, 300, closedH * 0.5)
     return {
       "--screen-w": `${geo.W}px`,
       "--screen-h": `${geo.H}px`,
@@ -284,7 +282,7 @@ export function Desdobra({ products }: { products: Product[] }) {
       id="inicio"
       className="sc va"
       data-stage={stage}
-      data-axis={geo?.axis ?? "x"}
+      data-axis="x"
       data-motion={reduced ? "reduced" : "full"}
       data-ready={geo ? "1" : "0"}
       data-unified="0"
@@ -296,13 +294,9 @@ export function Desdobra({ products }: { products: Product[] }) {
         <div className="va-stage">
           <div className="sc-glow va-glow" aria-hidden="true" />
           <h1 className="va-wordmark">
-            <span className="sc-sr">Saymon Cell — assistência técnica de smartphones em Divinópolis</span>
-            <span className="sc-wordmark va-wordmark__saymon" aria-hidden="true">
-              Saymon
-            </span>
-            <span className="sc-wordmark sc-wordmark--cell va-wordmark__cell" aria-hidden="true">
-              Cell
-            </span>
+            <span className="sc-label va-wordmark__kicker">{HEADLINE_KICKER}</span>{" "}
+            <span className="sc-wordmark va-wordmark__saymon">Saymon</span>{" "}
+            <span className="sc-wordmark sc-wordmark--cell va-wordmark__cell">Cell</span>
           </h1>
           <div className="va-floor" aria-hidden="true" />
 
@@ -450,10 +444,13 @@ function DeviceShell({ children, clipRef }: { children: React.ReactNode; clipRef
 
 /** Cópia decorativa do conteúdo para as metades que giram (sem foco, sem leitor de tela). */
 function ScreenCopy({ products, time }: { products: Product[]; time: string }) {
+  // Montadas só no navegador: no HTML o conteúdo aparece uma vez só (na camada interativa).
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
   return (
     <>
       <div className="va-content-wrap" inert>
-        <ScreenContent products={products} />
+        {mounted && <ScreenContent products={products} />}
       </div>
       <StatusBar time={time} />
     </>
@@ -474,6 +471,7 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
             <p className="sc-body va-hero__lead">
               A tela quebrou ou a bateria viciou? A Saymon Cell busca, conserta e devolve seu aparelho novo de novo.
             </p>
+            <p className="sc-label va-muted">{PICKUP_NOTE}</p>
             <div className="va-actions">
               <button type="button" className="sc-pill sc-pill--red" onClick={() => quote.open()}>
                 Pedir orçamento <ArrowUpRight />
@@ -621,6 +619,7 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
             <br />
             {ADDRESS.city} · CEP {ADDRESS.zip}
           </p>
+          <p className="sc-body">{PARKING_NOTE}</p>
           <a className="sc-pill sc-pill--ink" href={MAPS_URL} target="_blank" rel="noopener noreferrer">
             Abrir no Maps <ArrowUpRight />
           </a>
@@ -635,14 +634,19 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
               </div>
             ))}
           </dl>
-          <p className="sc-label va-muted">WhatsApp</p>
-          <p className="sc-display sc-display--row">{WHATSAPP_DISPLAY}</p>
+          <p className="sc-label va-muted">WhatsApp e telefone</p>
+          <a className="sc-display sc-display--row va-phone" href={PHONE_URL}>
+            {WHATSAPP_DISPLAY}
+          </a>
         </div>
       </section>
 
       <section className="va-block va-end" data-section="fim" data-tab="contato" data-glow="rgba(255,2,0,.4)" data-bar="white">
         <div className="sc-cta">
-          <h2 className="sc-display sc-display--row">Tela trincada? A gente busca.</h2>
+          <div>
+            <h2 className="sc-display sc-display--row">Tela trincada? A gente busca.</h2>
+            <p className="sc-label sc-cta__note">{PICKUP_NOTE}</p>
+          </div>
           <div className="sc-cta__actions">
             <button type="button" className="sc-pill sc-pill--red" onClick={() => quote.open()}>
               Pedir orçamento <ArrowUpRight />
@@ -652,12 +656,9 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
             </a>
           </div>
         </div>
-        <div className="va-footer">
-          <span className="sc-label va-muted">© {new Date().getFullYear()} Saymon Cell · Assistência técnica</span>
-          <a className="sc-label" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-            Instagram <ArrowUpRight />
-          </a>
-        </div>
+        <footer className="va-footer">
+          <HomeFooter />
+        </footer>
       </section>
     </div>
   )
@@ -696,10 +697,10 @@ function LockScreen({ time, healed }: { time: string; healed: boolean }) {
           </span>
           <span>
             <span className="sc-notif__title" style={{ display: "block" }}>
-              Buscamos seu celular hoje
+              Busca e entrega em Divinópolis
             </span>
             <span className="sc-notif__meta" style={{ display: "block" }}>
-              Delivery · Divinópolis
+              Consulte disponibilidade
             </span>
           </span>
           <span className="sc-notif__time">agora</span>
