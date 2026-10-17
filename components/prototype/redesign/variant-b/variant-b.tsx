@@ -109,7 +109,7 @@ export function VariantB({ products }: { products: Product[] }) {
   return (
     <div ref={rootRef} className="sc vb" data-phase={phase}>
       <header className="vb-header">
-        <a className="sc-logo" href="?variant=B" aria-label="Saymon Cell, início">
+        <a className="sc-logo" href="/prototipo/b" aria-label="Saymon Cell, início">
           Saymon <b>Cell</b>
           <sup>®</sup>
         </a>

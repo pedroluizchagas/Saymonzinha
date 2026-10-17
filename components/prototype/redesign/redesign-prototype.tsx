@@ -1,11 +1,11 @@
 // PROTÓTIPO do redesign (referência: foldfolio.framer.website), descartável.
-// Três variantes radicalmente diferentes na rota "/", alternadas por ?variant=:
+// Três variantes radicalmente diferentes em /prototipo/a|b|c, fora da home:
 //   A "Desdobra" — o site vive dentro de um celular dobrável que se conserta e desdobra com o scroll.
 //   B "Raio-X"   — o celular se desmonta em camadas; cada peça apresenta um serviço.
 //   C "Sistema"  — o site é o sistema operacional de um celular; navegação por apps.
-// Sem ?variant= a rota mostra o site atual. Nada aqui deve ir para a main.
+// /prototipo/atual mostra o site atual com a barra de troca. Está na main só para ser visto
+// em produção enquanto a variante é escolhida: reverter depois da escolha.
 
-import { Suspense } from "react"
 import type { Product } from "@/types/database"
 import { PrototypeSwitcher, type PrototypeVariant } from "../prototype-switcher"
 import { scFontVariables } from "./fonts"
@@ -14,6 +14,8 @@ import { VariantA } from "./variant-a/variant-a"
 import { VariantB } from "./variant-b/variant-b"
 import { VariantC } from "./variant-c/variant-c"
 
+export const REDESIGN_PATH = "/prototipo"
+
 export const REDESIGN_VARIANTS: PrototypeVariant[] = [
   { key: "atual", name: "Site atual" },
   { key: "A", name: "Desdobra" },
@@ -21,13 +23,9 @@ export const REDESIGN_VARIANTS: PrototypeVariant[] = [
   { key: "C", name: "Sistema" },
 ]
 
-export function isPrototypeEnabled() {
-  return process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
-}
-
-export function redesignVariant(value: string | string[] | undefined) {
-  const key = Array.isArray(value) ? value[0] : value
-  return REDESIGN_VARIANTS.some((v) => v.key === key && key !== "atual") ? (key as "A" | "B" | "C") : null
+export function redesignVariant(segment: string) {
+  const key = segment.toUpperCase()
+  return key === "A" || key === "B" || key === "C" ? key : null
 }
 
 export function RedesignPrototype({ variant, products }: { variant: "A" | "B" | "C"; products: Product[] }) {
@@ -42,9 +40,5 @@ export function RedesignPrototype({ variant, products }: { variant: "A" | "B" | 
 }
 
 export function RedesignSwitcher() {
-  return (
-    <Suspense fallback={null}>
-      <PrototypeSwitcher variants={REDESIGN_VARIANTS} />
-    </Suspense>
-  )
+  return <PrototypeSwitcher basePath={REDESIGN_PATH} variants={REDESIGN_VARIANTS} />
 }

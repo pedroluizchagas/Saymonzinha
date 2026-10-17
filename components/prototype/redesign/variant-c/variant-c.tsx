@@ -132,7 +132,7 @@ export function VariantC({ products }: { products: Product[] }) {
   return (
     <div className="sc vc" data-unlocked={unlocked ? "1" : "0"} data-app={app ?? "home"}>
       <header className="vc-header">
-        <a className="sc-logo" href="?variant=C" aria-label="Saymon Cell, início">
+        <a className="sc-logo" href="/prototipo/c" aria-label="Saymon Cell, início">
           Saymon <b>Cell</b>
           <sup>®</sup>
         </a>

@@ -1,34 +1,28 @@
 "use client"
 
-// PROTÓTIPO: barra flutuante para alternar variantes via ?variant=. Setas ← → também funcionam.
-// Só aparece fora de produção ou em deploy de preview da Vercel (ver isPrototypeEnabled).
+// PROTÓTIPO: barra flutuante para alternar variantes em <basePath>/<variante>. Setas ← → também funcionam.
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useCallback, useEffect } from "react"
 
 export type PrototypeVariant = { key: string; name: string }
 
-export function PrototypeSwitcher({ variants }: { variants: PrototypeVariant[] }) {
+export function PrototypeSwitcher({ basePath, variants }: { basePath: string; variants: PrototypeVariant[] }) {
   const router = useRouter()
   const pathname = usePathname()
-  const params = useSearchParams()
-  const current = params.get("variant") ?? variants[0].key
+  const current = pathname.split("/").pop()?.toLowerCase()
   const index = Math.max(
     0,
-    variants.findIndex((v) => v.key === current),
+    variants.findIndex((v) => v.key.toLowerCase() === current),
   )
 
   const go = useCallback(
     (dir: number) => {
       const next = variants[(index + dir + variants.length) % variants.length]
-      const search = new URLSearchParams(params.toString())
-      if (next.key === variants[0].key) search.delete("variant")
-      else search.set("variant", next.key)
-      const qs = search.toString()
-      router.replace(qs ? `${pathname}?${qs}` : pathname)
+      router.replace(`${basePath}/${next.key.toLowerCase()}`)
       window.scrollTo(0, 0)
     },
-    [index, params, pathname, router, variants],
+    [basePath, index, router, variants],
   )
 
   useEffect(() => {

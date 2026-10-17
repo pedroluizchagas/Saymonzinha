@@ -347,7 +347,7 @@ export function VariantA({ products }: { products: Product[] }) {
       </div>
 
       <header className="va-header">
-        <a className="sc-logo" href="?variant=A" aria-label="Saymon Cell, início">
+        <a className="sc-logo" href="/prototipo/a" aria-label="Saymon Cell, início">
           Saymon <b>Cell</b>
           <sup>®</sup>
         </a>
