@@ -53,3 +53,23 @@ describe("escolha da apresentação no servidor", () => {
     expect(choosePresentation({ userAgent: UA.iphone, cookie: "sistema" }).version).toBe("raio-x")
   })
 })
+
+describe("escolha da apresentação no navegador", () => {
+  test("uma tela de toque recebe a Raio-X mesmo larga", () => {
+    expect(choosePresentation({ userAgent: UA.mac, screen: { touch: true, width: 1366 } }).version).toBe("raio-x")
+  })
+
+  test("com mouse e 1024px ou mais, recebe a Desdobra mesmo com pista de celular", () => {
+    expect(choosePresentation({ userAgent: UA.iphone, screen: { touch: false, width: 1024 } }).version).toBe("desdobra")
+  })
+
+  test("com mouse e menos de 1024px, recebe a Raio-X", () => {
+    expect(choosePresentation({ userAgent: UA.windows, screen: { touch: false, width: 1023 } }).version).toBe("raio-x")
+  })
+
+  test("os dados de tela vencem o cookie da visita anterior", () => {
+    expect(
+      choosePresentation({ userAgent: UA.mac, cookie: "raio-x", screen: { touch: false, width: 1440 } }).version,
+    ).toBe("desdobra")
+  })
+})
