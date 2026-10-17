@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Plus, Package, Loader2, AlertTriangle, Store, Eye, EyeOff, Pencil } from "lucide-react"
 import type { Product, ProductCategory } from "@/types/database"
+import { uploadProductPhoto } from "@/lib/product-photo"
 import Image from "next/image"
 
 interface ProductsListProps {
@@ -44,8 +45,33 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
   const [minStock, setMinStock] = useState("")
   const [imageUrl, setImageUrl] = useState("")
   const [showInStore, setShowInStore] = useState(false)
+  // Foto escolhida no aparelho, enviada só ao salvar, e a prévia dela
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState("")
+  const [saveError, setSaveError] = useState("")
+
+  const clearPhoto = () => {
+    if (photoPreview) URL.revokeObjectURL(photoPreview)
+    setPhotoFile(null)
+    setPhotoPreview("")
+  }
+
+  const pickPhoto = (file: File | undefined) => {
+    if (!file) return
+    clearPhoto()
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+    setSaveError("")
+  }
+
+  const removePhoto = () => {
+    clearPhoto()
+    setImageUrl("")
+  }
 
   const resetForm = () => {
+    clearPhoto()
+    setSaveError("")
     setName("")
     setDescription("")
     setBarcode("")
@@ -60,6 +86,8 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
   }
 
   const openEditDialog = (product: Product) => {
+    clearPhoto()
+    setSaveError("")
     setEditingProduct(product)
     setName(product.name)
     setDescription(product.description || "")
@@ -76,40 +104,45 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
 
   const handleCreate = async () => {
     setIsSubmitting(true)
+    setSaveError("")
     const supabase = createClient()
 
-    const productData = {
-      name,
-      description: description || null,
-      barcode: barcode || null,
-      category,
-      purchase_price: Number.parseFloat(purchasePrice) || 0,
-      sale_price: Number.parseFloat(salePrice),
-      stock_quantity: Number.parseInt(stockQuantity) || 0,
-      min_stock: Number.parseInt(minStock) || 0,
-      image_url: imageUrl || null,
-      show_in_store: showInStore,
-    }
-
-    if (editingProduct) {
-      // Update existing product
-      const { data, error } = await supabase
-        .from("products")
-        .update(productData)
-        .eq("id", editingProduct.id)
-        .select()
-        .single()
-
-      if (!error && data) {
-        setProducts(products.map((p) => (p.id === editingProduct.id ? (data as Product) : p)))
+    try {
+      // A foto nova sobe primeiro; se algo falhar, o formulário continua aberto e preenchido.
+      const photoUrl = photoFile ? await uploadProductPhoto(photoFile) : imageUrl || null
+      const productData = {
+        name,
+        description: description || null,
+        barcode: barcode || null,
+        category,
+        purchase_price: Number.parseFloat(purchasePrice) || 0,
+        sale_price: Number.parseFloat(salePrice),
+        stock_quantity: Number.parseInt(stockQuantity) || 0,
+        min_stock: Number.parseInt(minStock) || 0,
+        image_url: photoUrl,
+        show_in_store: showInStore,
       }
-    } else {
-      // Create new product
-      const { data, error } = await supabase.from("products").insert(productData).select().single()
 
-      if (!error && data) {
+      if (editingProduct) {
+        // Update existing product
+        const { data, error } = await supabase
+          .from("products")
+          .update(productData)
+          .eq("id", editingProduct.id)
+          .select()
+          .single()
+        if (error || !data) throw new Error("Não deu para salvar o produto agora. Tente de novo.")
+        setProducts(products.map((p) => (p.id === editingProduct.id ? (data as Product) : p)))
+      } else {
+        // Create new product
+        const { data, error } = await supabase.from("products").insert(productData).select().single()
+        if (error || !data) throw new Error("Não deu para salvar o produto agora. Tente de novo.")
         setProducts([data as Product, ...products])
       }
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Não deu para salvar o produto agora. Tente de novo.")
+      setIsSubmitting(false)
+      return
     }
 
     setIsSubmitting(false)
@@ -295,24 +328,44 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-foreground">URL da Imagem</Label>
-                  <Input
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="bg-background border-input"
-                    placeholder="https://exemplo.com/imagem.jpg"
-                  />
-                  {imageUrl && (
-                    <div className="mt-2 relative w-20 h-20 rounded-lg overflow-hidden border border-border">
-                      <Image
-                        src={imageUrl || "/placeholder.svg"}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                        onError={() => setImageUrl("")}
-                      />
+                  <Label className="text-foreground">Foto</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-24 h-24 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center shrink-0">
+                      {photoPreview || imageUrl ? (
+                        <img
+                          src={photoPreview || imageUrl}
+                          alt="Prévia da foto do produto"
+                          className="w-full h-full object-contain bg-white"
+                        />
+                      ) : (
+                        <Package className="w-8 h-8 text-muted-foreground" aria-hidden="true" />
+                      )}
                     </div>
-                  )}
+                    <div className="flex flex-col items-start gap-2">
+                      <Button type="button" variant="outline" size="sm" asChild>
+                        <label className="cursor-pointer">
+                          {photoPreview || imageUrl ? "Trocar foto" : "Escolher foto"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="sr-only"
+                            onChange={(e) => {
+                              pickPhoto(e.target.files?.[0])
+                              e.target.value = ""
+                            }}
+                          />
+                        </label>
+                      </Button>
+                      {(photoPreview || imageUrl) && (
+                        <Button type="button" variant="ghost" size="sm" onClick={removePhoto}>
+                          Remover foto
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    A foto é reduzida antes do envio, para a loja virtual abrir rápido no celular.
+                  </p>
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
@@ -323,6 +376,11 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
                   <Switch checked={showInStore} onCheckedChange={setShowInStore} />
                 </div>
               </div>
+              {saveError && (
+                <p role="alert" className="text-sm text-destructive">
+                  {saveError}
+                </p>
+              )}
               <DialogFooter>
                 <Button
                   variant="outline"
