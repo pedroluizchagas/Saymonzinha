@@ -1,5 +1,5 @@
 // Rodapé das duas versões da home e da loja virtual: endereço, contatos, menu e ©. As cores vêm de quem
-// o usa; fora da home, o menu vem com os endereços completos (siteMenu).
+// o usa; fora da home, o menu vem com os endereços completos (SITE_MENU).
 
 import { ADDRESS, INSTAGRAM_URL, MENU, PHONE_URL, WHATSAPP_DISPLAY, whatsappLink } from "./content"
 

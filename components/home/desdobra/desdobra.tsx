@@ -8,6 +8,7 @@
 
 import { ArrowDown, ArrowUpRight, Check, Instagram, MessageCircle, Moon, Package, Sun } from "lucide-react"
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react"
+import { STORE_PATH, productPath } from "@/lib/catalog"
 import type { Product } from "@/types/database"
 import { ARRIVAL_HOLD_MS, onFirstInteraction } from "../shared/arrival"
 import {
@@ -585,14 +586,14 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
             <p className="sc-label">{SECTIONS.store.label}</p>
             <h2 className="sc-display sc-display--section">{SECTIONS.store.title}</h2>
           </div>
-          <a className="sc-pill sc-pill--ink" href="/loja">
+          <a className="sc-pill sc-pill--ink" href={STORE_PATH}>
             Ver a loja <ArrowUpRight />
           </a>
         </div>
         {products.length > 0 ? (
           <div className="va-products">
             {products.map((p) => (
-              <a className="va-product" href="/loja" key={p.id}>
+              <a className="va-product" href={productPath(p)} key={p.id}>
                 <span className="va-product__img">
                   {p.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element

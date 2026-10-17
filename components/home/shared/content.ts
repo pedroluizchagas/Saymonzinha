@@ -1,5 +1,7 @@
 // Conteúdo da home: fonte única para a Desdobra e a Raio-X (ver docs/adr/0001).
 
+import { STORE_PATH } from "@/lib/catalog"
+
 /** Endereço do site, para links completos (prévias de link, mensagens de WhatsApp, dados para o Google). */
 export const SITE_URL = "https://www.saymoncell.com.br"
 
@@ -123,21 +125,16 @@ export const SECTIONS = {
   call: { label: "Chamada recebida · sobre o seu conserto", message: "Olá Saymon Cell! Vim pelo site e quero consertar meu celular." },
 }
 
-// Menu das duas versões. As âncoras são as mesmas do cabeçalho e do rodapé da loja.
+// Menu das duas versões. Na loja virtual, ele vem com os endereços completos (SITE_MENU).
 export const MENU = [
   { label: "Serviços", href: "#servicos" },
   { label: "Como funciona", href: "#como-funciona" },
-  { label: "Loja", href: "/loja" },
+  { label: "Loja", href: STORE_PATH },
   { label: "Localização", href: "#localizacao" },
 ]
 
-/** O menu fora da home (na loja virtual): as âncoras levam à home, e "Loja" à loja virtual. */
-export function siteMenu(storePath: string) {
-  return MENU.map((item) => ({
-    ...item,
-    href: item.href.startsWith("#") ? `/${item.href}` : item.href === "/loja" ? storePath : item.href,
-  }))
-}
+/** O menu fora da home (na loja virtual): as âncoras levam à home. */
+export const SITE_MENU = MENU.map((item) => (item.href.startsWith("#") ? { ...item, href: `/${item.href}` } : item))
 
 export const BRANDS = ["Apple", "Samsung", "Motorola", "Xiaomi", "LG", "Asus", "Huawei", "Realme", "OnePlus", "Nokia"]
 

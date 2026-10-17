@@ -84,12 +84,12 @@ describe("catálogo da loja virtual", () => {
 
   test("o endereço do produto é o nome sem acentos, em minúsculas e com hífens, mais o começo do código", () => {
     const id = "3f2a9c1d-0000-4000-8000-000000000001"
-    expect(productPath(product("Película de vidro 3D", { id }))).toBe("/nova-loja/pelicula-de-vidro-3d-3f2a9c1d")
+    expect(productPath(product("Película de vidro 3D", { id }))).toBe("/loja/pelicula-de-vidro-3d-3f2a9c1d")
     expect(productPath(product("Carregador turbo USB-C 25W (original)!", { id }))).toBe(
-      "/nova-loja/carregador-turbo-usb-c-25w-original-3f2a9c1d",
+      "/loja/carregador-turbo-usb-c-25w-original-3f2a9c1d",
     )
-    expect(productPath(product("Power bank 10.000 mAh", { id }))).toBe("/nova-loja/power-bank-10-000-mah-3f2a9c1d")
-    expect(productPath(product("***", { id }))).toBe("/nova-loja/produto-3f2a9c1d")
+    expect(productPath(product("Power bank 10.000 mAh", { id }))).toBe("/loja/power-bank-10-000-mah-3f2a9c1d")
+    expect(productPath(product("***", { id }))).toBe("/loja/produto-3f2a9c1d")
   })
 
   test("acha o produto pelo trecho do código no endereço", () => {
@@ -100,7 +100,7 @@ describe("catálogo da loja virtual", () => {
 
   test("quando o nome mudou, o endereço antigo manda para o endereço atual", () => {
     const pelicula = product("Película de vidro 3D", { id: "3f2a9c1d-0000-4000-8000-000000000001" })
-    expect(findProduct("pelicula-antiga-3f2a9c1d", [pelicula])).toEqual({ redirect: "/nova-loja/pelicula-de-vidro-3d-3f2a9c1d" })
+    expect(findProduct("pelicula-antiga-3f2a9c1d", [pelicula])).toEqual({ redirect: "/loja/pelicula-de-vidro-3d-3f2a9c1d" })
   })
 
   test("endereço sem produto não acha nada: código desconhecido, sem código ou incompleto", () => {

@@ -7,6 +7,7 @@
 
 import { ArrowDown, ArrowUpRight, Check, Instagram, MapPin, Menu, Package, Phone, X } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
+import { STORE_PATH, productPath } from "@/lib/catalog"
 import type { Product } from "@/types/database"
 import {
   ADDRESS,
@@ -332,14 +333,14 @@ export function RaioX({ products, lite }: { products: Product[]; lite: boolean }
             <p className="sc-label">{SECTIONS.store.label}</p>
             <h2 className="sc-display vb-h2">{SECTIONS.store.title}</h2>
           </div>
-          <a className="sc-pill sc-pill--ink" href="/loja">
+          <a className="sc-pill sc-pill--ink" href={STORE_PATH}>
             Ver a loja <ArrowUpRight />
           </a>
         </div>
         {products.length > 0 ? (
           <div className="vb-products">
             {products.map((p) => (
-              <a className="vb-product" href="/loja" key={p.id}>
+              <a className="vb-product" href={productPath(p)} key={p.id}>
                 <span className="vb-product__img">
                   {p.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element

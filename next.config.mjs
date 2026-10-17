@@ -12,6 +12,9 @@ const nextConfig = {
       { source: "/nova-home", destination: "/", permanent: true },
       { source: "/prototipo", destination: "/", permanent: true },
       { source: "/prototipo/:path*", destination: "/", permanent: true },
+      // A loja virtual foi aprovada em /nova-loja; os links da aprovação levam à loja virtual.
+      { source: "/nova-loja", destination: "/loja", permanent: true },
+      { source: "/nova-loja/:path*", destination: "/loja/:path*", permanent: true },
     ]
   },
 }

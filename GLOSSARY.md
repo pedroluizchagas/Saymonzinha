@@ -38,6 +38,10 @@ _Evitar_: delivery, leva e traz
 O catálogo de produtos do site, com o carrinho, de onde o cliente envia um pedido de compra.
 _Evitar_: loja online, e-commerce
 
+**Produto publicado**:
+Um produto ativo que a loja marcou no painel para aparecer na loja virtual. Esgotado, ele continua publicado: sai do catálogo, mas mantém a página.
+_Evitar_: produto na loja, produto visível
+
 **Pedido de compra**:
 O que o cliente envia pelo carrinho da loja virtual, pelo WhatsApp, com os produtos e como quer receber. Vira uma venda quando a loja fecha o negócio.
 _Evitar_: pedido (sozinho), encomenda, orçamento

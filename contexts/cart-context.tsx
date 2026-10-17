@@ -10,15 +10,11 @@ import type { Product, CartItem } from "@/types/database"
 
 interface CartContextType {
   items: CartItem[]
-  /** Por padrão abre o carrinho; a loja virtual nova avisa com uma notificação e passa `open: false`. */
-  addItem: (product: Product, quantity?: number, options?: { open?: boolean }) => void
+  addItem: (product: Product, quantity?: number) => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
-  getTotal: () => number
   getItemCount: () => number
-  isOpen: boolean
-  setIsOpen: (open: boolean) => void
   /** O carrinho guardado no navegador já foi lido. */
   isHydrated: boolean
   /** Troca os itens pelos conferidos com o banco (preço, estoque, produtos que saíram). */
@@ -31,7 +27,6 @@ const CART_STORAGE_KEY = "saymon-cell-cart"
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
-  const [isOpen, setIsOpen] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
   // Carregar carrinho do localStorage
@@ -54,7 +49,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isHydrated])
 
-  const addItem = useCallback((product: Product, quantity = 1, { open = true }: { open?: boolean } = {}) => {
+  const addItem = useCallback((product: Product, quantity = 1) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.product.id === product.id)
 
@@ -68,7 +63,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       return [...prev, { product, quantity: Math.min(quantity, product.stock_quantity) }]
     })
-    if (open) setIsOpen(true)
   }, [])
 
   const removeItem = useCallback((productId: string) => {
@@ -95,10 +89,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([])
   }, [])
 
-  const getTotal = useCallback(() => {
-    return items.reduce((total, item) => total + item.product.sale_price * item.quantity, 0)
-  }, [items])
-
   const getItemCount = useCallback(() => {
     return items.reduce((count, item) => count + item.quantity, 0)
   }, [items])
@@ -111,10 +101,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeItem,
         updateQuantity,
         clearCart,
-        getTotal,
         getItemCount,
-        isOpen,
-        setIsOpen,
         isHydrated,
         replaceItems: setItems,
       }}

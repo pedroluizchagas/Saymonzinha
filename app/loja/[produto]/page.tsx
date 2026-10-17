@@ -27,14 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     metadataBase: new URL(SITE_URL),
     title: `${product.name} | Loja virtual Saymon Cell`,
     description: describe(product),
-    // Fica fora do Google até a loja virtual nova substituir /loja.
-    robots: { index: false, follow: false },
     alternates: { canonical: productPath(product) },
     openGraph: { title: product.name, description: describe(product), url: productPath(product), type: "website" },
   }
 }
 
-export default async function ProdutoPage({ params }: Props) {
+export default async function ProductPage({ params }: Props) {
   const products = await published()
   const found = findProduct((await params).produto, products)
   // Produto desativado, desmarcado ou endereço sem produto: a loja virtual. Nome mudado: o endereço novo.

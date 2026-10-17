@@ -7,8 +7,8 @@
 // conferido com o banco.
 
 import "@/components/home/sc-system.css"
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
-import { siteMenu } from "@/components/home/shared/content"
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react"
+import { SITE_MENU } from "@/components/home/shared/content"
 import { HomeFooter } from "@/components/home/shared/home-footer"
 import { QuoteRequestProvider } from "@/components/home/shared/quote-dialog"
 import { useModalLayout } from "@/components/home/shared/use-modal-layout"
@@ -39,7 +39,6 @@ export function StoreShell({ children }: { children: ReactNode }) {
   const { addItem, items, isHydrated, replaceItems } = cart
   const quoteLayout = useModalLayout("center")
   const cartLayout = useModalLayout("side")
-  const menu = useMemo(() => siteMenu(STORE_PATH), [])
   const [notice, setNotice] = useState<{ notice: StoreNotice | null; signal: number }>({ notice: null, signal: 0 })
   const [cartOpen, setCartOpen] = useState(false)
   const [published, setPublished] = useState<Product[] | null>(null)
@@ -85,7 +84,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
         notify({ title: "Todas as unidades já estão no carrinho", detail: product.name, tone: "info" })
         return false
       }
-      addItem(product, Math.min(quantity, room), { open: false })
+      addItem(product, Math.min(quantity, room))
       notify({
         title: quantity > room ? `Só ${room} ${room === 1 ? "unidade adicionada" : "unidades adicionadas"}: é o que há em estoque` : "Adicionado ao carrinho",
         detail: product.name,
@@ -106,11 +105,11 @@ export function StoreShell({ children }: { children: ReactNode }) {
     <QuoteRequestProvider layout={quoteLayout}>
       <AddToCartContext.Provider value={add}>
         <div className="sc lv" data-scrolled={scrolled ? "1" : "0"}>
-          <SiteHeader menu={menu} current={STORE_PATH} cartCount={cart.getItemCount()} onOpenCart={openCart} />
+          <SiteHeader menu={SITE_MENU} current={STORE_PATH} cartCount={cart.getItemCount()} onOpenCart={openCart} />
           {children}
           <footer className="lv-footer">
             <StoreCall />
-            <HomeFooter menu={menu} />
+            <HomeFooter menu={SITE_MENU} />
           </footer>
           <StoreNotification notice={notice.notice} signal={notice.signal} onOpenCart={openCart} />
           <CartDialog
