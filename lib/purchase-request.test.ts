@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import type { CartItem, Product } from "@/types/database"
-import { checkPurchaseRequest } from "./purchase-request"
+import { checkPurchaseRequest, reconcileCart } from "./purchase-request"
 
 function product(name: string, overrides: Partial<Product> = {}): Product {
   return {
@@ -38,7 +38,7 @@ describe("pedido de compra", () => {
     expect(checkPurchaseRequest([saved(capinha, 5)], [capinha], "retirada").items[0].quantity).toBe(2)
   })
 
-  test("o produto que saiu da loja virtual ou esgotou sai do pedido e é listado para o aviso", () => {
+  test("o produto que saiu da loja virtual ou esgotou sai do pedido de compra e é listado para o aviso", () => {
     const capinha = product("Capinha")
     const cabo = product("Cabo")
     const fone = product("Fone", { stock_quantity: 0 })
@@ -78,5 +78,13 @@ describe("pedido de compra", () => {
     const request = checkPurchaseRequest([saved(capinha, 1)], [capinha], "retirada")
     expect(request.whatsappUrl.startsWith("https://wa.me/5537988023341?text=")).toBe(true)
     expect(decodeURIComponent(request.whatsappUrl.split("text=")[1])).toBe(request.message)
+  })
+
+  test("a conferência do carrinho diz se algo mudou, para só trocar os itens guardados quando precisa", () => {
+    const capinha = product("Capinha", { sale_price: 12, stock_quantity: 3 })
+    expect(reconcileCart([saved(capinha, 2)], [capinha]).changed).toBe(false)
+    expect(reconcileCart([saved({ ...capinha, sale_price: 10 }, 2)], [capinha]).changed).toBe(true)
+    expect(reconcileCart([saved(capinha, 5)], [capinha]).changed).toBe(true)
+    expect(reconcileCart([saved(capinha, 1)], []).changed).toBe(true)
   })
 })

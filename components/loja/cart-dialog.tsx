@@ -4,7 +4,7 @@
 // computador. Mostra os itens já conferidos com o banco, a forma de receber e envia o pedido de
 // compra pelo WhatsApp. Depois do envio, o carrinho continua guardado, com a opção de esvaziar.
 
-import { ArrowUpRight, Check, Minus, Plus, Trash2, X } from "lucide-react"
+import { ArrowUpRight, Check, Trash2, X } from "lucide-react"
 import { useId, useState } from "react"
 import { ADDRESS } from "@/components/home/shared/content"
 import { Modal, type ModalLayout } from "@/components/home/shared/modal"
@@ -12,6 +12,7 @@ import { useCart } from "@/contexts/cart-context"
 import { formatPrice, productPath } from "@/lib/catalog"
 import { checkPurchaseRequest, type Receiving } from "@/lib/purchase-request"
 import type { Product } from "@/types/database"
+import { QuantityStepper } from "./quantity-stepper"
 
 export function CartDialog({
   open,
@@ -115,25 +116,13 @@ export function CartDialog({
                     </a>
                     <span className="lv-cartd__unit">{formatPrice(product.sale_price)} cada</span>
                     <div className="lv-cartd__row">
-                      <div className="lv-qty lv-qty--sm" role="group" aria-label={`Quantidade de ${product.name}`}>
-                        <button
-                          type="button"
-                          aria-label="Diminuir a quantidade"
-                          disabled={quantity <= 1}
-                          onClick={() => cart.updateQuantity(product.id, quantity - 1)}
-                        >
-                          <Minus aria-hidden="true" />
-                        </button>
-                        <output aria-live="polite">{quantity}</output>
-                        <button
-                          type="button"
-                          aria-label="Aumentar a quantidade"
-                          disabled={quantity >= product.stock_quantity}
-                          onClick={() => cart.updateQuantity(product.id, quantity + 1)}
-                        >
-                          <Plus aria-hidden="true" />
-                        </button>
-                      </div>
+                      <QuantityStepper
+                        small
+                        value={quantity}
+                        max={product.stock_quantity}
+                        onChange={(next) => cart.updateQuantity(product.id, next)}
+                        label={`Quantidade de ${product.name}`}
+                      />
                       <strong className="lv-cartd__subtotal">{formatPrice(subtotal)}</strong>
                       <button
                         type="button"

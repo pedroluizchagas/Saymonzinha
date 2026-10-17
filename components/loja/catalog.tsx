@@ -25,8 +25,6 @@ export function Catalog({ products }: { products: Product[] }) {
         <span className="sc-label lv-title__kicker">Acessórios para celular em Divinópolis</span>{" "}
         <span className="sc-display lv-title__name">Loja virtual</span>
       </h1>
-      <p className="sc-body lv-intro">Capinhas, carregadores, fones e caixinhas de som. Retire na loja ou receba em casa.</p>
-
       {products.length === 0 ? (
         <section className="lv-empty" aria-label="Loja virtual sem produtos">
           <p className="sc-body">
@@ -49,6 +47,10 @@ export function Catalog({ products }: { products: Product[] }) {
         </section>
       ) : (
         <>
+          <p className="sc-body lv-intro">
+            Capinhas, carregadores, fones e caixinhas de som. Retire na loja ou receba em casa (consulte disponibilidade e
+            valor para sua região).
+          </p>
           {(filters.length > 0 || searchable) && (
             <div className="lv-controls">
               {filters.length > 0 && (

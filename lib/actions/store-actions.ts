@@ -27,8 +27,11 @@ export async function getStoreProducts(): Promise<Product[]> {
   return data || []
 }
 
-/** Produtos publicados na loja virtual, com ou sem estoque: a página do produto esgotado e a conferência do carrinho. */
-export async function getPublishedProducts(): Promise<Product[]> {
+/**
+ * Produtos publicados na loja virtual, com ou sem estoque: a página do produto esgotado e a conferência
+ * do carrinho. `null` quando o banco não respondeu, para ninguém confundir falha com loja vazia.
+ */
+export async function getPublishedProducts(): Promise<Product[] | null> {
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -40,7 +43,7 @@ export async function getPublishedProducts(): Promise<Product[]> {
 
   if (error) {
     console.error("Erro ao buscar produtos publicados:", error)
-    return []
+    return null
   }
 
   return data || []

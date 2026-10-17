@@ -38,8 +38,13 @@ export function shouldShowSearch(products: Product[]) {
 /** Até este estoque, o produto mostra "Últimas unidades". */
 const FEW_LEFT = 2
 
+/** Sem estoque: a página do produto continua, mas ele não entra no carrinho. */
+export function isSoldOut(product: Product) {
+  return product.stock_quantity <= 0
+}
+
 export function stockBadge(product: Product): "Esgotado" | "Últimas unidades" | null {
-  if (product.stock_quantity <= 0) return "Esgotado"
+  if (isSoldOut(product)) return "Esgotado"
   return product.stock_quantity <= FEW_LEFT ? "Últimas unidades" : null
 }
 

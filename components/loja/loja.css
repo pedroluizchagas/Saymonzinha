@@ -1,4 +1,5 @@
-/* Loja virtual (ver loja-virtual.tsx), no sistema visual da home: tema Noite, uma versão só.
+/* Loja virtual (ver store-shell.tsx, catalog.tsx e product-detail.tsx), no sistema visual da home:
+   tema Noite, uma versão só.
    Vem depois de sc-system.css. */
 
 .lv {
@@ -87,16 +88,12 @@
   background: var(--stage-control);
 }
 @media (max-width: 479px) {
-  /* No celular, o WhatsApp do cabeçalho vai para o menu compacto, para caber a marca, o "Pedir
-     orçamento", o carrinho e o menu. */
-  .lv-header {
-    gap: 8px;
+  /* No celular, o cabeçalho fica compacto para caber a marca, o WhatsApp, o "Pedir orçamento", o
+     carrinho e o menu. */
+  .lv-header,
+  .lv-header .sc-header-actions {
+    gap: 6px;
   }
-  .lv-header .sc-header-actions > a.sc-pill--icon {
-    display: none;
-  }
-}
-@media (max-width: 380px) {
   .lv-header {
     padding-inline: 12px;
   }
@@ -104,7 +101,16 @@
     font-size: 18px;
   }
   .lv-header .sc-pill--red {
-    padding-inline: 10px;
+    padding-inline: 12px;
+  }
+  .lv-header .sc-pill--red svg {
+    display: none;
+  }
+}
+@media (max-width: 374px) {
+  /* Telas bem estreitas: o WhatsApp vai para o menu compacto. */
+  .lv-header .sc-header-actions > a.sc-pill--icon {
+    display: none;
   }
 }
 @media (min-width: 1024px) {

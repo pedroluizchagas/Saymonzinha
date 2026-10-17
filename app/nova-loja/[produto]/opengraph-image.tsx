@@ -25,7 +25,7 @@ async function drawablePhoto(url: string | null) {
 }
 
 export default async function Image({ params }: { params: Promise<{ produto: string }> }) {
-  const found = findProduct((await params).produto, await getPublishedProducts())
+  const found = findProduct((await params).produto, (await getPublishedProducts()) ?? [])
   const product = found && "product" in found ? found.product : null
   // Foto em formato que a prévia não desenha (WebP, por exemplo): o desenho da marca, e não um quadro vazio.
   const photo = await drawablePhoto(product?.image_url ?? null)
@@ -44,7 +44,7 @@ export default async function Image({ params }: { params: Promise<{ produto: str
           <div style={{ fontSize: 26, letterSpacing: 6, color: "#a6a29b", textTransform: "uppercase" }}>Saymon Cell · Loja virtual</div>
           <div style={{ fontSize: 62, fontWeight: 700, lineHeight: 1.05 }}>{product?.name ?? "Loja virtual"}</div>
           {product && <div style={{ fontSize: 76, fontWeight: 700, color: "#ff0200" }}>{formatPrice(product.sale_price)}</div>}
-          <div style={{ fontSize: 26, color: "#a6a29b" }}>Divinópolis · Retire na loja ou receba em casa</div>
+          <div style={{ fontSize: 26, color: "#a6a29b" }}>Divinópolis · Peça pelo WhatsApp</div>
         </div>
       </div>
     ),

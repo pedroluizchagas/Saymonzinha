@@ -2,7 +2,7 @@
 // seguir pelo WhatsApp.
 
 import { whatsappLink } from "@/components/home/shared/content"
-import { formatPrice } from "@/lib/catalog"
+import { formatPrice, isSoldOut } from "@/lib/catalog"
 import type { CartItem, Product } from "@/types/database"
 
 /** Retirada: o cliente busca na loja. Entrega: a loja leva até o cliente. */
@@ -10,19 +10,33 @@ export type Receiving = "retirada" | "entrega"
 
 export type PurchaseItem = { product: Product; quantity: number; subtotal: number }
 
-export function checkPurchaseRequest(cart: CartItem[], published: Product[], receiving: Receiving) {
-  const items: PurchaseItem[] = []
-  // Produtos que saíram da loja virtual ou esgotaram desde que foram para o carrinho.
+/**
+ * O carrinho guardado conferido com os produtos publicados: preço atual, quantidade até o estoque e
+ * sem os produtos que saíram ou esgotaram (listados para o aviso). `changed` diz se algo mudou.
+ */
+export function reconcileCart(cart: CartItem[], published: Product[]) {
+  const items: CartItem[] = []
   const removed: string[] = []
   for (const saved of cart) {
     const product = published.find((p) => p.id === saved.product.id)
-    if (!product || product.stock_quantity <= 0) {
+    if (!product || isSoldOut(product)) {
       removed.push(saved.product.name)
       continue
     }
-    const quantity = Math.min(saved.quantity, product.stock_quantity)
-    items.push({ product, quantity, subtotal: cents(product.sale_price) * quantity / 100 })
+    items.push({ product, quantity: Math.min(saved.quantity, product.stock_quantity) })
   }
+  const key = (list: CartItem[]) =>
+    JSON.stringify(list.map((i) => [i.product.id, i.quantity, i.product.sale_price, i.product.stock_quantity]))
+  return { items, removed, changed: key(items) !== key(cart) }
+}
+
+export function checkPurchaseRequest(cart: CartItem[], published: Product[], receiving: Receiving) {
+  const { items: checked, removed } = reconcileCart(cart, published)
+  const items: PurchaseItem[] = checked.map(({ product, quantity }) => ({
+    product,
+    quantity,
+    subtotal: (cents(product.sale_price) * quantity) / 100,
+  }))
   const total = items.reduce((sum, item) => sum + cents(item.subtotal), 0) / 100
   // O começo é fixo: é por ele que a loja reconhece e conta os pedidos de compra no WhatsApp.
   const message = [

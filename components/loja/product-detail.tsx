@@ -4,17 +4,18 @@
 // a quantidade, "Adicionar ao carrinho" e "Perguntar no WhatsApp". Esgotado, a página continua, com o
 // aviso e a pergunta de quando chega.
 
-import { ArrowLeft, MessageCircle, Minus, Plus } from "lucide-react"
+import { ArrowLeft, MessageCircle } from "lucide-react"
 import { useState } from "react"
 import { whatsappLink } from "@/components/home/shared/content"
-import { STORE_PATH, formatPrice, stockBadge } from "@/lib/catalog"
+import { STORE_PATH, formatPrice, isSoldOut, stockBadge } from "@/lib/catalog"
 import type { Product } from "@/types/database"
+import { QuantityStepper } from "./quantity-stepper"
 import { useAddToCart } from "./store-shell"
 
 export function ProductDetail({ product, url }: { product: Product; url: string }) {
   const add = useAddToCart()
   const badge = stockBadge(product)
-  const soldOut = product.stock_quantity <= 0
+  const soldOut = isSoldOut(product)
   const [quantity, setQuantity] = useState(1)
   const question = soldOut
     ? `Olá Saymon Cell! O produto ${product.name} está esgotado na loja virtual. Quando chega? ${url}`
@@ -42,25 +43,7 @@ export function ProductDetail({ product, url }: { product: Product; url: string 
 
           {!soldOut && (
             <div className="lv-product__buy">
-              <div className="lv-qty" role="group" aria-label="Quantidade">
-                <button
-                  type="button"
-                  aria-label="Diminuir a quantidade"
-                  disabled={quantity <= 1}
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                >
-                  <Minus aria-hidden="true" />
-                </button>
-                <output aria-live="polite">{quantity}</output>
-                <button
-                  type="button"
-                  aria-label="Aumentar a quantidade"
-                  disabled={quantity >= product.stock_quantity}
-                  onClick={() => setQuantity((q) => Math.min(product.stock_quantity, q + 1))}
-                >
-                  <Plus aria-hidden="true" />
-                </button>
-              </div>
+              <QuantityStepper value={quantity} max={product.stock_quantity} onChange={setQuantity} label="Quantidade" />
               <button type="button" className="sc-pill sc-pill--red lv-product__add" onClick={() => add(product, quantity)}>
                 Adicionar ao carrinho
               </button>

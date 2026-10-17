@@ -9,8 +9,9 @@ import { getPublishedProducts } from "@/lib/actions/store-actions"
 import { STORE_PATH, findProduct, formatPrice, productPath } from "@/lib/catalog"
 import type { Product } from "@/types/database"
 
-// Página de um produto da loja virtual (ADR 0002). O metadado e a página leem os produtos uma vez só.
-const published = cache(getPublishedProducts)
+// Página de um produto da loja virtual (ADR 0002). O metadado e a página leem os produtos uma vez só;
+// se o banco não responder, o endereço cai na loja virtual.
+const published = cache(async () => (await getPublishedProducts()) ?? [])
 
 type Props = { params: Promise<{ produto: string }> }
 
