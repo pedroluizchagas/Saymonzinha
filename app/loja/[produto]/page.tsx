@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function ProdutoPage({ params }: Props) {
+export default async function ProductPage({ params }: Props) {
   const found = findProduct((await params).produto, await published())
   // Produto desativado, desmarcado ou endereço sem produto: a loja virtual. Nome mudado: o endereço novo.
   if (!found) redirect(STORE_PATH)

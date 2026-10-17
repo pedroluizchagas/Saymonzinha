@@ -6,8 +6,8 @@
 // carrinho guardado é conferido com o banco.
 
 import "@/components/home/sc-system.css"
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
-import { siteMenu } from "@/components/home/shared/content"
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react"
+import { SITE_MENU } from "@/components/home/shared/content"
 import { HomeFooter } from "@/components/home/shared/home-footer"
 import { QuoteRequestProvider } from "@/components/home/shared/quote-dialog"
 import { useModalLayout } from "@/components/home/shared/use-modal-layout"
@@ -36,7 +36,6 @@ export function StoreShell({ children }: { children: ReactNode }) {
   const { addItem, items, isHydrated, replaceItems } = cart
   const quoteLayout = useModalLayout("center")
   const cartLayout = useModalLayout("side")
-  const menu = useMemo(() => siteMenu(STORE_PATH), [])
   const [notice, setNotice] = useState<{ notice: StoreNotice | null; signal: number }>({ notice: null, signal: 0 })
   const [cartOpen, setCartOpen] = useState(false)
   const [published, setPublished] = useState<Product[] | null>(null)
@@ -88,7 +87,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
       <AddToCartContext.Provider value={add}>
         <div className="sc lv">
           <SiteHeader
-            menu={menu}
+            menu={SITE_MENU}
             current={STORE_PATH}
             cartCount={cart.getItemCount()}
             onOpenCart={() => {
@@ -98,7 +97,7 @@ export function StoreShell({ children }: { children: ReactNode }) {
           />
           {children}
           <footer className="lv-footer">
-            <HomeFooter menu={menu} />
+            <HomeFooter menu={SITE_MENU} />
           </footer>
           <StoreNotification notice={notice.notice} signal={notice.signal} />
           <CartDialog
