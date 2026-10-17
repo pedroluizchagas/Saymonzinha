@@ -19,6 +19,10 @@ interface CartContextType {
   getItemCount: () => number
   isOpen: boolean
   setIsOpen: (open: boolean) => void
+  /** O carrinho guardado no navegador já foi lido. */
+  isHydrated: boolean
+  /** Troca os itens pelos conferidos com o banco (preço, estoque, produtos que saíram). */
+  replaceItems: (items: CartItem[]) => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -111,6 +115,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         getItemCount,
         isOpen,
         setIsOpen,
+        isHydrated,
+        replaceItems: setItems,
       }}
     >
       {children}
