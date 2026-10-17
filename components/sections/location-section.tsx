@@ -29,7 +29,7 @@ export function LocationSection() {
                   subtitle="Jardim dos Candidés, Divinópolis - MG"
                   extra="CEP: 35502-297"
                 />
-                <InfoItem icon={Phone} title="Telefone / WhatsApp" content="(37) 99922-0892" />
+                <InfoItem icon={Phone} title="Telefone / WhatsApp" content="(37) 98802-3341" />
                 <InfoItem
                   icon={Clock}
                   title="Horário de Funcionamento"
@@ -41,7 +41,7 @@ export function LocationSection() {
 
             <Button asChild size="lg" className="w-full mt-8 bg-accent hover:bg-accent/90 text-accent-foreground">
               <a
-                href="https://wa.me/5537999220892?text=Olá%20Saymon%20Cell%2C%20vi%20o%20site%20e%20gostaria%20de%20um%20orçamento%20para..."
+                href="https://wa.me/5537988023341?text=Olá%20Saymon%20Cell%2C%20vi%20o%20site%20e%20gostaria%20de%20um%20orçamento%20para..."
                 target="_blank"
                 rel="noopener noreferrer"
               >

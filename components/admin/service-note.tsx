@@ -398,7 +398,7 @@ export function ServiceNote({ order, items = [] }: ServiceNoteProps) {
                       Entregue: {formatDate(order.delivered_at)}
                     </p>
                     <p className="text-[10px] text-gray-300 mt-0.5">
-                      Saymon Cell -- Atendimento: (37) 99922-0892 -- Endereco: Av. Anhanguera, 1286, Loja 02 -- Jardim dos
+                      Saymon Cell -- Atendimento: (37) 98802-3341 -- Endereco: Av. Anhanguera, 1286, Loja 02 -- Jardim dos
                       Candides, Divinopolis - MG
                     </p>
                   </div>

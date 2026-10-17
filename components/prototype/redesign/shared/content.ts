@@ -3,7 +3,7 @@
 
 export const WHATSAPP_NUMBER = "5537988023341"
 export const WHATSAPP_DISPLAY = "(37) 98802-3341"
-export const INSTAGRAM_URL = "https://instagram.com/saymoncell"
+export const INSTAGRAM_URL = "https://instagram.com/saymoncell037"
 export const MAPS_URL =
   "https://www.google.com/maps/search/?api=1&query=Av.+Anhanguera%2C+1286%2C+Jardim+dos+Candid%C3%A9s%2C+Divin%C3%B3polis+-+MG"
 

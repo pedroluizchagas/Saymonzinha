@@ -34,7 +34,7 @@ export function CartDrawer() {
 
   const handleCheckout = () => {
     const message = generateWhatsAppMessage()
-    window.open(`https://wa.me/5537999220892?text=${message}`, "_blank")
+    window.open(`https://wa.me/5537988023341?text=${message}`, "_blank")
   }
 
   return (

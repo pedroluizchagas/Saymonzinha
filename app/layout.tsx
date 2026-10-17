@@ -20,7 +20,7 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Saymon Cell | Assistencia Tecnica de Smartphones em Divinopolis",
   description:
-    "Consertamos seu smartphone sem voce sair de casa em Divinopolis. Troca de tela, bateria, conector de carga e mais. Servico de busca e entrega. 3 anos de experiencia.",
+    "Consertamos seu smartphone sem voce sair de casa em Divinopolis. Troca de tela, bateria, conector de carga e mais. Servico de busca e entrega. 10 anos de experiencia.",
   keywords: [
     "conserto de celular",
     "assistencia tecnica",

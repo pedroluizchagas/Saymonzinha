@@ -311,7 +311,7 @@ export function VariantB({ products }: { products: Product[] }) {
               <MapPin /> Abrir no Maps
             </a>
             <a className="sc-pill sc-pill--ghost" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-              <Instagram /> @saymoncell
+              <Instagram /> @saymoncell037
             </a>
           </div>
         </div>

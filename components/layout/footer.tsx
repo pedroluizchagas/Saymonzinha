@@ -43,11 +43,11 @@ export function Footer() {
             <h4 className="font-semibold text-foreground mb-4">Contato</h4>
             <div className="space-y-3">
               <a
-                href="tel:+5537999220892"
+                href="tel:+5537988023341"
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
               >
                 <Phone className="w-4 h-4" />
-                (37) 99922-0892
+                (37) 98802-3341
               </a>
               <div className="flex items-start gap-2 text-muted-foreground text-sm">
                 <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
@@ -59,7 +59,7 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-4 pt-2">
                 <a
-                  href="https://instagram.com/saymoncell"
+                  href="https://instagram.com/saymoncell037"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary/20 transition-colors"

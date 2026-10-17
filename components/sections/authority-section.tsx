@@ -45,7 +45,7 @@ export function AuthoritySection() {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard icon={Award} value="3+" label="Anos de Experiência" />
+            <StatCard icon={Award} value="10" label="Anos de Experiência" />
             <StatCard
               icon={Smartphone}
               value={`${repairsCount.toLocaleString("pt-BR")}+`}
