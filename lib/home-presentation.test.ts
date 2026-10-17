@@ -103,8 +103,8 @@ describe("escolha da apresentação no navegador", () => {
     expect(choosePresentation({ screen: { touch: true, width: 390 }, janky: true }).lite).toBe(true)
   })
 
-  test("a versão leve de uma visita anterior continua", () => {
-    expect(choosePresentation({ screen: { touch: true, width: 390 }, cookie: "raio-x.leve" }).lite).toBe(true)
+  test("no navegador, a versão leve da visita anterior não prende: quem desligou o menos movimento volta à completa", () => {
+    expect(choosePresentation({ screen: { touch: true, width: 390 }, cookie: "raio-x.leve" }).lite).toBe(false)
   })
 
   test("os dados de tela vencem o cookie da visita anterior", () => {

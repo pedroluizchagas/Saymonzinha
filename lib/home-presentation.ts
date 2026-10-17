@@ -18,6 +18,13 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 /** Atributos do cookie de versão, para o navegador gravar depois de conferir a tela. */
 export const PRESENTATION_COOKIE_ATTRIBUTES = `Max-Age=${COOKIE_MAX_AGE}; Path=/; SameSite=Lax`
 
+/** Cookie que lembra, por uma semana, que a página engasgou neste aparelho. Depois a medição
+ * recomeça, para que um engasgo passageiro (o modo de economia de bateria, por exemplo) não prenda o
+ * aparelho na versão leve. */
+export const JANK_COOKIE = "home-engasgo"
+
+export const JANK_COOKIE_ATTRIBUTES = `Max-Age=${60 * 60 * 24 * 7}; Path=/; SameSite=Lax`
+
 /** Estilo que esconde a página enquanto o navegador troca uma versão que o servidor errou. */
 export const SWAP_STYLE_ID = "home-trocando"
 
@@ -35,7 +42,8 @@ export type PresentationSignals = {
   memoryGb?: number
   /** Só no navegador: núcleos do processador (navigator.hardwareConcurrency). */
   cores?: number
-  /** Só no navegador: a página engasgou nos primeiros segundos de rolagem. */
+  /** Só no navegador: a página engasgou nos primeiros segundos de rolagem, nesta visita ou numa
+   * visita da última semana (JANK_COOKIE). */
   janky?: boolean
 }
 
@@ -64,16 +72,18 @@ export function choosePresentation(signals: PresentationSignals): Presentation {
 }
 
 function chooseLite(signals: PresentationSignals, liteBefore: boolean): boolean {
+  // No servidor, sem os sinais do aparelho, vale o modo da visita anterior. No navegador, os sinais
+  // são lidos de novo a cada visita: quem desliga o "menos movimento" volta à versão completa.
+  if (!signals.screen) return liteBefore
   const { memoryGb, cores } = signals
   // Memória e núcleos só dizem algo em celular e tablet: num computador, 4 núcleos dão conta; lá
   // vale o engasgo medido. E os núcleos só contam com a memória informada, porque o Safari mostra
   // poucos núcleos até em iPhone potente.
   const weak =
-    Boolean(signals.screen?.touch) &&
+    signals.screen.touch &&
     memoryGb !== undefined &&
     (memoryGb <= LITE_MAX_MEMORY_GB || (cores !== undefined && cores <= LITE_MAX_CORES))
-  // A versão leve de uma visita anterior continua: um engasgo medido uma vez vale para as próximas.
-  return Boolean(signals.reducedMotion) || weak || Boolean(signals.janky) || liteBefore
+  return Boolean(signals.reducedMotion) || weak || Boolean(signals.janky)
 }
 
 function chooseVersion(signals: PresentationSignals, versionBefore: HomeVersion | undefined): HomeVersion {

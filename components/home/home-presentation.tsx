@@ -9,6 +9,8 @@
 import { useEffect, useRef, useState } from "react"
 import {
   DESKTOP_MIN_WIDTH,
+  JANK_COOKIE,
+  JANK_COOKIE_ATTRIBUTES,
   PRESENTATION_COOKIE,
   PRESENTATION_COOKIE_ATTRIBUTES,
   REDUCED_MOTION_QUERY,
@@ -79,8 +81,9 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
     const wide = window.matchMedia(`(min-width: ${DESKTOP_MIN_WIDTH}px)`)
     const reduce = window.matchMedia(REDUCED_MOTION_QUERY)
     const nav = navigator as Navigator & { deviceMemory?: number }
+    const secure = window.location.protocol === "https:" ? "; Secure" : ""
     let current = initial
-    let janky = false
+    let janky = document.cookie.split("; ").includes(`${JANK_COOKIE}=1`)
     let firstCheck = true
     const check = () => {
       const next = choosePresentation({
@@ -89,10 +92,7 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
         memoryGb: nav.deviceMemory,
         cores: nav.hardwareConcurrency,
         janky,
-        // o modo leve, uma vez ligado, continua (inclusive o que veio do cookie)
-        cookie: presentationCookieValue(current),
       })
-      const secure = window.location.protocol === "https:" ? "; Secure" : ""
       document.cookie = `${PRESENTATION_COOKIE}=${presentationCookieValue(next)}; ${PRESENTATION_COOKIE_ATTRIBUTES}${secure}`
       setConfirmed(true)
       if (next.version !== current.version || next.lite !== current.lite) {
@@ -113,6 +113,7 @@ export function HomePresentation({ initial, products }: { initial: Presentation;
       ? () => {}
       : watchForJank(() => {
           janky = true
+          document.cookie = `${JANK_COOKIE}=1; ${JANK_COOKIE_ATTRIBUTES}${secure}`
           check()
         })
     return () => {
