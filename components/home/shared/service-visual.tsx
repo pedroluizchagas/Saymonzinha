@@ -1,4 +1,4 @@
-// PROTÓTIPO: ilustrações dos serviços (lado esquerdo dos painéis). Formas simples nas
+// Ilustrações dos serviços (lado esquerdo dos painéis). Formas simples nas
 // cores da marca; o reparo em placa usa a foto real do panfleto. Trocar por fotos da bancada.
 
 import { useId, useMemo, type CSSProperties } from "react"
@@ -25,7 +25,7 @@ export function ServiceVisual({ kind }: { kind: VisualKind }) {
       {kind === "banho" && <WaterArt />}
       {kind === "placa" && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img className="sv__photo" src="/prototype/redesign/teardown.jpg" alt="Interior de um smartphone aberto" />
+        <img className="sv__photo" src="/home/teardown.jpg" alt="Interior de um smartphone aberto" />
       )}
       {kind === "software" && <SoftwareArt />}
       <span className="sv__caption sc-label">{CAPTIONS[kind]}</span>

@@ -1,6 +1,6 @@
 /* =====================================================================
-   PROTÓTIPO · Variante A "Desdobra"
-   Variáveis dirigidas pelo scroll (variant-a.tsx):
+   Home nova · Desdobra (desktop)
+   Variáveis dirigidas pelo scroll (desdobra.tsx):
    --heal 0→1 (vidro), --open 0→1 (dobra), --phi 180→0deg (giro da metade A),
    --shift (centraliza a parte visível), --vis (largura/altura visível),
    --scroll (deslocamento do conteúdo dentro da tela).

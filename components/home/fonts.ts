@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono, Sofia_Sans_Extra_Condensed } from "next/font/google"
 
-// PROTÓTIPO: as três vozes tipográficas do redesign (mesmas do Foldfolio).
+// As três vozes tipográficas da home nova (mesmas do Foldfolio).
 // As variáveis --sc-font-* são lidas por sc-system.css dentro de .sc.
 
 const display = Sofia_Sans_Extra_Condensed({

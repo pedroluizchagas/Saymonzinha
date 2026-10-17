@@ -1,4 +1,4 @@
-// PROTÓTIPO do redesign: conteúdo real do site atual, compartilhado pelas variantes.
+// Conteúdo da home nova: fonte única para a Desdobra e a Raio-X (ver docs/adr/0001).
 // Fonte: components/sections/*, components/layout/footer.tsx e components/forms/pre-quote-form.tsx.
 
 export const WHATSAPP_NUMBER = "5537988023341"

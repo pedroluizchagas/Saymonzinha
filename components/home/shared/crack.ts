@@ -1,4 +1,4 @@
-// PROTÓTIPO: gera o vidro trincado de forma determinística (mesma saída no SSR e no cliente).
+// Gera o vidro trincado de forma determinística (mesma saída no SSR e no cliente).
 // Cada caminho começa no ponto de impacto, então "curar" = recolher o traço até o centro.
 
 type Point = [number, number]

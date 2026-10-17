@@ -1,6 +1,6 @@
 "use client"
 
-// PROTÓTIPO — Variante B "Raio-X": o conteúdo fica fora do aparelho.
+// Home nova, versão de celular e tablet "Raio-X": o conteúdo fica fora do aparelho.
 // O celular é a peça explicada: o scroll o desmonta em camadas (vista isométrica),
 // cada camada apresenta um serviço, e ele se remonta "novo de novo".
 // Depois a página segue editorial: etapas, números, marcas, loja e contato.
@@ -26,7 +26,7 @@ import {
 } from "../shared/content"
 import { makeCracks } from "../shared/crack"
 import { CallSlider, useClock } from "../shared/device-ui"
-import "./variant-b.css"
+import "./raio-x.css"
 
 type LayerKey = "vidro" | "display" | "bateria" | "placa" | "chassi" | "tampa"
 
@@ -46,7 +46,7 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 
 const T = { hero: 0.55, explode: 1.0, layer: 0.85, collapse: 1.0, hold: 0.5 }
 const SCENE_VH = T.hero + T.explode + LAYERS.length * T.layer + T.collapse + T.hold
 
-export function VariantB({ products }: { products: Product[] }) {
+export function RaioX({ products }: { products: Product[] }) {
   const rootRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(-1)
@@ -107,9 +107,9 @@ export function VariantB({ products }: { products: Product[] }) {
   const services = useMemo(() => LAYERS.map((l) => SERVICES.find((s) => s.key === l.service) as Service), [])
 
   return (
-    <div ref={rootRef} className="sc vb" data-phase={phase}>
+    <div ref={rootRef} id="inicio" className="sc vb" data-phase={phase}>
       <header className="vb-header">
-        <a className="sc-logo" href="/prototipo/b" aria-label="Saymon Cell, início">
+        <a className="sc-logo" href="#inicio" aria-label="Saymon Cell, início">
           Saymon <b>Cell</b>
           <sup>®</sup>
         </a>
@@ -333,7 +333,7 @@ export function VariantB({ products }: { products: Product[] }) {
         <div className="vb-call" role="group" aria-label="Chamada recebida da Saymon Cell">
           <span className="vb-call__avatar" aria-hidden="true">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/prototype/redesign/glyph.png" alt="" />
+            <img src="/home/glyph.png" alt="" />
           </span>
           <div className="vb-call__text">
             <p className="sc-ui">Saymon Cell</p>
@@ -374,7 +374,7 @@ function LayerArt({ kind, time }: { kind: LayerKey; time: string }) {
           <span className="sc-label vb-screen__status">Sistema restaurado</span>
           <span className="vb-screen__notif">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/prototype/redesign/glyph.png" alt="" />
+            <img src="/home/glyph.png" alt="" />
             <span>
               <b>Saymon Cell</b>
               <small>Seu celular está pronto</small>
@@ -432,7 +432,7 @@ function LayerArt({ kind, time }: { kind: LayerKey; time: string }) {
             <i />
           </span>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="vb-back__logo" src="/prototype/redesign/glyph.png" alt="" />
+          <img className="vb-back__logo" src="/home/glyph.png" alt="" />
           <span className="vb-back__drops">
             {[0, 1, 2, 3, 4].map((d) => (
               <i key={d} />

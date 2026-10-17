@@ -1,6 +1,6 @@
 "use client"
 
-// PROTÓTIPO: peças de interface do aparelho usadas pelas variantes (barra de status,
+// Peças de interface do aparelho usadas pelas duas versões (barra de status,
 // relógio ao vivo, deslize para atender). Estilos em ../sc-system.css.
 
 import { Phone } from "lucide-react"

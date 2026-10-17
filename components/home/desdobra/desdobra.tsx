@@ -1,6 +1,6 @@
 "use client"
 
-// PROTÓTIPO — Variante A "Desdobra": a adaptação literal do Foldfolio.
+// Home nova, versão de desktop "Desdobra": a adaptação literal do Foldfolio.
 // O site inteiro vive dentro de um celular dobrável no palco:
 //   tela de bloqueio trincada → o scroll conserta o vidro → o aparelho desdobra →
 //   o conteúdo rola dentro da tela → dobra de volta → chamada recebida (WhatsApp).
@@ -27,7 +27,7 @@ import {
 import { makeCracks } from "../shared/crack"
 import { CallSlider, StatusBar, useClock } from "../shared/device-ui"
 import { ServiceVisual, type VisualKind } from "../shared/service-visual"
-import "./variant-a.css"
+import "./desdobra.css"
 
 type Axis = "x" | "y"
 type Geometry = { axis: Axis; vw: number; vh: number; W: number; H: number; f: number }
@@ -85,7 +85,7 @@ function buildTimeline(vh: number, travel: number): Timeline {
   return { heal, unfoldStart, unfoldEnd, contentEnd, foldEnd, total: foldEnd + 0.6 * vh, travel }
 }
 
-export function VariantA({ products }: { products: Product[] }) {
+export function Desdobra({ products }: { products: Product[] }) {
   const rootRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const clipRef = useRef<HTMLDivElement>(null)
@@ -265,6 +265,7 @@ export function VariantA({ products }: { products: Product[] }) {
   return (
     <div
       ref={rootRef}
+      id="inicio"
       className="sc va"
       data-stage={stage}
       data-axis={geo?.axis ?? "x"}
@@ -347,7 +348,7 @@ export function VariantA({ products }: { products: Product[] }) {
       </div>
 
       <header className="va-header">
-        <a className="sc-logo" href="/prototipo/a" aria-label="Saymon Cell, início">
+        <a className="sc-logo" href="#inicio" aria-label="Saymon Cell, início">
           Saymon <b>Cell</b>
           <sup>®</sup>
         </a>
@@ -439,7 +440,7 @@ function ScreenContent({ products, onNav, ref }: { products: Product[]; onNav?: 
         </div>
         <div className="va-hero__media">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/prototype/redesign/teardown.jpg" alt="Interior de um smartphone aberto na bancada" />
+          <img src="/home/teardown.jpg" alt="Interior de um smartphone aberto na bancada" />
         </div>
       </section>
 
@@ -616,7 +617,7 @@ function LockScreen({ time, healed }: { time: string; healed: boolean }) {
   return (
     <div className="va-lock">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="va-lock__wall" src="/prototype/redesign/teardown.jpg" alt="" />
+      <img className="va-lock__wall" src="/home/teardown.jpg" alt="" />
       <StatusBar time={time} level={healed ? 100 : 12} />
       <div className="va-lock__top">
         <div className="sc-clock va-lock__clock">{time}</div>
@@ -640,7 +641,7 @@ function LockScreen({ time, healed }: { time: string; healed: boolean }) {
         <div className="sc-notif">
           <span className="sc-notif__icon">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/prototype/redesign/glyph.png" alt="" />
+            <img src="/home/glyph.png" alt="" />
           </span>
           <span>
             <span className="sc-notif__title" style={{ display: "block" }}>
@@ -697,7 +698,7 @@ function CallScreen({ time }: { time: string }) {
       <p className="sc-ui sc-call__sub">Chamada recebida · sobre o seu conserto</p>
       <div className="sc-call__avatar">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/prototype/redesign/glyph.png" alt="" />
+        <img src="/home/glyph.png" alt="" />
       </div>
       <div className="sc-call__foot">
         <CallSlider href={whatsappLink("Olá Saymon Cell! Vim pelo site e quero consertar meu celular.")} />
