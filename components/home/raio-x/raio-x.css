@@ -1061,6 +1061,55 @@
   }
 }
 
+/* ---------- versão leve: sem a cena presa na tela e sem movimento 3D ---------- */
+
+.vb[data-lite="1"] .vb-sticky {
+  position: static;
+  display: grid;
+  gap: clamp(56px, 8vw, 104px);
+  height: auto;
+  padding: 128px max(24px, 6vw) clamp(64px, 8vw, 120px);
+  overflow: visible;
+}
+.vb[data-lite="1"] .vb-hero,
+.vb[data-lite="1"] .vb-finale,
+.vb[data-lite="1"] .vb-panel,
+.vb[data-lite="1"] .vb-card {
+  position: static;
+  inset: auto;
+  width: auto;
+  height: auto;
+  margin: 0;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+.vb[data-lite="1"] .vb-device {
+  position: relative;
+  left: auto;
+  top: auto;
+  margin: 64px auto 120px;
+}
+.vb[data-lite="1"] .vb-layer {
+  transition: none;
+}
+.vb[data-lite="1"] .vb-panel {
+  display: grid;
+  gap: 56px;
+  visibility: visible;
+}
+/* o "Novo de novo" fecha a lista, como fecha a cena na versão completa */
+.vb[data-lite="1"] .vb-finale {
+  order: 1;
+}
+.vb[data-lite="1"] .vb-card {
+  pointer-events: auto;
+}
+.vb[data-lite="1"] .vb-hero__cue,
+.vb[data-lite="1"] .vb-dots {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .vb-marquee__track,
   .vb-screen__ring,

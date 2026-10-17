@@ -11,12 +11,12 @@ export const metadata: Metadata = {
 
 export default async function NovaHomePage() {
   const [requestHeaders, cookieStore] = await Promise.all([headers(), cookies()])
-  const { version } = choosePresentation({
+  const presentation = choosePresentation({
     userAgent: requestHeaders.get("user-agent") ?? undefined,
     mobileHint: requestHeaders.get("sec-ch-ua-mobile"),
     cookie: cookieStore.get(PRESENTATION_COOKIE)?.value,
   })
   const products = await getFeaturedProducts(4).catch(() => [])
 
-  return <HomeNova version={version} products={products} />
+  return <HomeNova presentation={presentation} products={products} />
 }

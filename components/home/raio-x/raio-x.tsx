@@ -54,7 +54,7 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 
 const T = { hero: 0.55, explode: 1.0, layer: 0.85, collapse: 1.0, hold: 0.5 }
 const SCENE_VH = T.hero + T.explode + LAYERS.length * T.layer + T.collapse + T.hold
 
-export function RaioX({ products }: { products: Product[] }) {
+export function RaioX({ products, lite }: { products: Product[]; lite: boolean }) {
   const quote = useQuoteRequest()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
@@ -68,7 +68,20 @@ export function RaioX({ products }: { products: Product[] }) {
     const root = rootRef.current
     const scene = sceneRef.current
     if (!root || !scene) return
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    if (lite) {
+      // Versão leve: tudo parado e aberto; a rolagem só decide o fundo do cabeçalho.
+      const s = root.style
+      s.setProperty("--open", "1")
+      s.setProperty("--heal", "0")
+      s.setProperty("--intro", "0")
+      setActive(-1)
+      const onScroll = () => {
+        root.dataset.scrolled = window.scrollY > 40 ? "1" : "0"
+      }
+      onScroll()
+      window.addEventListener("scroll", onScroll, { passive: true })
+      return () => window.removeEventListener("scroll", onScroll)
+    }
     let raf = 0
     let last = { active: -2, phase: "" }
     const update = () => {
@@ -90,7 +103,7 @@ export function RaioX({ products }: { products: Product[] }) {
 
       root.dataset.scrolled = u > SCENE_VH + 0.2 ? "1" : "0"
       const s = root.style
-      s.setProperty("--open", (reduced ? 1 : open).toFixed(4))
+      s.setProperty("--open", open.toFixed(4))
       s.setProperty("--heal", heal.toFixed(4))
       s.setProperty("--intro", clamp(u / (t1 + T.explode * 0.6)).toFixed(4))
       if (idx !== last.active) {
@@ -113,7 +126,7 @@ export function RaioX({ products }: { products: Product[] }) {
       window.removeEventListener("resize", onScroll)
       cancelAnimationFrame(raf)
     }
-  }, [])
+  }, [lite])
 
   // Esc fecha o menu e devolve o foco ao botão.
   useEffect(() => {
@@ -130,7 +143,7 @@ export function RaioX({ products }: { products: Product[] }) {
   const services = useMemo(() => LAYERS.map((l) => SERVICES.find((s) => s.key === l.service) as Service), [])
 
   return (
-    <div ref={rootRef} id="inicio" className="sc vb" data-phase={phase}>
+    <div ref={rootRef} id="inicio" className="sc vb" data-phase={phase} data-lite={lite ? "1" : undefined}>
       <header className="vb-header">
         <a className="sc-logo" href="#inicio" aria-label="Saymon Cell, início">
           Saymon <b>Cell</b>
@@ -176,9 +189,11 @@ export function RaioX({ products }: { products: Product[] }) {
       </nav>
 
       {/* ---------- a cena: abrir, explicar, remontar ---------- */}
-      <div className="vb-scene" ref={sceneRef} style={{ height: `${(SCENE_VH + 1) * 100}svh` }}>
-        {/* âncora de Serviços: o começo das camadas, já com a primeira à mostra */}
-        <span id="servicos" className="vb-anchor" style={{ top: `${(T.hero + T.explode + T.layer * 0.25) * 100}svh` }} />
+      <div className="vb-scene" ref={sceneRef} style={lite ? undefined : { height: `${(SCENE_VH + 1) * 100}svh` }}>
+        {/* âncora de Serviços: o começo das camadas, já com a primeira à mostra (na versão leve, a lista) */}
+        {!lite && (
+          <span id="servicos" className="vb-anchor" style={{ top: `${(T.hero + T.explode + T.layer * 0.25) * 100}svh` }} />
+        )}
         <div className="vb-sticky">
           <div className="vb-grid" aria-hidden="true" />
 
@@ -204,7 +219,7 @@ export function RaioX({ products }: { products: Product[] }) {
             </div>
           </div>
 
-          <p className="sc-display vb-finale" aria-hidden={phase !== "done"}>
+          <p className="sc-display vb-finale" aria-hidden={!lite && phase !== "done"}>
             Novo
             <br />
             de novo<span className="vb-red">.</span>
@@ -228,9 +243,14 @@ export function RaioX({ products }: { products: Product[] }) {
             </div>
           </div>
 
-          <div className="vb-panel" aria-live="polite">
+          <div className="vb-panel" id={lite ? "servicos" : undefined} aria-live={lite ? undefined : "polite"}>
             {services.map((service, i) => (
-              <article key={service.key} className="vb-card" data-on={active === i ? "1" : "0"} aria-hidden={active !== i}>
+              <article
+                key={service.key}
+                className="vb-card"
+                data-on={lite || active === i ? "1" : "0"}
+                aria-hidden={!lite && active !== i}
+              >
                 <p className="sc-label vb-card__meta">
                   Camada {String(i + 1).padStart(2, "0")}/{String(LAYERS.length).padStart(2, "0")} · {LAYERS[i].part}
                 </p>
@@ -241,7 +261,7 @@ export function RaioX({ products }: { products: Product[] }) {
                   type="button"
                   className="sc-pill sc-pill--red"
                   onClick={() => quote.open(service.problem)}
-                  tabIndex={active === i ? 0 : -1}
+                  tabIndex={lite || active === i ? 0 : -1}
                 >
                   Pedir orçamento <ArrowUpRight />
                 </button>

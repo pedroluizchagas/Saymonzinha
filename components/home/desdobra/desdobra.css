@@ -854,9 +854,17 @@
   height: 100svh;
 }
 .va[data-motion="reduced"] .va-half,
-.va[data-motion="reduced"] .va-wordmark,
 .va[data-motion="reduced"] .va-floor {
   display: none;
+}
+/* o h1 continua presente para leitores de tela e para o Google */
+.va[data-motion="reduced"] .va-wordmark {
+  inset: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 .va[data-motion="reduced"] .va-device {
   transform: none;

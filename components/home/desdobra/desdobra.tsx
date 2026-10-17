@@ -80,7 +80,7 @@ function computeGeometry(vw: number, vh: number): Geometry {
   return { vw, vh, W: H * 1.478, H, f }
 }
 
-export function Desdobra({ products }: { products: Product[] }) {
+export function Desdobra({ products, lite }: { products: Product[]; lite: boolean }) {
   const quote = useQuoteRequest()
   const rootRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -92,20 +92,14 @@ export function Desdobra({ products }: { products: Product[] }) {
 
   const [geo, setGeo] = useState<Geometry | null>(null)
   const [pageHeight, setPageHeight] = useState<number | null>(null)
-  const [reduced, setReduced] = useState(false)
   const [stage, setStage] = useState<"noite" | "papel">("noite")
   const [finish, setFinish] = useState(FINISHES[0].key)
   const [active, setActive] = useState("inicio")
   const [healed, setHealed] = useState(false)
   const time = useClock()
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const sync = () => setReduced(mq.matches)
-    sync()
-    mq.addEventListener("change", sync)
-    return () => mq.removeEventListener("change", sync)
-  }, [])
+  // Versão leve (menos movimento, aparelho fraco ou engasgo): aparelho aberto e rolagem nativa na tela.
+  const reduced = lite
 
   useLayoutEffect(() => {
     const measure = () => setGeo(computeGeometry(window.innerWidth, window.innerHeight))

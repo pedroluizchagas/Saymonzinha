@@ -52,6 +52,14 @@ describe("escolha da apresentação no servidor", () => {
   test("um cookie inválido é ignorado", () => {
     expect(choosePresentation({ userAgent: UA.iphone, cookie: "sistema" }).version).toBe("raio-x")
   })
+
+  test("o servidor manda a versão leve quando o cookie pede", () => {
+    expect(choosePresentation({ userAgent: UA.mac, cookie: "raio-x.leve" })).toEqual({ version: "raio-x", lite: true })
+  })
+
+  test("sem o cookie da versão leve, o servidor manda a completa", () => {
+    expect(choosePresentation({ userAgent: UA.iphone }).lite).toBe(false)
+  })
 })
 
 describe("escolha da apresentação no navegador", () => {
@@ -65,6 +73,38 @@ describe("escolha da apresentação no navegador", () => {
 
   test("com mouse e menos de 1024px, recebe a Raio-X", () => {
     expect(choosePresentation({ userAgent: UA.windows, screen: { touch: false, width: 1023 } }).version).toBe("raio-x")
+  })
+
+  test("sem nenhum sinal de aparelho fraco, a versão é a completa", () => {
+    expect(choosePresentation({ screen: { touch: true, width: 390 } }).lite).toBe(false)
+  })
+
+  test("quem pede menos movimento no sistema recebe a versão leve", () => {
+    expect(choosePresentation({ screen: { touch: true, width: 390 }, reducedMotion: true }).lite).toBe(true)
+  })
+
+  test("um aparelho com até 2 GB de memória recebe a versão leve", () => {
+    expect(choosePresentation({ screen: { touch: true, width: 390 }, memoryGb: 2, cores: 8 }).lite).toBe(true)
+  })
+
+  test("um aparelho com até 4 núcleos recebe a versão leve", () => {
+    expect(choosePresentation({ screen: { touch: true, width: 390 }, memoryGb: 4, cores: 4 }).lite).toBe(true)
+  })
+
+  test("num computador com mouse, memória e núcleos não ligam a versão leve (só o engasgo)", () => {
+    expect(choosePresentation({ screen: { touch: false, width: 1440 }, memoryGb: 2, cores: 4 }).lite).toBe(false)
+  })
+
+  test("sem a memória informada (Safari limita os núcleos que mostra), os núcleos não contam", () => {
+    expect(choosePresentation({ screen: { touch: true, width: 390 }, cores: 2 }).lite).toBe(false)
+  })
+
+  test("um engasgo na rolagem liga a versão leve", () => {
+    expect(choosePresentation({ screen: { touch: true, width: 390 }, janky: true }).lite).toBe(true)
+  })
+
+  test("a versão leve de uma visita anterior continua", () => {
+    expect(choosePresentation({ screen: { touch: true, width: 390 }, cookie: "raio-x.leve" }).lite).toBe(true)
   })
 
   test("os dados de tela vencem o cookie da visita anterior", () => {
