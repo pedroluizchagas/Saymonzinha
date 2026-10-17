@@ -7,6 +7,8 @@ A home pública tem duas implementações completas com o mesmo conteúdo. A Des
 - **Uma página responsiva só**: não comporta os dois conceitos escolhidos.
 - **As duas versões na mesma página, com o CSS escondendo uma**: a versão escondida continuava ouvindo o scroll e interferia na outra, e o HTML saía com dois h1 e todo o conteúdo repetido.
 - **Decidir só no servidor, pelo user agent**: o iPad receberia a versão de desktop.
+- **Recarregar a página quando o servidor erra a versão**: rápida localmente, mas em produção paga duas vezes a resposta do servidor. Medido no iPad na primeira visita, a mediana ficou em 5,0 s, contra 3,6 s trocando no navegador.
+- **Baixar a outra versão só na hora da troca**: o código chegava só depois do JavaScript principal, e o iPad ficava de 1,5 a 2,5 s a mais com a página oculta. As duas versões vêm no mesmo pacote, o que custa cerca de 15 KB com gzip.
 
 ## Consequências
 
